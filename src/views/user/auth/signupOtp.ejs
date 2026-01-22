@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= pageTitle || 'Verify Your Account - ELARA' %></title>
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    
+
+</head>
+<body class="bg-[#e8dfd6] min-h-screen flex items-center justify-center p-4">
+    
+    <!-- OTP Verification Card -->
+    <div class="bg-white rounded-2xl shadow-lg p-8 sm:p-12 w-full max-w-md">
+        
+        <!-- Brand Logo/Name -->
+        <div class="text-center mb-8">
+            <h1 class="text-3xl sm:text-4xl font-light text-gray-800 tracking-wide mb-2">
+                <%= brandName || 'ELARA' %>
+            </h1>
+            <p class="text-sm text-gray-500 font-light tracking-wide">
+                <%= brandTagline || 'Elegance Redefined' %>
+            </p>
+        </div>
+        
+        <!-- Page Title -->
+        <h2 class="text-2xl font-normal text-gray-700 text-center mb-4">
+            <%= heading || 'Verify Your Account' %>
+        </h2>
+        
+        <!-- Description Text -->
+        <p class="text-sm text-gray-500 text-center mb-6 leading-relaxed">
+            <%= description || "We've sent a one-time password to your email. Please enter the code below to complete your sign-up." %>
+        </p>
+        
+        <!-- Resend Timer -->
+        <p class="text-xs text-gray-400 text-center mb-6">
+            Resend OTP in <span id="timer" class="font-medium text-gray-600"><%= countdown || '00:45' %></span> sec
+        </p>
+        
+        <!-- OTP Verification Form -->
+        <form action="<%= submitUrl || '/verify-otp' %>" method="POST" id="otpForm">
+            
+            <!-- OTP Input Boxes -->
+            <div class="flex justify-center gap-3 mb-8">
+                <input 
+                    type="number" 
+                    maxlength="1" 
+                    class="otp-input" 
+                    name="otp1" 
+                    id="otp1"
+                    required
+                    autocomplete="off"
+                    pattern="[0-9]"
+                    inputmode="numeric"
+                />
+                <input 
+                    type="number" 
+                    maxlength="1" 
+                    class="otp-input" 
+                    name="otp2" 
+                    id="otp2"
+                    required
+                    autocomplete="off"
+                    pattern="[0-9]"
+                    inputmode="numeric"
+                />
+                <input 
+                    type="number" 
+                    maxlength="1" 
+                    class="otp-input" 
+                    name="otp3" 
+                    id="otp3"
+                    required
+                    autocomplete="off"
+                    pattern="[0-9]"
+                    inputmode="numeric"
+                />
+                <input 
+                    type="number" 
+                    maxlength="1" 
+                    class="otp-input" 
+                    name="otp4" 
+                    id="otp4"
+                    required
+                    autocomplete="off"
+                    pattern="[0-9]"
+                    inputmode="numeric"
+                />
+            </div>
+            
+            <!-- Hidden field to store complete OTP -->
+            <input type="hidden" name="otp" id="completeOtp" value="">
+            
+            <!-- Error Message (conditionally rendered) -->
+            <% if (typeof errorMessage !== 'undefined' && errorMessage) { %>
+                <div class="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg mb-4 text-sm text-center">
+                    <%= errorMessage %>
+                </div>
+            <% } %>
+            
+            <!-- Success Message (conditionally rendered) -->
+            <% if (typeof successMessage !== 'undefined' && successMessage) { %>
+                <div class="bg-green-50 border border-green-200 text-green-600 px-4 py-3 rounded-lg mb-4 text-sm text-center">
+                    <%= successMessage %>
+                </div>
+            <% } %>
+            
+            <!-- Verify Button -->
+            <button 
+                type="submit" 
+                class="w-full bg-[#a78a7f] hover:bg-[#8f7568] text-white font-medium py-3.5 rounded-lg transition-colors duration-200 uppercase tracking-wide text-sm"
+            >
+                Verify
+            </button>
+            
+        </form>
+        
+        <!-- Resend Link (shown after timer expires) -->
+        <div class="text-center mt-6">
+            <button 
+                id="resendBtn"
+                type="button"
+                class="text-sm text-gray-400 hover:text-gray-600 transition-colors duration-200 disabled:cursor-not-allowed"
+                disabled
+            >
+                Didn't receive code? <span class="underline">Resend</span>
+            </button>
+        </div>
+        
+    </div>
+    
+    <!-- JavaScript for OTP Input Auto-focus and Timer -->
+    <script>
+        // OTP Input Auto-focus Logic
+        const otpInputs = document.querySelectorAll('.otp-input');
+        const completeOtpField = document.getElementById('completeOtp');
+        
+        otpInputs.forEach((input, index) => {
+            // Auto-focus next input on entry
+            input.addEventListener('input', (e) => {
+                const value = e.target.value;
+                
+                // Only allow single digit
+                if (value.length > 1) {
+                    e.target.value = value.slice(0, 1);
+                }
+                
+                // Move to next input
+                if (value.length === 1 && index < otpInputs.length - 1) {
+                    otpInputs[index + 1].focus();
+                }
+                
+                // Update hidden field with complete OTP
+                updateCompleteOtp();
+            });
+            
+            // Handle backspace
+            input.addEventListener('keydown', (e) => {
+                if (e.key === 'Backspace' && !e.target.value && index > 0) {
+                    otpInputs[index - 1].focus();
+                }
+            });
+            
+            // Paste handling
+            input.addEventListener('paste', (e) => {
+                e.preventDefault();
+                const pasteData = e.clipboardData.getData('text').slice(0, 4);
+                
+                pasteData.split('').forEach((char, i) => {
+                    if (otpInputs[i] && /^\d$/.test(char)) {
+                        otpInputs[i].value = char;
+                    }
+                });
+                
+                // Focus last filled input
+                const lastIndex = Math.min(pasteData.length, otpInputs.length) - 1;
+                if (lastIndex >= 0) {
+                    otpInputs[lastIndex].focus();
+                }
+                
+                updateCompleteOtp();
+            });
+        });
+        
+        // Update complete OTP hidden field
+        function updateCompleteOtp() {
+            const otp = Array.from(otpInputs).map(input => input.value).join('');
+            completeOtpField.value = otp;
+        }
+        
+        // Countdown Timer Logic
+        let timeLeft = <%= timerSeconds || 45 %>;
+        const timerElement = document.getElementById('timer');
+        const resendBtn = document.getElementById('resendBtn');
+        
+        function updateTimer() {
+            const minutes = Math.floor(timeLeft / 60);
+            const seconds = timeLeft % 60;
+            timerElement.textContent = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+            
+            if (timeLeft <= 0) {
+                clearInterval(timerInterval);
+                resendBtn.disabled = false;
+                resendBtn.classList.remove('text-gray-400');
+                resendBtn.classList.add('text-[#a78a7f]', 'cursor-pointer');
+            }
+            
+            timeLeft--;
+        }
+        
+        const timerInterval = setInterval(updateTimer, 1000);
+        updateTimer(); // Initial call
+        
+        // Resend OTP functionality
+        resendBtn.addEventListener('click', async () => {
+            if (!resendBtn.disabled) {
+                try {
+                    // Send resend request to server
+                    const response = await fetch('<%= resendUrl || "/resend-otp" %>', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            email: '<%= userEmail || "" %>'
+                        })
+                    });
+                    
+                    if (response.ok) {
+                        // Reset timer
+                        timeLeft = <%= timerSeconds || 45 %>;
+                        resendBtn.disabled = true;
+                        resendBtn.classList.remove('text-[#a78a7f]', 'cursor-pointer');
+                        resendBtn.classList.add('text-gray-400');
+                        
+                        // Show success message
+                        alert('OTP has been resent to your email!');
+                    } else {
+                        alert('Failed to resend OTP. Please try again.');
+                    }
+                } catch (error) {
+                    console.error('Error resending OTP:', error);
+                    alert('An error occurred. Please try again.');
+                }
+            }
+        });
+        
+        // Auto-submit when all 4 digits are entered (optional)
+        otpInputs[3].addEventListener('input', () => {
+            if (otpInputs[3].value) {
+                // Uncomment to enable auto-submit
+                // document.getElementById('otpForm').submit();
+            }
+        });
+    </script>
+    
+</body>
+</html>

@@ -1,0 +1,345 @@
+/* Login Page Styles */
+
+/* Color Variables */
+:root {
+  --primary-brown: #b08968;
+  --primary-brown-hover: #9a7556;
+  --background-beige: #e8e3dd;
+  --text-dark: #4a4a4a;
+  --text-light: #6b7280;
+  --border-gray: #e5e7eb;
+  --error-red: #ef4444;
+  --success-green: #10b981;
+  --white: #ffffff;
+}
+
+/* Global Styles */
+body {
+  background-color: var(--background-beige);
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  color: var(--text-dark);
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+  padding: 1rem;
+}
+
+/* Login Container */
+.login-container {
+  width: 100%;
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+/* Page Title */
+.page-title {
+  font-size: 2.5rem;
+  font-weight: 600;
+  color: var(--primary-brown);
+  text-align: center;
+  margin-bottom: 2rem;
+  letter-spacing: 0.02em;
+}
+
+/* Welcome Message */
+.welcome-message {
+  font-size: 2rem;
+  font-weight: 400;
+  color: var(--text-dark);
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+/* Card Styles */
+.login-card {
+  background: var(--white);
+  border-radius: 12px;
+  border: 1px solid var(--border-gray);
+  padding: 3rem 2.5rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+}
+
+/* Form Subtitle */
+.form-subtitle {
+  text-align: center;
+  color: var(--text-light);
+  font-size: 0.95rem;
+  margin-bottom: 2rem;
+}
+
+/* Form Group */
+.form-group {
+  margin-bottom: 1.5rem;
+}
+
+/* Labels */
+.form-label {
+  display: block;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--text-dark);
+  margin-bottom: 0.5rem;
+}
+
+/* Input Fields */
+.form-input {
+  width: 100%;
+  padding: 0.875rem 1rem;
+  font-size: 0.95rem;
+  color: var(--text-dark);
+  background-color: #f9fafb;
+  border: 1px solid var(--border-gray);
+  border-radius: 6px;
+  outline: none;
+  transition: all 0.3s ease;
+}
+
+.form-input:focus {
+  background-color: var(--white);
+  border-color: var(--primary-brown);
+  box-shadow: 0 0 0 3px rgba(176, 137, 104, 0.1);
+}
+
+.form-input::placeholder {
+  color: #9ca3af;
+}
+
+/* Password Field Container */
+.password-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+/* Forgot Password Link */
+.forgot-password {
+  font-size: 0.85rem;
+  color: var(--primary-brown);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.forgot-password:hover {
+  color: var(--primary-brown-hover);
+  text-decoration: underline;
+}
+
+/* Login Button */
+.login-button {
+  width: 100%;
+  padding: 0.875rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--white);
+  background-color: var(--primary-brown);
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-top: 1.5rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.login-button:hover {
+  background-color: var(--primary-brown-hover);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(176, 137, 104, 0.3);
+}
+
+.login-button:active {
+  transform: translateY(0);
+}
+
+.login-button:disabled {
+  background-color: #d1d5db;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Sign Up Section */
+.signup-section {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 1.5rem;
+  font-size: 0.9rem;
+}
+
+.signup-text {
+  color: var(--text-light);
+}
+
+.signup-link {
+  color: var(--primary-brown);
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.2s ease;
+}
+
+.signup-link:hover {
+  color: var(--primary-brown-hover);
+  text-decoration: underline;
+}
+
+/* Divider */
+.divider-container {
+  display: flex;
+  align-items: center;
+  margin: 2rem 0;
+}
+
+.divider-line {
+  flex: 1;
+  height: 1px;
+  background-color: var(--border-gray);
+}
+
+.divider-text {
+  padding: 0 1rem;
+  font-size: 0.875rem;
+  color: var(--text-light);
+}
+
+/* Google Button */
+.google-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  width: 100%;
+  padding: 0.875rem 1.5rem;
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: var(--text-dark);
+  background-color: var(--white);
+  border: 1px solid var(--border-gray);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.google-button:hover {
+  background-color: #f9fafb;
+  border-color: #d1d5db;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.google-button:active {
+  transform: scale(0.98);
+}
+
+.google-icon {
+  width: 20px;
+  height: 20px;
+}
+
+/* Alert Messages */
+.alert {
+  padding: 0.875rem 1rem;
+  border-radius: 6px;
+  margin-bottom: 1.5rem;
+  font-size: 0.9rem;
+}
+
+.alert-error {
+  background-color: #fee2e2;
+  border: 1px solid #fca5a5;
+  color: #991b1b;
+}
+
+.alert-success {
+  background-color: #d1fae5;
+  border: 1px solid #6ee7b7;
+  color: #065f46;
+}
+
+/* Responsive Design */
+@media (max-width: 640px) {
+  .page-title {
+    font-size: 2rem;
+  }
+
+  .welcome-message {
+    font-size: 1.5rem;
+  }
+
+  .login-card {
+    padding: 2rem 1.5rem;
+  }
+
+  body {
+    padding: 0.5rem;
+  }
+}
+
+@media (max-width: 400px) {
+  .page-title {
+    font-size: 1.75rem;
+  }
+
+  .welcome-message {
+    font-size: 1.25rem;
+  }
+
+  .login-card {
+    padding: 1.5rem 1rem;
+  }
+}
+
+/* Loading State */
+.loading-spinner {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  border-top-color: white;
+  animation: spinner 0.6s linear infinite;
+}
+
+@keyframes spinner {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Focus Visible */
+.form-input:focus-visible,
+.login-button:focus-visible,
+.google-button:focus-visible,
+.forgot-password:focus-visible,
+.signup-link:focus-visible {
+  outline: 2px solid var(--primary-brown);
+  outline-offset: 2px;
+}
+
+body {
+            font-family: 'Inter', sans-serif;
+        }
+        
+        /* Custom focus styles */
+        input:focus {
+            outline: none;
+            border-color: #B08968;
+            box-shadow: 0 0 0 3px rgba(176, 137, 104, 0.1);
+        }
+        
+        /* Google button hover effect */
+        .google-btn:hover {
+            background-color: #f8f8f8;
+        }
+        
+        /* Login button hover effect */
+        .login-btn:hover {
+            background-color: #9d7558;
+        }
+        
+        /* Link hover effects */
+        .link-hover:hover {
+            color: #B08968;
+        }

@@ -1,0 +1,58 @@
+/* Custom Colors */
+:root {
+    --beige-bg: #E8DDD4;
+    --brown-button: #B08968;
+    --brown-button-hover: #9A7555;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    background-color: var(--beige-bg);
+}
+
+.card {
+    background: white;
+    border-radius: 1rem;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    padding: 3rem;
+    max-width: 32rem;
+    width: 100%;
+}
+
+.btn-apply {
+    background-color: var(--brown-button);
+    color: white;
+    padding: 0.875rem;
+    border-radius: 0.5rem;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+    transition: all 0.2s;
+    border: none;
+    cursor: pointer;
+    width: 100%;
+}
+
+.btn-apply:hover {
+    background-color: var(--brown-button-hover);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+input[type="text"] {
+    background-color: #F3F4F6;
+    text-align: center;
+    padding: 0.875rem 1rem;
+    border-radius: 0.5rem;
+    border: none;
+    width: 100%;
+    color: #374151;
+}
+
+input[type="text"]:focus {
+    outline: 2px solid #D1D5DB;
+}
+
+@media (max-width: 768px) {
+    .card {
+        padding: 2rem;
+    }
+}

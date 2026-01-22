@@ -1,0 +1,49 @@
+/* Custom styles for registration page */
+
+/* If not using Tailwind, add these base styles */
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background-color: #e8dfd3;
+    margin: 0;
+    padding: 0;
+}
+
+/* Form validation styles */
+input:invalid:focus {
+    border-color: #ef4444;
+    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+}
+
+input:valid:focus {
+    border-color: #a98968;
+    box-shadow: 0 0 0 3px rgba(169, 137, 104, 0.1);
+}
+
+/* Custom animations */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.card-container {
+    animation: fadeIn 0.3s ease-out;
+}
+
+/* Smooth transitions */
+button, input, a {
+    transition: all 0.2s ease;
+}
+
+/* Focus styles for accessibility */
+button:focus,
+input:focus,
+a:focus {
+    outline: 2px solid #a98968;
+    outline-offset: 2px;
+}

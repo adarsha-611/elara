@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enter Verification Code</title>
+    <link rel="stylesheet" href="../../../public/css/loginOtp.css">
+    
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <h1>Enter verification code</h1>
+            <p class="description">We've sent a 4-digit code to your email. Please enter it below to complete your verification.</p>
+            <p class="timer">Resend OTP in 00:45 sec</p>
+            
+            <form>
+                <div class="otp-inputs">
+                    <input type="text" class="otp-box" maxlength="1" pattern="[0-9]" inputmode="numeric">
+                    <input type="text" class="otp-box" maxlength="1" pattern="[0-9]" inputmode="numeric">
+                    <input type="text" class="otp-box" maxlength="1" pattern="[0-9]" inputmode="numeric">
+                    <input type="text" class="otp-box" maxlength="1" pattern="[0-9]" inputmode="numeric">
+                </div>
+                
+                <button type="submit" class="verify-btn">Verify Account</button>
+            </form>
+            
+            <div class="footer-text">
+                <p class="no-code">Didn't receive the code?</p>
+                <a href="#" class="resend-link">Click to resend</a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

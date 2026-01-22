@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Login to your account">
+    <title>Login - Welcome Back</title>
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+</head>
+<body class="bg-[#E8E3DD] min-h-screen flex items-center justify-center p-4">
+    
+    <!-- Main Container -->
+    <div class="w-full max-w-6xl">
+        
+        <!-- Page Title (Top Left) -->
+        <div class="mb-8">
+            <h1 class="text-[#B08968] text-3xl md:text-4xl font-semibold">Login</h1>
+        </div>
+        
+        <!-- Login Card -->
+        <div class="bg-white rounded-2xl border border-gray-200 p-8 md:p-12 shadow-sm max-w-xl mx-auto">
+            
+            <!-- Welcome Heading -->
+            <div class="text-center mb-8">
+                <h2 class="text-3xl md:text-4xl font-semibold text-gray-800 mb-3">Welcome Back</h2>
+                <p class="text-gray-500 text-sm">Please enter your details to Login</p>
+            </div>
+            
+            <!-- Login Form -->
+            <form action="/login" method="POST" class="space-y-6">
+                
+                <!-- Email Address Field -->
+                <div>
+                    <label for="email" class="block text-gray-700 text-sm font-medium mb-2">
+                        Email Address
+                    </label>
+                    <input 
+                        type="email" 
+                        id="email" 
+                        name="email" 
+                        required
+                        placeholder="Enter your email"
+                        class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg text-gray-700 transition-all duration-200"
+                    >
+                </div>
+                
+                <!-- Password Field with Forgot Password Link -->
+                <div>
+                    <div class="flex items-center justify-between mb-2">
+                        <label for="password" class="block text-gray-700 text-sm font-medium">
+                            Password
+                        </label>
+                        <a 
+                            href="/forgot-password" 
+                            class="text-sm text-[#D4A59A] hover:text-[#B08968] transition-colors"
+                        >
+                            Forgot password?
+                        </a>
+                    </div>
+                    <input 
+                        type="password" 
+                        id="password" 
+                        name="password" 
+                        required
+                        placeholder="Enter your password"
+                        class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg text-gray-700 transition-all duration-200"
+                    >
+                </div>
+                
+                <!-- Login Button -->
+                <button 
+                    type="submit" 
+                    class="w-full bg-[#B08968] text-white py-3.5 rounded-lg font-medium text-base hover:bg-[#9d7557] transition-colors duration-200"
+                >
+                    Login
+                </button>
+                
+            </form>
+            
+            <!-- Sign Up Link -->
+            <div class="text-center mt-6">
+                <p class="text-gray-600 text-sm">
+                    Don't have an account? 
+                    <a 
+                        href="/signup" 
+                        class="text-[#D4A59A] hover:text-[#B08968] font-medium transition-colors ml-1"
+                    >
+                        Sign up
+                    </a>
+                </p>
+            </div>
+            
+            <!-- Google Sign In Button -->
+            <div class="mt-6">
+                <a 
+                    href="/auth/google" 
+                    class="w-full flex items-center justify-center gap-3 bg-gray-50 border border-gray-200 text-gray-700 py-3.5 rounded-lg font-medium text-base transition-colors duration-200 hover:bg-gray-100"
+                >
+                    <!-- Google Icon SVG -->
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M19.9895 10.1871C19.9895 9.36767 19.9214 8.76973 19.7742 8.14966H10.1992V11.848H15.8195C15.7062 12.7671 15.0943 14.1512 13.7346 15.0813L13.7155 15.2051L16.7429 17.4969L16.9527 17.5174C18.879 15.7789 19.9895 13.221 19.9895 10.1871Z" fill="#4285F4"/>
+                        <path d="M10.1993 19.9313C12.9527 19.9313 15.2643 19.0454 16.9527 17.5174L13.7346 15.0813C12.8734 15.6682 11.7176 16.0779 10.1993 16.0779C7.50243 16.0779 5.21352 14.3395 4.39759 11.9366L4.27799 11.9465L1.13003 14.3273L1.08887 14.4391C2.76588 17.6945 6.21061 19.9313 10.1993 19.9313Z" fill="#34A853"/>
+                        <path d="M4.39748 11.9366C4.18219 11.3166 4.05759 10.6521 4.05759 9.96565C4.05759 9.27909 4.18219 8.61473 4.38615 7.99466L4.38045 7.8626L1.19304 5.44366L1.08875 5.49214C0.397576 6.84305 0.000976562 8.36008 0.000976562 9.96565C0.000976562 11.5712 0.397576 13.0882 1.08875 14.4391L4.39748 11.9366Z" fill="#FBBC05"/>
+                        <path d="M10.1993 3.85336C12.1142 3.85336 13.406 4.66168 14.1425 5.33717L17.0207 2.59107C15.253 0.985496 12.9527 0 10.1993 0C6.2106 0 2.76588 2.23672 1.08887 5.49214L4.38626 7.99466C5.21352 5.59183 7.50242 3.85336 10.1993 3.85336Z" fill="#EB4335"/>
+                    </svg>
+                    <span>Google</span>
+                </a>
+            </div>
+            
+        </div>
+        
+    </div>
+    
+    <!-- Optional: JavaScript for form validation or enhancements -->
+    <script>
+        // Auto-focus on email field when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            const emailInput = document.getElementById('email');
+            if (emailInput && !emailInput.value) {
+                emailInput.focus();
+            }
+        });
+        
+        // Form validation (optional - basic client-side validation)
+        const loginForm = document.querySelector('form');
+        if (loginForm) {
+            loginForm.addEventListener('submit', function(e) {
+                const email = document.getElementById('email').value;
+                const password = document.getElementById('password').value;
+                
+                if (!email || !password) {
+                    e.preventDefault();
+                    alert('Please fill in all fields');
+                }
+            });
+        }
+    </script>
+    
+</body>
+</html>
