@@ -11,6 +11,11 @@ export async function findUserByreferralCode(referralCode) {
 
 }
 
+export async function findUserDataByEmail(email) {
+    const user = await User.findOne({email:email}).select('fullName email');
+    return user;
+}
+
 export async function createUser(userData) {
         try {
             const user = new User(userData);

@@ -39,6 +39,17 @@
             Let's get started with your free account.
         </p>
         
+        <!-- Display error messages -->
+        <% if (typeof errors !== 'undefined' && errors.length > 0) { %>
+            <div class="bg-red-50 border border-red-200 rounded-md p-4 mb-6">
+                <ul class="text-red-700 text-sm space-y-1">
+                    <% errors.forEach(function(error) { %>
+                        <li>• <%= error %></li>
+                    <% }); %>
+                </ul>
+            </div>
+        <% } %>
+        
         <!-- Registration Form -->
         <form id="signform" action="/signup" method="POST">
             

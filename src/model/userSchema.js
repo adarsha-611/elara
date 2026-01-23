@@ -41,7 +41,8 @@ const userSchema = new mongoose.Schema(
     referredBy: {
       type: String,
       default: null
-    }
+    },
+
   },
   {
     timestamps: true   

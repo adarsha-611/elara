@@ -3,11 +3,12 @@ import path from "path";
 import dotenv from "dotenv"
 import { fileURLToPath } from "url";
 import session from "express-session";
+import flash from "connect-flash";
 
 import db from "./src/config/db.js";
 // import userRouter from "./src/routes/userRouter.js";
 import signupRouter from "./src/routes/auth/signupRouter.js";
-// import loginRouter from "./src/routes/auth/loginRouter.js";
+import loginRouter from "./src/routes/auth/loginRouter.js";
 
 
 dotenv.config();
@@ -33,13 +34,14 @@ app.use(
     },
   })
 );
+app.use(flash());
 app.set("view engine","ejs");
 app.set("views", path.join(__dirname, "src/views"));
 app.use(express.static(path.join(__dirname,"src/public")));
 
 
 app.use("/", signupRouter);
-// app.use('/',loginRouter)
+app.use('/', loginRouter);
 // app.use('/',userRouter)
 
 
