@@ -3,53 +3,38 @@
 import nodemailer from "nodemailer";
 import otpSchema from "../../model/otpSchema.js";
 
-/* =========================
-   1. Nodemailer Transporter
-   ========================= */
+
 const OTP = otpSchema;
 const transporter = nodemailer.createTransport({
   host: process.env.EMAIL_HOST,
   port: process.env.EMAIL_PORT,
-  secure: false, // true for 465, false for other ports
+  secure: false, 
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS,
   },
 });
 
-/* =========================
-   2. OTP Schema & Model
-   ========================= */
-
-
-
-
-/* =========================
-   3. OTP Generator
-   ========================= */
-
 const generateOTP = () => {
-  return Math.floor(100000 + Math.random() * 900000).toString(); // 6 digit
+  return Math.floor(100000 + Math.random() * 900000).toString(); 
 };
 
-/* =========================
-   4. Send OTP
-   ========================= */
+
 
 export const sendOTP = async (email) => {
   const otp = generateOTP();
-
-  // Save / Update OTP in DB
+ console.log(otp)
+  
   await OTP.findOneAndUpdate(
     { email },
     {
       otp,
-      expiresAt: new Date(Date.now() + 5 * 60 * 1000), // 5 minutes
+      expiresAt: new Date(Date.now() + 5 * 60 * 1000), 
     },
     { upsert: true }
   );
 
-  // Mail content
+  
   const mailOptions = {
     from: `"Elara" <${process.env.EMAIL_USER}>`,
     to: email,
@@ -64,15 +49,13 @@ export const sendOTP = async (email) => {
     `,
   };
 
-  // Send mail
+  
   await transporter.sendMail(mailOptions);
   console.log("Email sent successfully")
   return true;
 };
 
-/* =========================
-   5. Verify OTP
-   ========================= */
+
 
 export const verifyOTP = async (email, enteredOTP) => {
   const record = await OTP.findOne({ email });
@@ -89,14 +72,10 @@ export const verifyOTP = async (email, enteredOTP) => {
     throw new Error("Invalid OTP");
   }
 
-  // Cleanup after successful verification
+
   await OTP.deleteOne({ email });
 
   return true;
 };
 
-/* =========================
-   6. Example Express Controllers
-   ========================= */
 
-// Send OTP Controller

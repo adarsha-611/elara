@@ -1,11 +1,13 @@
-import { findUserByemail, findUserByreferralCode, createUser } from "../../../repositories/user/userRepo.js";
+import { findUserByemail, findUserByreferralCode, createUser } from "../userService.js";
 import {hashString} from "../../../utils/bcrypt.js";
 import { sendOTP } from "../../email/emailService.js";
 
 
 export async function register(data) {
+    
     const existingUser = await findUserByemail(data.email)
     console.log(existingUser)
+
     if(existingUser){
         throw new Error("User already exist");
         
@@ -28,16 +30,14 @@ export async function register(data) {
         email:data.email,
         password:hashPassword,
         referralCode:generatedReferralCode,
-        referredBy: data.referralCode || null
+        referredBy: data.referralCode || null,
+        isVerified: true
     }
     
-    // Create the user directly without OTP
+    
     const createdUser = await createUser(userData);
     
-    // Send welcome email
-   
     
-    // Return the created user data
     return { 
         id: createdUser._id,
         email: createdUser.email,

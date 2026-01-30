@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ELARA - Admin User Management</title>
+    <style>
+        body { font-family: Arial, sans-serif; background: #f9f9f9; margin: 0; }
+        .navbar { background: #333; color: white; padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; }
+        .navbar a { color: white; text-decoration: none; margin-left: 20px; }
+        .container { padding: 30px; max-width: 1200px; margin: 0 auto; }
+        .header-actions { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .search-form { display: flex; gap: 10px; }
+        input[type="text"] { padding: 8px; border: 1px solid #ddd; border-radius: 4px; width: 300px; }
+        .btn { padding: 8px 15px; border: none; border-radius: 4px; cursor: pointer; text-decoration: none; display: inline-block; font-size: 14px; }
+        .btn-primary { background: #007bff; color: white; }
+        .btn-danger { background: #dc3545; color: white; }
+        .btn-success { background: #28a745; color: white; }
+        .btn-secondary { background: #6c757d; color: white; }
+        table { width: 100%; border-collapse: collapse; background: white; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        th, td { padding: 12px 15px; text-align: left; border-bottom: 1px solid #eee; }
+        th { background: #f1f1f1; font-weight: 600; }
+        .status-active { color: #28a745; font-weight: bold; }
+        .status-blocked { color: #dc3545; font-weight: bold; }
+        .pagination { margin-top: 20px; display: flex; justify-content: center; gap: 10px; }
+        .page-link { padding: 8px 12px; border: 1px solid #ddd; background: white; text-decoration: none; color: #333; border-radius: 4px; }
+        .page-link.active { background: #007bff; color: white; border-color: #007bff; }
+        .alert { padding: 10px; margin-bottom: 20px; border-radius: 4px; }
+        .alert-success { background: #d4edda; color: #155724; }
+        .alert-error { background: #f8d7da; color: #721c24; }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="logo" style="font-weight: bold; font-size: 1.2em;">ELARA ADMIN</div>
+        <div>
+            <span style="margin-right: 20px;">User Management</span>
+            <a href="/admin/logout">Logout</a>
+        </div>
+    </nav>
+    
+    <div class="container">
+        <% if (success && success.length > 0) { %>
+            <div class="alert alert-success"><%= success %></div>
+        <% } %>
+        <% if (error && error.length > 0) { %>
+            <div class="alert alert-error"><%= error %></div>
+        <% } %>
+
+        <div class="header-actions">
+            <h1>User Management</h1>
+            <form action="/admin/users" method="GET" class="search-form">
+                <input type="text" name="search" placeholder="Search by name or email" value="<%= search || '' %>">
+                <button type="submit" class="btn btn-primary">Search</button>
+                <% if (search) { %>
+                    <a href="/admin/users" class="btn btn-secondary">Clear</a>
+                <% } %>
+            </form>
+        </div>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Created</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% if (users.length > 0) { %>
+                    <% users.forEach(user => { %>
+                        <tr>
+                            <td><%= user.fullName %></td>
+                            <td><%= user.email %></td>
+                            <td><%= new Date(user.createdAt).toLocaleDateString() %></td>
+                            <td>
+                                <% if (user.isBlocked) { %>
+                                    <span class="status-blocked">Blocked</span>
+                                <% } else { %>
+                                    <span class="status-active">Active</span>
+                                <% } %>
+                            </td>
+                            <td>
+                                <% if (user.isBlocked) { %>
+                                    <a href="/admin/users/block/<%= user._id %>" class="btn btn-success" onclick="return confirm('Are you sure you want to unblock this user?')">Unblock</a>
+                                <% } else { %>
+                                    <a href="/admin/users/block/<%= user._id %>" class="btn btn-danger" onclick="return confirm('Are you sure you want to block this user? This will prevent them from logging in.')">Block</a>
+                                <% } %>
+                            </td>
+                        </tr>
+                    <% }) %>
+                <% } else { %>
+                    <tr>
+                        <td colspan="5" style="text-align: center; padding: 20px;">No users found</td>
+                    </tr>
+                <% } %>
+            </tbody>
+        </table>
+
+        <!-- Pagination -->
+        <% if (totalPages > 1) { %>
+            <div class="pagination">
+                <% if (currentPage > 1) { %>
+                    <a href="/admin/users?page=<%= currentPage - 1 %>&search=<%= search || '' %>" class="page-link">&laquo; Prev</a>
+                <% } %>
+                
+                <% for(let i = 1; i <= totalPages; i++) { %>
+                    <a href="/admin/users?page=<%= i %>&search=<%= search || '' %>" class="page-link <%= currentPage === i ? 'active' : '' %>"><%= i %></a>
+                <% } %>
+
+                <% if (currentPage < totalPages) { %>
+                    <a href="/admin/users?page=<%= currentPage + 1 %>&search=<%= search || '' %>" class="page-link">Next &raquo;</a>
+                <% } %>
+            </div>
+        <% } %>
+    </div>
+</body>
+</html>

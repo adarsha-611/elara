@@ -3,33 +3,184 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Enter Verification Code</title>
-    <link rel="stylesheet" href="../../../public/css/loginOtp.css">
-    
+    <title>Verify OTP - ELARA</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .otp-input {
+            width: 60px;
+            height: 60px;
+            text-align: center;
+            font-size: 24px;
+            font-weight: 600;
+            border: 2px solid #d0c4b8;
+            border-radius: 12px;
+            background-color: #faf8f6;
+            color: #4a3f35;
+            transition: all 0.2s;
+            outline: none;
+        }
+        .otp-input:focus {
+            border-color: #a78a7f;
+            background-color: #fff;
+            box-shadow: 0 0 0 4px rgba(167, 138, 127, 0.1);
+        }
+        /* Style for invalid state without changing base styles */
+        .otp-input.border-red-500 {
+            border-color: #ef4444;
+        }
+    </style>
 </head>
-<body>
-    <div class="container">
-        <div class="card">
-            <h1>Enter verification code</h1>
-            <p class="description">We've sent a 4-digit code to your email. Please enter it below to complete your verification.</p>
-            <p class="timer">Resend OTP in 00:45 sec</p>
-            
-            <form>
-                <div class="otp-inputs">
-                    <input type="text" class="otp-box" maxlength="1" pattern="[0-9]" inputmode="numeric">
-                    <input type="text" class="otp-box" maxlength="1" pattern="[0-9]" inputmode="numeric">
-                    <input type="text" class="otp-box" maxlength="1" pattern="[0-9]" inputmode="numeric">
-                    <input type="text" class="otp-box" maxlength="1" pattern="[0-9]" inputmode="numeric">
-                </div>
-                
-                <button type="submit" class="verify-btn">Verify Account</button>
-            </form>
-            
-            <div class="footer-text">
-                <p class="no-code">Didn't receive the code?</p>
-                <a href="#" class="resend-link">Click to resend</a>
+<body class="bg-[#e8dfd6] min-h-screen flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-lg p-8 sm:p-12 w-full max-w-md">
+        <h1 class="text-[#a78a7f] text-3xl font-semibold text-center mb-6 tracking-wide">ELARA</h1>
+        <h2 class="text-2xl font-normal text-gray-700 text-center mb-4">Verification Code</h2>
+        <p class="text-sm text-gray-500 text-center mb-8">
+            We've sent a 6-digit code to <span class="font-medium text-gray-700"><%= email %></span>.
+        </p>
+
+        <% if (locals.error && error.length > 0) { %>
+            <div class="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg mb-6 text-sm text-center">
+                <%= error %>
             </div>
+        <% } %>
+
+        <% if (locals.success && success.length > 0) { %>
+            <div class="bg-green-50 border border-green-200 text-green-600 px-4 py-3 rounded-lg mb-6 text-sm text-center">
+                <%= success %>
+            </div>
+        <% } %>
+
+        <div id="otp-error" class="hidden bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg mb-6 text-sm text-center"></div>
+
+        <div class="flex justify-center gap-3 mb-8" id="otp-container">
+            <input type="text" inputmode="numeric" maxlength="1" class="otp-input" id="otp1">
+            <input type="text" inputmode="numeric" maxlength="1" class="otp-input" id="otp2">
+            <input type="text" inputmode="numeric" maxlength="1" class="otp-input" id="otp3">
+            <input type="text" inputmode="numeric" maxlength="1" class="otp-input" id="otp4">
+            <input type="text" inputmode="numeric" maxlength="1" class="otp-input" id="otp5">
+            <input type="text" inputmode="numeric" maxlength="1" class="otp-input" id="otp6">
+        </div>
+
+        <button 
+            id="verify-btn"
+            class="w-full bg-[#a78a7f] hover:bg-[#8f7568] text-white font-medium py-3.5 rounded-lg transition-colors duration-200 uppercase tracking-wide text-sm"
+        >
+            Verify & Continue
+        </button>
+
+        <div class="text-center mt-8">
+            <p class="text-sm text-gray-500 mb-2">Didn't receive the code?</p>
+            <button id="resend-btn" class="text-sm text-gray-400 font-medium underline disabled:cursor-not-allowed" disabled>
+                Resend OTP in <span id="timer">45</span>s
+            </button>
         </div>
     </div>
+
+    <script>
+        const inputs = document.querySelectorAll('.otp-input');
+        const verifyBtn = document.getElementById('verify-btn');
+        const resendBtn = document.getElementById('resend-btn');
+        const timerSpan = document.getElementById('timer');
+        const errorDiv = document.getElementById('otp-error');
+
+        // Function to show/hide error
+        const showError = (message) => {
+            if (message) {
+                errorDiv.innerText = message;
+                errorDiv.classList.remove('hidden');
+            } else {
+                errorDiv.classList.add('hidden');
+            }
+        };
+
+        inputs.forEach((input, index) => {
+            // Only allow numbers
+            input.addEventListener('input', (e) => {
+                const value = e.target.value;
+                
+                // Validation: Remove non-numeric characters
+                if (/[^0-9]/.test(value)) {
+                    e.target.value = "";
+                    return;
+                }
+
+                showError(null); // Clear error on input
+                
+                if (value && index < inputs.length - 1) {
+                    inputs[index + 1].focus();
+                }
+            });
+
+            input.addEventListener('keydown', (e) => {
+                if (e.key === 'Backspace' && !e.target.value && index > 0) {
+                    inputs[index - 1].focus();
+                }
+            });
+
+            // Paste functionality
+            input.addEventListener('paste', (e) => {
+                e.preventDefault();
+                const data = e.clipboardData.getData('text').slice(0, 6).split('');
+                if (data.every(char => /[0-9]/.test(char))) {
+                    data.forEach((char, i) => {
+                        if (inputs[i]) inputs[i].value = char;
+                    });
+                    if (inputs[data.length - 1]) inputs[data.length - 1].focus();
+                    else inputs[inputs.length - 1].focus();
+                }
+            });
+        });
+
+        // Timer Logic
+        let timeLeft = 45;
+        const timer = setInterval(() => {
+            timeLeft--;
+            if (timerSpan) timerSpan.innerText = timeLeft;
+            if (timeLeft <= 0) {
+                clearInterval(timer);
+                resendBtn.disabled = false;
+                resendBtn.innerText = 'Click to resend';
+                resendBtn.classList.remove('text-gray-400');
+                resendBtn.classList.add('text-[#a78a7f]');
+            }
+        }, 1000);
+
+        verifyBtn.addEventListener('click', async () => {
+            const otp = Array.from(inputs).map(i => i.value).join('');
+            
+            // Validation Check
+            if (otp.length < 6) {
+                showError("Please enter the complete 6-digit code.");
+                // Highlight empty inputs
+                inputs.forEach(input => {
+                    if (!input.value) input.classList.add('border-red-500');
+                    else input.classList.remove('border-red-500');
+                });
+                return;
+            }
+
+            // Clear visual errors before fetch
+            inputs.forEach(input => input.classList.remove('border-red-500'));
+            showError(null);
+
+            try {
+                const res = await fetch('/verify-forgot-otp', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ otp })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    window.location.href = '/reset-password';
+                } else {
+                    showError(data.message || "Invalid OTP. Please try again.");
+                }
+            } catch (err) {
+                showError('Something went wrong. Please try again.');
+            }
+        });
+    </script>
 </body>
 </html>

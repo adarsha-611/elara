@@ -18,7 +18,6 @@ const userSchema = new mongoose.Schema(
 
     password: {
       type: String,
-      required: true
     },
 
     role: {
@@ -42,6 +41,27 @@ const userSchema = new mongoose.Schema(
       type: String,
       default: null
     },
+
+    profileImage: {
+      type: String,
+      default: null
+    },
+
+    isBlocked: {
+      type: Boolean,
+      default: false
+    },
+
+    addresses: [{
+      fullName: { type: String, required: true },
+      phoneNumber: { type: String, required: true },
+      street: { type: String, required: true },
+      city: { type: String, required: true },
+      state: { type: String, required: true },
+      pincode: { type: String, required: true },
+      addressType: { type: String, enum: ['Home', 'Work'], required: true },
+      isDefault: { type: Boolean, default: false }
+    }]
 
   },
   {

@@ -1,49 +1,179 @@
-/* Custom styles for registration page */
-
-/* If not using Tailwind, add these base styles */
-body {
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    background-color: #e8dfd3;
+* {
     margin: 0;
     padding: 0;
+    box-sizing: border-box;
 }
 
-/* Form validation styles */
-input:invalid:focus {
-    border-color: #ef4444;
-    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    background-color: #f5f1ed;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
 }
 
-input:valid:focus {
-    border-color: #a98968;
-    box-shadow: 0 0 0 3px rgba(169, 137, 104, 0.1);
+.container {
+    width: 100%;
+    max-width: 420px;
 }
 
-/* Custom animations */
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-        transform: translateY(-10px);
+.card {
+    background-color: #ffffff;
+    border-radius: 12px;
+    border: 1px solid #e8e4df;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    padding: 32px 36px;
+}
+
+.card-header {
+    text-align: center;
+    margin-bottom: 24px;
+}
+
+.card-header h1 {
+    font-size: 26px;
+    font-weight: 600;
+    color: #5a4a42;
+    margin-bottom: 6px;
+}
+
+.card-header p {
+    font-size: 13px;
+    color: #8b7e74;
+}
+
+.form-group {
+    margin-bottom: 16px;
+}
+
+.form-group label {
+    display: block;
+    font-size: 13px;
+    font-weight: 500;
+    color: #4a3f35;
+    margin-bottom: 8px;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 11px 14px;
+    font-size: 14px;
+    background-color: #faf8f6;
+    border: 1px solid #e8e4df;
+    border-radius: 8px;
+    outline: none;
+    transition: border-color 0.2s;
+    color: #4a3f35;
+}
+
+.form-group input:focus {
+    border-color: #8b7e74;
+}
+
+.form-group input::placeholder {
+    color: #b5a99f;
+}
+
+.password-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+.referral-section {
+    margin-bottom: 20px;
+}
+
+.referral-toggle {
+    display: none;
+}
+
+.referral-link {
+    display: inline-block;
+    font-size: 13px;
+    color: #8b7e74;
+    cursor: pointer;
+    text-decoration: underline;
+    margin-bottom: 16px;
+    transition: color 0.3s;
+}
+
+.referral-link:hover {
+    color: #5a4a42;
+}
+
+.referral-input-wrapper {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease;
+}
+
+.referral-toggle:checked ~ .referral-input-wrapper {
+    max-height: 85px;
+}
+
+.referral-toggle:checked ~ .referral-link {
+    display: none;
+}
+
+.submit-btn {
+    width: 100%;
+    padding: 13px 16px;
+    font-size: 15px;
+    font-weight: 500;
+    color: #ffffff;
+    background-color: #6b5b52;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    margin-bottom: 16px;
+}
+
+.submit-btn:hover {
+    background-color: #5a4a42;
+}
+
+.footer-text {
+    text-align: center;
+}
+
+.footer-text p {
+    font-size: 13px;
+    color: #8b7e74;
+}
+
+.footer-text a {
+    color: #6b5b52;
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.3s;
+}
+
+.footer-text a:hover {
+    color: #5a4a42;
+    text-decoration: underline;
+}
+
+@media (max-width: 640px) {
+    .card {
+        padding: 28px 24px;
     }
-    to {
-        opacity: 1;
-        transform: translateY(0);
+
+    .card-header h1 {
+        font-size: 24px;
+    }
+
+    .password-row {
+        grid-template-columns: 1fr;
+        gap: 0;
     }
 }
 
-.card-container {
-    animation: fadeIn 0.3s ease-out;
-}
-
-/* Smooth transitions */
-button, input, a {
-    transition: all 0.2s ease;
-}
-
-/* Focus styles for accessibility */
-button:focus,
-input:focus,
-a:focus {
-    outline: 2px solid #a98968;
-    outline-offset: 2px;
+@media (max-width: 480px) {
+    .container {
+        max-width: 100%;
+    }
 }

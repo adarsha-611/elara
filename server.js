@@ -3,12 +3,21 @@ import path from "path";
 import dotenv from "dotenv"
 import { fileURLToPath } from "url";
 import session from "express-session";
+import MongoStore from "connect-mongo";
 import flash from "connect-flash";
+import mongoose from "mongoose";
+
+
+
 
 import db from "./src/config/db.js";
-// import userRouter from "./src/routes/userRouter.js";
 import signupRouter from "./src/routes/auth/signupRouter.js";
 import loginRouter from "./src/routes/auth/loginRouter.js";
+import passport from "./src/config/passport.js";
+import homeRouter from "./src/routes/homeRouter.js";
+import profileRouter from "./src/routes/profileRouter.js";
+import adminRouter from "./src/routes/adminRoutes/adminRouter.js"
+
 
 
 dotenv.config();
@@ -24,17 +33,29 @@ app.use(express.json());
 app.use(express.urlencoded({extended:true}));
 app.use(
   session({
+    name: "elara.sid", 
     secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: false,
+
+    store: MongoStore.create({
+    client: mongoose.connection.getClient(), 
+   collectionName: "sessions",
+   ttl: 72 * 60 * 60,
+  }),
+
+
     cookie: {
       httpOnly: true,
-      secure: false, // true only in HTTPS
-      maxAge: 72*60*60*1000, // 1 day
+      secure: false,
+      maxAge: 72 * 60 * 60 * 1000, 
     },
   })
 );
+
 app.use(flash());
+app.use(passport.initialize());
+app.use(passport.session());
 app.set("view engine","ejs");
 app.set("views", path.join(__dirname, "src/views"));
 app.use(express.static(path.join(__dirname,"src/public")));
@@ -42,7 +63,10 @@ app.use(express.static(path.join(__dirname,"src/public")));
 
 app.use("/", signupRouter);
 app.use('/', loginRouter);
-// app.use('/',userRouter)
+app.use('/',homeRouter);
+app.use('/',profileRouter);
+app.use('/admin',adminRouter);
+
 
 
 

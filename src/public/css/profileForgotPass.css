@@ -1,0 +1,205 @@
+/* --- Root Variables & Reset --- */
+:root {
+    --bg-soft-beige: #f5f1ee;
+    --card-white: #ffffff;
+    --brand-brown: #4d3227; /* Darker header/footer brown */
+    --accent-brown: #b0988a; /* Soft brown from Update button */
+    --text-muted: #8e867e;
+    --border-light: #e0d8d0;
+    --input-fill: #f9f7f5;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Inter', sans-serif;
+}
+
+body {
+    background-color: var(--bg-soft-beige);
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+/* --- Header --- */
+.main-header {
+    background-color: var(--brand-brown);
+    padding: 15px 6%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: white;
+}
+
+.logo {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.6rem;
+    letter-spacing: 2px;
+}
+
+.nav-links a {
+    color: white;
+    text-decoration: none;
+    margin: 0 15px;
+    font-size: 0.8rem;
+    letter-spacing: 1px;
+}
+
+.header-icons {
+    display: flex;
+    gap: 15px;
+}
+
+.icon-btn {
+    color: white;
+    text-decoration: none;
+}
+
+/* --- Main Content Section --- */
+.content-wrapper {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 60px 20px;
+}
+
+.reset-card {
+    background-color: var(--card-white);
+    width: 100%;
+    max-width: 580px; /* Medium fixed width */
+    padding: 50px 40px;
+    border-radius: 12px;
+    border: 1px solid var(--border-light);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.03);
+    text-align: center;
+}
+
+.reset-card h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: 2.2rem;
+    color: var(--brand-brown);
+    margin-bottom: 12px;
+}
+
+.subtext {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    margin-bottom: 40px;
+}
+
+/* --- Form Elements --- */
+.reset-form {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    max-width: 400px;
+    margin: 0 auto;
+}
+
+.input-field {
+    text-align: left;
+    display: flex;
+    flex-direction: column;
+}
+
+.input-field input {
+    width: 100%;
+    padding: 14px 18px;
+    border-radius: 6px;
+    border: 1px solid transparent;
+    background-color: var(--input-fill);
+    font-size: 0.95rem;
+    color: var(--brand-brown);
+    outline: none;
+    transition: border-color 0.3s;
+}
+
+.input-field input:focus {
+    border-color: var(--accent-brown);
+}
+
+.resend-link {
+    font-size: 0.75rem;
+    color: var(--accent-brown);
+    text-decoration: underline;
+    margin-top: 6px;
+    align-self: flex-end;
+}
+
+.btn-update {
+    background-color: var(--accent-brown);
+    color: white;
+    border: none;
+    padding: 16px;
+    border-radius: 6px;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    margin-top: 15px;
+    transition: background-color 0.3s;
+}
+
+.btn-update:hover {
+    background-color: var(--brand-brown);
+}
+
+/* --- Footer --- */
+.main-footer {
+    background-color: var(--brand-brown);
+    color: white;
+    padding: 60px 6% 30px;
+}
+
+.footer-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 40px;
+    margin-bottom: 50px;
+}
+
+.footer-col h3 { font-size: 1rem; margin-bottom: 20px; }
+.footer-col a, .footer-col p { 
+    display: block; 
+    font-size: 0.8rem; 
+    color: #ccc; 
+    text-decoration: none;
+    margin-bottom: 10px;
+}
+
+.sub-input {
+    display: flex;
+    border: 1px solid white;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.sub-input input {
+    background: transparent;
+    border: none;
+    padding: 8px;
+    color: white;
+    flex: 1;
+}
+
+.qr-placeholder img {
+    height: 30px;
+    margin-top: 10px;
+}
+
+.footer-bottom {
+    text-align: center;
+    font-size: 0.75rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    padding-top: 20px;
+    color: #777;
+}
+
+/* --- Responsive --- */
+@media (max-width: 600px) {
+    .nav-links { display: none; }
+    .reset-card { padding: 40px 20px; }
+    .reset-card h1 { font-size: 1.8rem; }
+}

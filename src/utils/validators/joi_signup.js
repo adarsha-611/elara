@@ -4,7 +4,7 @@ export const signupSchema = Joi.object({
   fullName: Joi.string()
     .min(3)
     .max(50)
-    .pattern(/^[A-Za-z ]+$/) // allow space for full names
+    .pattern(/^[A-Za-z ]+$/) 
     .required()
     .messages({
       "string.empty": "Full name is required",

@@ -1,0 +1,41 @@
+<aside class="sidebar">
+    <div class="user-info">
+        <div class="user-avatar">
+            <% if (user.profileImage) { %>
+                <img src="/uploads/profiles/<%= user.profileImage %>" alt="Profile" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">
+            <% } else { %>
+                <%= user.fullName.charAt(0).toUpperCase() %>
+            <% } %>
+        </div>
+        <div class="user-details">
+            <h3><%= user.fullName %></h3>
+            <p><%= user.email %></p>
+        </div>
+    </div>
+    <nav class="sidebar-menu">
+        <a href="/profile" class="menu-item <%= path === '/profile' ? 'active' : '' %>">
+            <span class="icon">👤</span>
+            <span>My Profile</span>
+        </a>
+        <a href="/profile/orders" class="menu-item <%= path === '/profile/orders' ? 'active' : '' %>">
+            <span class="icon">📦</span>
+            <span>My Orders</span>
+        </a>
+        <a href="/profile/wallet" class="menu-item <%= path === '/profile/wallet' ? 'active' : '' %>">
+            <span class="icon">💳</span>
+            <span>Wallet</span>
+        </a>
+        <a href="/profile/address" class="menu-item <%= path === '/profile/address' ? 'active' : '' %>">
+            <span class="icon">📖</span>
+            <span>My Address</span>
+        </a>
+        <a href="/profile/referral" class="menu-item <%= path === '/profile/referral' ? 'active' : '' %>">
+             <span class="icon">🎟️</span>
+            <span>Refer & Earn</span>
+        </a>
+        <a href="/logout" class="menu-item">
+            <span class="icon">↪️</span>
+            <span>Log Out</span>
+        </a>
+    </nav>
+</aside>

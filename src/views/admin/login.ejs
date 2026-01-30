@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ELARA - Admin Login</title>
+   <style>
+    body {
+        font-family: Arial, sans-serif;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        background: #f3ede7; /* light beige (reference bg) */
+    }
+
+    .login-card {
+        background: #f7f1eb; /* soft beige card */
+        padding: 40px;
+        border-radius: 8px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        width: 100%;
+        max-width: 400px;
+        text-align: center;
+    }
+
+    .form-group {
+        margin-bottom: 20px;
+        text-align: left;
+    }
+
+    label {
+        display: block;
+        margin-bottom: 5px;
+        font-weight: bold;
+        color: #3b2a1a; /* dark brown text */
+    }
+
+    input {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #cbb8a5; /* light brown border */
+        border-radius: 4px;
+        box-sizing: border-box;
+        background: #f5f5f5;
+    }
+
+    button {
+        background: #5b3a23; /* main brown (reference) */
+        color: white;
+        padding: 12px;
+        width: 100%;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 16px;
+    }
+
+    button:hover {
+        background: #4a2f1d; /* darker brown hover */
+    }
+
+    .error {
+        color: #4a1f1f;
+        background: #f1d6d6;
+        padding: 10px;
+        margin-bottom: 20px;
+        border-radius: 4px;
+        border: 1px solid #ddbcbc;
+    }
+</style>
+
+</head>
+<body>
+    <div class="login-card">
+        <h2>Admin Login</h2>
+        <% if (error && error.length > 0) { %>
+            <div class="error"><%= error %></div>
+        <% } %>
+        <form action="/admin/login" method="POST">
+            <div class="form-group">
+                <label>Email</label>
+                <input type="email" name="email" required>
+            </div>
+            <div class="form-group">
+                <label>Password</label>
+                <input type="password" name="password" required>
+            </div>
+            <button type="submit">Login</button>
+        </form>
+    </div>
+</body>
+</html>

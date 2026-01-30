@@ -1,0 +1,472 @@
+/* ==========================================================================
+   Your existing styles (I kept them unchanged + added modal-related parts)
+   ========================================================================== */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    background-color: #e8dfd5;
+    color: #4a3f35;
+}
+
+/* Navigation Bar */
+.navbar {
+    background-color: #3d2e28;
+    padding: 16px 0;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+.nav-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 40px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.logo {
+    font-size: 20px;
+    font-weight: 700;
+    color: #f5f1ed;
+    letter-spacing: 2px;
+}
+
+.nav-links {
+    display: flex;
+    gap: 40px;
+}
+
+.nav-links a {
+    color: #f5f1ed;
+    text-decoration: none;
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 1px;
+    transition: color 0.3s;
+}
+
+.nav-links a:hover {
+    color: #c9a87c;
+}
+
+.nav-icons {
+    display: flex;
+    gap: 20px;
+}
+
+.nav-icons a {
+    color: #f5f1ed;
+    text-decoration: none;
+    font-size: 16px;
+    transition: color 0.3s;
+}
+
+.nav-icons a:hover {
+    color: #c9a87c;
+}
+
+/* Main Content */
+.main-content {
+    padding: 40px;
+    background-color: #e8dfd5;
+    min-height: calc(100vh - 200px);
+}
+
+.content-wrapper {
+    max-width: 1400px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    gap: 30px;
+}
+
+/* Sidebar */
+.sidebar {
+    background-color: #6b5347;
+    border-radius: 8px;
+    padding: 24px;
+    height: fit-content;
+}
+
+.user-info {
+    padding-bottom: 20px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.user-avatar {
+    width: 40px;
+    height: 40px;
+    background-color: #8b6f5f;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #f5f1ed;
+    font-size: 18px;
+}
+
+.user-details h3 {
+    font-size: 14px;
+    font-weight: 600;
+    color: #f5f1ed;
+    margin-bottom: 2px;
+}
+
+.user-details p {
+    font-size: 11px;
+    color: #c9b8a8;
+}
+
+.sidebar-menu {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.menu-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    color: #e8ddd0;
+    text-decoration: none;
+    border-radius: 6px;
+    font-size: 14px;
+    transition: background-color 0.3s;
+}
+
+.menu-item:hover {
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+.menu-item.active {
+    background-color: #5a443a;
+}
+
+.menu-item .icon {
+    font-size: 16px;
+    width: 20px;
+}
+
+/* Content Area */
+.content-area {
+    background-color: #ffffff;
+    border-radius: 12px;
+    padding: 40px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    border: 1px solid #e8e4df;
+}
+
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 32px;
+    gap: 20px;
+}
+
+.page-title-section h1 {
+    font-size: 24px;
+    font-weight: 600;
+    color: #3d2e28;
+    margin-bottom: 8px;
+}
+
+.page-title-section p {
+    font-size: 13px;
+    color: #8b7e74;
+    line-height: 1.5;
+}
+
+.btn-add-address {
+    padding: 12px 24px;
+    background-color: #6b5347;
+    color: #ffffff;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    white-space: nowrap;
+}
+
+.btn-add-address:hover {
+    background-color: #5a443a;
+}
+
+/* Address List */
+.address-list {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.address-card {
+    background-color: #faf8f6;
+    border: 1px solid #e8e4df;
+    border-radius: 12px;
+    padding: 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 20px;
+    transition: box-shadow 0.3s;
+}
+
+.address-card:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.address-content {
+    flex: 1;
+}
+
+.address-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 12px;
+}
+
+.address-header h3 {
+    font-size: 16px;
+    font-weight: 600;
+    color: #3d2e28;
+}
+
+.badge-default {
+    background-color: #6b5347;
+    color: #ffffff;
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 500;
+}
+
+.address-text {
+    font-size: 14px;
+    color: #6b5b52;
+    line-height: 1.6;
+}
+
+.address-actions {
+    display: flex;
+    gap: 12px;
+}
+
+.btn-icon {
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: transparent;
+    border: 1px solid #d0c4b8;
+    border-radius: 8px;
+    color: #6b5347;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.btn-icon:hover {
+    background-color: #6b5347;
+    color: #ffffff;
+    border-color: #6b5347;
+}
+
+/* ==========================================================================
+   MODAL STYLES  (new / added part)
+   ========================================================================== */
+
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(61, 46, 40, 0.75);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 2000;
+    padding: 20px;
+}
+
+.modal-container {
+    background: #ffffff;
+    width: 100%;
+    max-width: 560px;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 12px 48px rgba(61, 46, 40, 0.30);
+    border: 1px solid #e8e4df;
+}
+
+.modal-header {
+    padding: 24px 32px 20px;
+    border-bottom: 1px solid #e8e4df;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #faf8f6;
+}
+
+.modal-header h2 {
+    font-size: 20px;
+    font-weight: 600;
+    color: #3d2e28;
+    margin: 0;
+}
+
+.close-modal {
+    background: none;
+    border: none;
+    font-size: 32px;
+    line-height: 1;
+    color: #8b7e74;
+    cursor: pointer;
+    transition: color 0.2s;
+}
+
+.close-modal:hover,
+.close-modal:focus {
+    color: #3d2e28;
+}
+
+.address-form {
+    padding: 32px;
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+.form-group {
+    margin-bottom: 22px;
+}
+
+.form-group.full-width {
+    grid-column: 1 / -1;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-size: 13px;
+    font-weight: 500;
+    color: #6b5b52;
+}
+
+.form-group input,
+.form-group select {
+    width: 100%;
+    padding: 12px 14px;
+    border: 1px solid #d0c4b8;
+    border-radius: 8px;
+    font-size: 14px;
+    color: #4a3f35;
+    background: #fdfcfb;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+    outline: none;
+    border-color: #6b5347;
+    box-shadow: 0 0 0 3px rgba(107, 83, 71, 0.14);
+}
+
+.form-checkbox {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 16px 0 28px;
+}
+
+.form-checkbox input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    accent-color: #6b5347;
+}
+
+.form-checkbox label {
+    font-size: 14px;
+    color: #6b5b52;
+    cursor: pointer;
+    user-select: none;
+}
+
+.modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 16px;
+    padding: 24px 32px;
+    border-top: 1px solid #e8e4df;
+    background: #faf8f6;
+}
+
+.btn-cancel,
+.btn-save {
+    padding: 12px 28px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-cancel {
+    background: #f5f1ed;
+    color: #6b5347;
+    border: 1px solid #d0c4b8;
+}
+
+.btn-cancel:hover {
+    background: #e8ddd0;
+    border-color: #c9a87c;
+}
+
+.btn-save {
+    background: #6b5347;
+    color: #ffffff;
+    border: none;
+}
+
+.btn-save:hover {
+    background: #5a443a;
+}
+
+/* Responsive adjustments for modal */
+@media (max-width: 640px) {
+    .modal-container {
+        margin: 0 16px;
+    }
+
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+
+    .modal-footer {
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .btn-cancel,
+    .btn-save {
+        width: 100%;
+    }
+}

@@ -5,10 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Create Account - ELARA</title>
     
-    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     
-    <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -21,39 +19,34 @@
 </head>
 <body class="bg-[#e8dfd3] min-h-screen flex items-center justify-center p-4">
     
-    <!-- Registration Card Container -->
     <div class="bg-white rounded-lg shadow-sm border border-gray-200 w-full max-w-md p-8 md:p-12">
         
-        <!-- Brand Name -->
         <h1 class="text-[#a98968] text-3xl md:text-4xl font-semibold text-center mb-6 tracking-wide">
             ELARA
         </h1>
         
-        <!-- Page Title -->
         <h2 class="text-gray-700 text-2xl font-medium text-center mb-2">
             Create Your Account
         </h2>
         
-        <!-- Subtitle -->
         <p class="text-gray-500 text-sm text-center mb-8">
             Let's get started with your free account.
         </p>
         
-        <!-- Display error messages -->
-        <% if (typeof errors !== 'undefined' && errors.length > 0) { %>
-            <div class="bg-red-50 border border-red-200 rounded-md p-4 mb-6">
-                <ul class="text-red-700 text-sm space-y-1">
-                    <% errors.forEach(function(error) { %>
-                        <li>• <%= error %></li>
-                    <% }); %>
-                </ul>
+        <% if (locals.error && error.length > 0) { %>
+            <div class="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg mb-6 text-sm text-center">
+                <%= error %>
+            </div>
+        <% } %>
+
+        <% if (locals.success && success.length > 0) { %>
+            <div class="bg-green-50 border border-green-200 text-green-600 px-4 py-3 rounded-lg mb-6 text-sm text-center">
+                <%= success %>
             </div>
         <% } %>
         
-        <!-- Registration Form -->
-        <form id="signform" action="/signup" method="POST">
+        <form id="signform" action="/signup" method="POST" novalidate>
             
-            <!-- Full Name Field -->
             <div class="mb-5">
                 <label for="fullName" class="block text-gray-600 text-sm font-medium mb-2">
                     Full Name
@@ -63,12 +56,10 @@
                     id="fullName" 
                     name="fullName" 
                     class="w-full px-4 py-2.5 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#a98968] focus:border-transparent transition"
-                    required
                 >
-                <div id="err1" class="error.message"></div>
+                <div id="err1" class="text-red-500 text-xs mt-1"></div>
             </div>
             
-            <!-- Email Address Field -->
             <div class="mb-5">
                 <label for="email" class="block text-gray-600 text-sm font-medium mb-2">
                     Email address
@@ -78,12 +69,10 @@
                     id="email" 
                     name="email" 
                     class="w-full px-4 py-2.5 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#a98968] focus:border-transparent transition"
-                    required
                 >
-                <div id="err2" class="error.message"></div>
+                <div id="err2" class="text-red-500 text-xs mt-1"></div>
             </div>
             
-            <!-- Password Field -->
             <div class="mb-5">
                 <label for="password" class="block text-gray-600 text-sm font-medium mb-2">
                     Password
@@ -93,12 +82,10 @@
                     id="password" 
                     name="password" 
                     class="w-full px-4 py-2.5 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#a98968] focus:border-transparent transition"
-                    required
                 >
-                <div id="err3" class="error.message"></div>
+                <div id="err3" class="text-red-500 text-xs mt-1"></div>
             </div>
             
-            <!-- Confirm Password Field -->
             <div class="mb-6">
                 <label for="confirmPassword" class="block text-gray-600 text-sm font-medium mb-2">
                     Confirm password
@@ -108,12 +95,10 @@
                     id="confirmPassword" 
                     name="confirmPassword" 
                     class="w-full px-4 py-2.5 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#a98968] focus:border-transparent transition"
-                    required
                 >
-                <div id="err4" class="error.message"></div>
+                <div id="err4" class="text-red-500 text-xs mt-1"></div>
             </div>
             
-            <!-- Referral Code Button (Optional Field) -->
             <div class="mb-6">
                 <button 
                     type="button" 
@@ -123,7 +108,6 @@
                     Referral Code
                 </button>
                 
-                <!-- Hidden Referral Input (shows when button clicked) -->
                 <div id="referralInput" class="hidden mt-3">
                     <input 
                         type="text" 
@@ -134,7 +118,6 @@
                 </div>
             </div>
             
-            <!-- Create Account Button -->
             <button 
                 type="submit" 
                 class="w-full bg-[#c4a88a] hover:bg-[#b39878] text-white font-medium py-3 rounded-md transition mb-6"
@@ -144,7 +127,6 @@
             
         </form>
         
-        <!-- Login Link -->
         <p class="text-center text-gray-600 text-sm mb-4">
             Already have an account? 
             <a href="/login" class="text-[#a98968] hover:underline font-medium">
@@ -152,7 +134,6 @@
             </a>
         </p>
         
-        <!-- Divider -->
         <div class="relative mb-6">
             <div class="absolute inset-0 flex items-center">
                 <div class="w-full border-t border-gray-200"></div>
@@ -162,7 +143,6 @@
             </div>
         </div>
         
-        <!-- Google Sign In Button -->
         <a 
             href="/auth/google" 
             class="flex items-center justify-center w-full bg-gray-50 hover:bg-gray-100 border border-gray-300 text-gray-700 font-medium py-3 rounded-md transition"
@@ -175,16 +155,78 @@
             </svg>
             Google
         </a>
-        
     </div>
-    
-    <!-- JavaScript for Referral Code Toggle -->
+
     <script>
+        // Referral Toggle Logic
         document.getElementById('referralToggle').addEventListener('click', function() {
             const referralInput = document.getElementById('referralInput');
             referralInput.classList.toggle('hidden');
         });
+
+        // Client-side Validation Logic
+        const form = document.getElementById('signform');
+        
+        form.addEventListener('submit', function(e) {
+            let isValid = true;
+
+            // Select inputs
+            const fullName = document.getElementById('fullName');
+            const email = document.getElementById('email');
+            const password = document.getElementById('password');
+            const confirmPassword = document.getElementById('confirmPassword');
+
+            // Select error divs
+            const err1 = document.getElementById('err1');
+            const err2 = document.getElementById('err2');
+            const err3 = document.getElementById('err3');
+            const err4 = document.getElementById('err4');
+
+            // Reset errors
+            [err1, err2, err3, err4].forEach(el => el.textContent = "");
+
+            // 1. Full Name Validation
+            if (fullName.value.trim() === "") {
+                err1.textContent = "Full name is required";
+                isValid = false;
+            } else if (fullName.value.trim().length < 3) {
+                err1.textContent = "Name must be at least 3 characters";
+                isValid = false;
+            }
+
+            // 2. Email Validation
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (email.value.trim() === "") {
+                err2.textContent = "Email address is required";
+                isValid = false;
+            } else if (!emailRegex.test(email.value.trim())) {
+                err2.textContent = "Please enter a valid email address";
+                isValid = false;
+            }
+
+            // 3. Password Validation
+            if (password.value === "") {
+                err3.textContent = "Password is required";
+                isValid = false;
+            } else if (password.value.length < 8) {
+                err3.textContent = "Password must be at least 8 characters long";
+                isValid = false;
+            }
+
+            // 4. Confirm Password Validation
+            if (confirmPassword.value === "") {
+                err4.textContent = "Please confirm your password";
+                isValid = false;
+            } else if (confirmPassword.value !== password.value) {
+                err4.textContent = "Passwords do not match";
+                isValid = false;
+            }
+
+            // If any validation failed, prevent form submission
+            if (!isValid) {
+                e.preventDefault();
+            }
+        });
     </script>
-    
 </body>
 </html>

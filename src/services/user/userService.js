@@ -1,4 +1,5 @@
 import User from "../../model/userSchema.js";
+import mongoose from "mongoose";
 
 export async function findUserByemail(email) {
      const user = await User.findOne({email:email})
@@ -23,20 +24,28 @@ export async function createUser(userData) {
 
         } catch (error) {
 
-            // Duplicate key error (MongoDB error code 11000)
             if (error.code === 11000) {
                 const field = Object.keys(error.keyValue)[0];
                 throw new Error(`${field} already exists`);
             }
 
-            // Re-throw other errors
+            
             throw error;
         }
     }
 
+    export async function getUserById(userId){
+
+       try {
+        const objectId = new mongoose.Types.ObjectId(userId);
+            const user = await User.findOne({_id: objectId})
+
+        return user
 
 
 
-    
- 
-
+            
+       } catch (error) {
+          console.log(error)
+       }
+    }

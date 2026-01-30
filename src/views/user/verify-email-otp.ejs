@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ELARA - Verify Email</title>
+    <link rel="stylesheet" href="/css/profile.css">
+</head>
+<body>
+
+    <!-- Navigation Bar -->
+    <header class="navbar">
+        <div class="nav-container">
+            <div class="logo">ELARA</div>
+            <nav class="nav-links">
+                <a href="/home">HOME</a>
+                <a href="#shop">SHOP</a>
+                <a href="#about">ABOUT US</a>
+                <a href="#contact">CONTACT</a>
+            </nav>
+            <div class="nav-icons">
+                <a href="/wishlist">❤️</a>
+                <a href="/profile">👤</a>
+                <a href="/cart">🛒</a>
+            </div>
+        </div>
+    </header>
+
+    <div class="page-header">
+        <h2>Welcome, <%= user.fullName %></h2>
+    </div>
+
+    <main class="main-content">
+        <div class="content-wrapper">
+
+            <!-- Left Sidebar -->
+            <%- include('../partials/profileSidebar', { user, path: '/profileEdit' }) %>
+
+            <!-- Right Content Card -->
+            <section class="profile-card">
+
+                <% if (success && success.length > 0) { %>
+                    <div style="background:#d4edda;color:#155724;padding:10px;margin-bottom:10px;">
+                        <%= success %>
+                    </div>
+                <% } %>
+
+                <% if (error && error.length > 0) { %>
+                    <div style="background:#f8d7da;color:#721c24;padding:10px;margin-bottom:10px;">
+                        <%= error %>
+                    </div>
+                <% } %>
+
+                <div class="card-header">
+                    <h1>Verify Email</h1>
+                    <p>
+                        OTP has been sent to 
+                        <strong><%= newEmail %></strong>
+                    </p>
+                </div>
+
+                <!-- ✅ OTP FORM (ADDED) -->
+                <form action="/profile/email/verify" method="POST">
+                    <div class="form-group">
+                        <label>Enter OTP</label>
+                        <input 
+                            type="text" 
+                            name="otp" 
+                            placeholder="Enter 6-digit OTP"
+                            required
+                        >
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">
+                        Verify Email
+                    </button>
+                </form>
+
+            </section>
+        </div>
+    </main>
+
+</body>
+</html>
