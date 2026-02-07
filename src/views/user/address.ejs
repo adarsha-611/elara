@@ -1,4 +1,3 @@
-<!-- views/user/address.ejs -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -53,7 +52,6 @@
             background: white;
             border-radius: 10px;
             padding: 25px;
-            position: relative;
             box-shadow: 0 2px 5px rgba(0,0,0,0.05);
             display: flex;
             justify-content: space-between;
@@ -99,10 +97,9 @@
             background-color: #f5f5f5;
             border-radius: 5px;
             color: #555;
-            text-decoration: none;
+            cursor: pointer;
             transition: background 0.2s;
             border: none;
-            cursor: pointer;
         }
         
         .action-icon:hover {
@@ -150,6 +147,16 @@
             border: 1px solid #ddd;
             border-radius: 5px;
             font-size: 1em;
+            box-sizing: border-box;
+        }
+        .form-group input.is-invalid {
+            border-color: #dc3545;
+        }
+        .error-text {
+            color: #dc3545;
+            font-size: 0.82em;
+            margin-top: 4px;
+            min-height: 1.2em;
         }
         .modal-buttons {
             display: flex;
@@ -246,11 +253,11 @@
                                             onclick='openEditAddressModal(
                                                 "<%= addr._id %>",
                                                 <%= JSON.stringify(addr.fullName) %>,
-                                                <%= JSON.stringify(addr.phoneNumber) %>,
+                                                <%= JSON.stringify(addr.phoneNumber || '') %>,
                                                 <%= JSON.stringify(addr.street) %>,
                                                 <%= JSON.stringify(addr.city) %>,
                                                 <%= JSON.stringify(addr.state) %>,
-                                                <%= JSON.stringify(addr.pincode) %>,
+                                                <%= JSON.stringify(addr.pincode || '') %>,
                                                 <%= JSON.stringify(addr.addressType) %>,
                                                 <%= addr.isDefault %>
                                             )'
@@ -297,47 +304,52 @@
         </div>
     </main>
 
-    <!-- ====================== -->
-    <!--       MODAL            -->
-    <!-- ====================== -->
+    <!-- Modal -->
     <div id="addressModal" class="modal">
         <div class="modal-content">
             <h3 id="modalTitle" style="margin-bottom: 24px; color: #333;">Add New Address</h3>
 
             <form id="addressForm" action="/profile/address/add" method="POST">
-                <input type="hidden" name="addressId" id="addressId">
+                <!-- Hidden input for addressId (critical for edit) -->
+                <input type="hidden" name="addressId" id="addressId" value="">
 
                 <div class="form-row">
                     <div class="form-group">
                         <label>Full Name *</label>
                         <input type="text" name="fullName" id="fullName" required>
+                        <div class="error-text" id="fullName-error"></div>
                     </div>
                     <div class="form-group">
-                        <label>Phone Number</label>
-                        <input type="tel" name="phoneNumber" id="phoneNumber" maxlength="10">
+                        <label>Phone Number *</label>
+                        <input type="tel" name="phoneNumber" id="phoneNumber" maxlength="10" pattern="\d{10}" title="10-digit number only">
+                        <div class="error-text" id="phoneNumber-error"></div>
                     </div>
                 </div>
 
                 <div class="form-group">
                     <label>Address (House No, Street, Landmark) *</label>
                     <input type="text" name="street" id="street" required>
+                    <div class="error-text" id="street-error"></div>
                 </div>
 
                 <div class="form-row">
                     <div class="form-group">
                         <label>District / Town *</label>
                         <input type="text" name="city" id="city" required>
+                        <div class="error-text" id="city-error"></div>
                     </div>
                     <div class="form-group">
                         <label>State *</label>
                         <input type="text" name="state" id="state" required>
+                        <div class="error-text" id="state-error"></div>
                     </div>
                 </div>
 
                 <div class="form-row">
                     <div class="form-group">
-                        <label>Pincode</label>
-                        <input type="text" name="pincode" id="pincode" maxlength="6">
+                        <label>Pincode *</label>
+                        <input type="text" name="pincode" id="pincode" maxlength="6" pattern="\d{6}" title="6-digit number only">
+                        <div class="error-text" id="pincode-error"></div>
                     </div>
 
                     <div class="form-group">
@@ -373,38 +385,108 @@
 
         function openAddressModal() {
             document.getElementById('modalTitle').textContent = "Add New Address";
+            document.getElementById('addressForm').action = "/profile/address/add";
             document.getElementById('addressForm').reset();
             document.getElementById('addressId').value = '';
+            clearErrors();
             addressModal.classList.add('show');
         }
 
         function openEditAddressModal(id, fullName, phoneNumber, street, city, state, pincode, addressType, isDefault) {
+            console.log("Editing address ID:", id);  // Debug log
             document.getElementById('modalTitle').textContent = "Edit Address";
-            
+            document.getElementById('addressForm').action = "/profile/address/edit";
+
             document.getElementById('addressId').value = id;
-            document.getElementById('fullName').value = fullName;
-            document.getElementById('phoneNumber').value = phoneNumber;
-            document.getElementById('street').value = street;
-            document.getElementById('city').value = city;
-            document.getElementById('state').value = state;
-            document.getElementById('pincode').value = pincode;
+            document.getElementById('fullName').value = fullName || '';
+            document.getElementById('phoneNumber').value = phoneNumber || '';
+            document.getElementById('street').value = street || '';
+            document.getElementById('city').value = city || '';
+            document.getElementById('state').value = state || '';
+            document.getElementById('pincode').value = pincode || '';
 
-            if (addressType === 'Work') {
-                document.getElementById('typeWork').checked = true;
-            } else {
-                document.getElementById('typeHome').checked = true;
-            }
+            document.getElementById('typeHome').checked = addressType !== 'Work';
+            document.getElementById('typeWork').checked = addressType === 'Work';
 
-            document.getElementById('isDefault').checked = isDefault;
+            document.getElementById('isDefault').checked = !!isDefault;
 
+            clearErrors();
             addressModal.classList.add('show');
         }
 
         function closeAddressModal() {
             addressModal.classList.remove('show');
+            clearErrors();
         }
 
-        // Close when clicking outside
+        function clearErrors() {
+            document.querySelectorAll('.error-text').forEach(el => el.textContent = '');
+            document.querySelectorAll('input').forEach(el => el.classList.remove('is-invalid'));
+        }
+
+        function showFieldErrors(errors) {
+            clearErrors();
+            if (!errors || !Array.isArray(errors)) return;
+
+            errors.forEach(err => {
+                const errorEl = document.getElementById(`${err.field}-error`);
+                const inputEl = document.getElementById(err.field);
+                if (errorEl && inputEl) {
+                    errorEl.textContent = err.message;
+                    inputEl.classList.add('is-invalid');
+                }
+            });
+        }
+
+        // Auto-open modal after failed validation
+        document.addEventListener('DOMContentLoaded', () => {
+            const validationErrorsStr = '<%= typeof validationErrors !== "undefined" ? validationErrors : "" %>';
+            const oldInputStr = '<%= typeof oldInput !== "undefined" ? oldInput : "" %>';
+            const showModal = '<%= typeof showModalAfterError !== "undefined" ? showModalAfterError : "" %>';
+            const formMode = '<%= typeof formMode !== "undefined" ? formMode : "" %>';
+
+            if (validationErrorsStr || showModal) {
+                try {
+                    const errors = validationErrorsStr ? JSON.parse(validationErrorsStr) : [];
+                    const oldInput = oldInputStr ? JSON.parse(oldInputStr) : {};
+
+                    // Repopulate form
+                    document.getElementById('fullName').value = oldInput.fullName || '';
+                    document.getElementById('phoneNumber').value = oldInput.phoneNumber || '';
+                    document.getElementById('street').value = oldInput.street || '';
+                    document.getElementById('city').value = oldInput.city || '';
+                    document.getElementById('state').value = oldInput.state || '';
+                    document.getElementById('pincode').value = oldInput.pincode || '';
+                    document.getElementById('addressId').value = oldInput.addressId || '';
+
+                    document.getElementById('isDefault').checked = oldInput.isDefault === true || oldInput.isDefault === 'on';
+
+                    if (oldInput.addressType === 'Work') {
+                        document.getElementById('typeWork').checked = true;
+                    } else {
+                        document.getElementById('typeHome').checked = true;
+                    }
+
+                    // Show errors
+                    showFieldErrors(errors);
+
+                    // Set correct title and action
+                    if (formMode === 'edit' || showModal === 'edit') {
+                        document.getElementById('modalTitle').textContent = 'Edit Address';
+                        document.getElementById('addressForm').action = '/profile/address/edit';
+                    } else {
+                        document.getElementById('modalTitle').textContent = 'Add New Address';
+                        document.getElementById('addressForm').action = '/profile/address/add';
+                    }
+
+                    addressModal.classList.add('show');
+                } catch (e) {
+                    console.error('Error parsing validation data:', e);
+                }
+            }
+        });
+
+        // Close modal on outside click
         window.onclick = function(event) {
             if (event.target === addressModal) {
                 closeAddressModal();

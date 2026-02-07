@@ -67,7 +67,6 @@ const postEditProduct = async (req, res) => {
       return res.status(404).json({ success: false, message: "Product not found" });
     }
 
-    // This is the line most people forget — pass existing images!
     const existingImages = product.variants.flatMap(v => v.images || []);
 
     const { error } = validateProduct(req.body, req.files || [], existingImages);
