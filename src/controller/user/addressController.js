@@ -1,9 +1,10 @@
 import User from "../../model/userSchema.js";
+import { validateAddress } from "../../utils/validators/joi_address.js";
 
 const getAddresses = async (req, res) => {
     try {
         const userId = req.session.userId;
-        const user = await User.findById(userId);
+const user = await User.findById(userId).lean();
         return res.render("user/address", { 
             user, 
             success: req.flash('success'), 
@@ -18,39 +19,43 @@ const getAddresses = async (req, res) => {
 const addAddress = async (req, res) => {
   try {
     const userId = req.session.userId;
-    const { fullName, phoneNumber, street, city, state, pincode, addressType, isDefault } = req.body;
+
+    req.body.isDefault = req.body.isDefault === "on";
+
+    
+    const { error, value } = validateAddress(req.body);
+
+  if (error) {
+  req.flash("error", error.details.map(e => e.message).join(", "));
+  req.flash("formData", JSON.stringify(req.body));          
+  req.flash("isEdit", "false");                             
+  return res.redirect("/profile/address")}
 
     const user = await User.findById(userId);
-    
+
     let makeDefault = false;
-    if (user.addresses.length === 0) {
-        makeDefault = true;
-    } else if (isDefault === 'on') { 
-        makeDefault = true;
-        
-        user.addresses.forEach(a => a.isDefault = false);
+    if (user.addresses.length === 0 || value.isDefault) {
+      makeDefault = true;
+      user.addresses.forEach(a => a.isDefault = false);
     }
 
-    user.addresses.push({ 
-        fullName, 
-        phoneNumber, 
-        street, 
-        city, 
-        state, 
-        pincode, 
-        addressType, 
-        isDefault: makeDefault 
+    user.addresses.push({
+      ...value,
+      isDefault: makeDefault
     });
+
     await user.save();
 
     req.flash("success", "Address added successfully");
     res.redirect("/profile/address");
+
   } catch (error) {
     console.error("Error adding address:", error);
     req.flash("error", "Failed to add address");
     res.redirect("/profile/address");
   }
 };
+
 
 const editAddress = async (req, res) => {
   try {
@@ -60,10 +65,13 @@ const editAddress = async (req, res) => {
     const user = await User.findById(userId);
     const address = user.addresses.id(addressId);
 
-    if (!address) {
-        req.flash("error", "Address not found");
-        return res.redirect("/profile/address");
-    }
+ if (error) {
+  req.flash("error", error.details.map(e => e.message).join(", "));
+  req.flash("formData", JSON.stringify(req.body));
+  req.flash("isEdit", "true");
+  req.flash("addressId", req.body.addressId);                
+  return res.redirect("/profile/address");
+}
 
    
     address.fullName = fullName;

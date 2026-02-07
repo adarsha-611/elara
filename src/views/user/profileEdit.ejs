@@ -106,24 +106,31 @@
                     <hr class="section-divider" style="margin: 40px 0; border: none; border-top: 1px solid #e0d8d0;">
 
                     <!-- Section 2: Email Update -->
-                    <div class="edit-section-header">
-                        <h2>Update Email</h2>
-                        <p>Securely change your email</p>
-                    </div>
-                    
-                    <form action="/profile/email/update" method="POST" class="profile-form">
-                        <div class="form-group">
-                            <label>Current Email</label>
-                            <input type="email" value="<%= user.email %>" readonly disabled>
-                        </div>
-                        <div class="form-group">
-                            <label>New Email</label>
-                            <input type="email" name="newEmail" required placeholder="Enter new email address">
-                        </div>
-                        <div class="action-buttons">
-                            <button type="submit" class="btn btn-primary">Send Verification OTP</button>
-                        </div>
-                    </form>
+                    <!-- Section 2: Email Update -->
+            <div class="edit-section-header">
+                 <h2>Update Email</h2>
+                    <p>Securely change your email</p>
+            </div>
+
+            <% if (user.authType === "local") { %>
+        <form action="/profile/email/update" method="POST" class="profile-form">
+            <div class="form-group">
+                <label>Current Email</label>
+            <input type="email" value="<%= user.email %>" readonly disabled>
+            </div>
+        <div class="form-group">
+        <label>New Email</label>
+        <input type="email" name="newEmail" required placeholder="Enter new email address">
+        </div>
+    <div class="action-buttons">
+        <button type="submit" class="btn btn-primary">Send Verification OTP</button>
+    </div>
+    </form>
+    <% } else { %>
+    <p>Email: <%= user.email %></p>
+    <p>Password: Managed by <%= user.authType %></p>
+        <% } %>
+
                 </section>
                 
             </div>

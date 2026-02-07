@@ -15,8 +15,12 @@ const userSchema = new mongoose.Schema(
       lowercase: true,
       trim: true
     },
-
-    password: {
+    authType: {
+    type: String,
+    enum: ["local", "google"],
+    default: "local"
+    },
+     password: {
       type: String,
     },
 

@@ -1,195 +1,141 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ELARA - Luxury Jewelry</title>
-    <link rel="stylesheet" href="/css/HomePage.css">
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Elara - Luxury Jewelry</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&amp;family=Lato:wght@300;400;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet"/>
+<script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#a3866a", // Taupe/Gold accent color
+                        "primary-dark": "#8a7055",
+                        "background-light": "#f6f3f0", // Creamy white
+                        "background-dark": "#1a1a1a", // Dark gray for dark mode
+                        "charcoal": "#333333",
+                        "charcoal-dark": "#1f1f1f", // Footer dark
+                        "card-light": "#ffffff",
+                        "card-dark": "#2a2a2a",
+                    },
+                    fontFamily: {
+                        display: ["'Playfair Display'", "serif"],
+                        body: ["'Lato'", "sans-serif"],
+                    },
+                    borderRadius: {
+                        DEFAULT: "4px",
+                    },
+                },
+            },
+        };
+    </script>
+<style>.aspect-h-4 {
+            padding-bottom: 56.25%;
+        }
+    </style>
 </head>
-<body>
-    <!-- Navigation Bar -->
-    <header class="navbar">
-        <div class="nav-container">
-            <div class="logo">ELARA</div>
-            <nav class="nav-links">
-                <a href="/home">HOME</a>
-                <a href="#shop">SHOP</a>
-                <a href="#about">ABOUT US</a>
-                <a href="#contact">CONTACT</a>
-            </nav>
-            <div class="nav-icons">
-                <a href="wishlist">♡</a>
-                <a href="profile">👤</a>
-                <a href="cart">🛒</a>
-            </div>
-        </div>
-    </header>
+<body class="bg-background-light dark:bg-background-dark text-charcoal dark:text-gray-200 transition-colors duration-300 font-body">
+<%- include('../partials/header') %>
 
-    <!-- Hero Image Strip -->
-    <section class="hero-strip">
-        <div class="hero-strip-container">
-            <div class="hero-strip-item">
-                <div class="strip-text">SHOW NOW</div>
-                <img src="/Images/sideImg1.jfif" alt="Jewelry detail">
-            </div>
-            <div class="hero-strip-item center">
-                <img src="/Images/mainimage.jpg" alt="Model with hat" class="circle-image">
-            </div>
-            <div class="hero-strip-item">
-                <div class="strip-text right">SHOW NOW</div>
-                <img src="/Images/sideimg2.jfif" alt="Jewelry detail">
-            </div>
-        </div>
-    </section>
+<header class="w-full max-w-[1400px] mx-auto grid grid-cols-1 md:grid-cols-12 gap-4 px-4 md:px-8 mb-16">
+<div class="md:col-span-8 relative h-[600px] bg-gray-200 overflow-hidden group">
+<img alt="Woman wearing elegant black blazer and gold statement earrings" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBmZyvrfq-mibr5ng-crWAH8jjuEjwcW1gCyCP30bz2uLs-PtrXGJC_qSPUuSzPz1HHc2kCEcC0LJX9gV_59qowShp2iSxXCd4M-lbnlsjbexTzJD0VjOWd8uAB38larVnzzBoDvcuGZMDlZCzBxFi9V97ibWW6flSdWiPIeFsGfJzIQ2FqoyPvx7Q5_k5X3bVpS0acoOSk41eQVszrsvodLi4SizDKbdJ4ok7adkO_4cLdniF2NmYVn71OLHPZ6fjVICeIj0XvuGQd"/>
+<div class="absolute inset-0 bg-gradient-to-r from-black/40 to-transparent flex flex-col justify-center px-12 md:px-20 text-white">
+<h2 class="font-display text-4xl mb-4 tracking-wider">ELARA</h2>
+<h1 class="font-display text-5xl md:text-6xl mb-4 leading-tight">Statement Gold Earrings</h1>
+<p class="font-body text-lg mb-8 font-light tracking-wide opacity-90">Shop the latest collection.</p>
+<a class="bg-[#a3866a] hover:bg-[#8a7055] text-white px-8 py-3 w-max uppercase text-sm tracking-widest transition-colors shadow-lg" href="/shop">Shop Now</a>
+</div>
+</div>
+<div class="md:col-span-4 flex flex-col gap-4 h-[600px]">
+<div class="h-1/2 overflow-hidden bg-gray-200 relative">
+<img alt="Close up of gold drop earrings" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBtw8XGqbDcZRgmcgtrLMK2OGGkUIEqLCjQqU-1RKrxHlTbOQaTucKgpfhg2NSaVi-nTPjYfs1bgIR9A9tvIh1qFXuoZn7BrSCxru9C9smizIFfrF0khagkU0S6PWd7FlOxzihuM-2e7muxrr7ZIb3MeUGFyrx9mGThmI2LpfPVOzSe3ctifl4tkpOwBYrpxxcysM_8Mq6e-tcwd7dm-9YnbtUB7_AbvQ14ANCB9__ewXNo_UHtpR4jjidrTZ-1qfrVChC1EBA85Qpj"/>
+</div>
+<div class="h-1/2 overflow-hidden bg-gray-200 relative">
+<img alt="Woman touching her gold necklace and earrings" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB7hDyZAwHFNUaKW6Zz0TxMRvnNY6oWTucoc3Ax9QVl-3IRU3onKZN-_E9bliFS-q3A_pkSvqYWLwH3iq_YYp-ffcVn1p8EEn7lHuvJpFyRMh37LPzdBW_FtZJfRBA90jNy2pbPa1_y1Ei3419jh77CjtNymUYPoPYaKT_exXfsRxEkZQdVNVCt8YP6LVnGKoaB4AbV5_epVtl1scMOPblAFXmw3EEQfQJuP7zyGY0KLG1Y41n70GVKtZz5seEcqd3eULhUsKfjtzzk"/>
+</div>
+</div>
+</header>
+<section class="w-full bg-primary py-16 text-center text-white px-4">
+<h2 class="font-display text-3xl md:text-4xl mb-4 tracking-wide">WELCOME, ELARA</h2>
+<p class="font-body font-light tracking-wide text-sm opacity-90">Slow luxury, handcrafted for the modern woman.</p>
+</section>
+<section class="max-w-6xl mx-auto py-20 px-4 md:px-8">
+<h3 class="font-display text-3xl md:text-4xl text-center mb-16 tracking-widest text-charcoal dark:text-white uppercase">New Arrivals</h3>
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+<div class="group cursor-pointer">
+<div class="bg-gray-100 dark:bg-card-dark aspect-square overflow-hidden mb-4 relative">
+<img alt="Venus Hoops gold earrings" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD8q5ojBt03YjfacY-_3V6ES37M2fpHFGDfjNVG2OEyjtHJ3PLtGAhsJ93W39mcqSxbw1X6N_zBQ2h485PM9QuOo8SyRlGl-YUVgxCgM8dZuv3AdTD8JWjaDZ6vM8jPfpAzq5OmPUu8TZgEfWtfItYZtHZK89c1l1uJDgsen8ew1fiwKa1BD6ndM7xtSh3flxu2IMZakwy3Y4Tdq6j0fxqVkYneTJoqXj9dNzvn-hDRS5UkA24pM6HIlnq338R9so0eouEh439TT895"/>
+</div>
+<div class="bg-white dark:bg-card-dark p-4 border border-gray-100 dark:border-gray-700 shadow-sm">
+<h4 class="font-display text-lg mb-1 text-charcoal dark:text-white">Venus Hoops</h4>
+<p class="text-gray-500 dark:text-gray-400 text-sm font-light">₹ 18,500</p>
+</div>
+</div>
+<div class="group cursor-pointer">
+<div class="bg-gray-100 dark:bg-card-dark aspect-square overflow-hidden mb-4 relative">
+<img alt="Cleo Drops gold earrings" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBxzecwdNwy-MTdJfcRV_64iOFI0fUfUErCvECgZ3x_kPBdh9lw23RpnkjXymW1zrzfZPdUu9Wf5hmDQ7ww7LhBPmRLlFXgSMCRivtLnFjVTsAhjvoARKb-jqZpiU8YnFE3PxvtYvOhFg-JDj5Kb6uePKXXIxiCu3ORTvAsyW2Xum0KPREojniBxrEpVZ02jG0_6O3gb9K9Tn-H6cNemY6EaKwiViSFNEB0_HpujKWkBe86OuyWKE07Qvjt7jzeTwM9oAwmj16PP4pT"/>
+</div>
+<div class="bg-white dark:bg-card-dark p-4 border border-gray-100 dark:border-gray-700 shadow-sm">
+<h4 class="font-display text-lg mb-1 text-charcoal dark:text-white">Cleo Drops</h4>
+<p class="text-gray-500 dark:text-gray-400 text-sm font-light">₹ 25,200</p>
+</div>
+</div>
+<div class="group cursor-pointer">
+<div class="bg-gray-100 dark:bg-card-dark aspect-square overflow-hidden mb-4 relative">
+<img alt="Eaning Waslite pearl earrings" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD6loSxuL1FZ5frpVMXBULn38qKsMpyCDCwseyzzHXCkupmwvqNffykPEH7TrlrA54XUybAr76AAPiJHQtFOLYzaUhtFW0qDvJ7YWDsiI3uluLGv54EkXSgsTJrTxhFHDTZpnaO9M0kh-EfEoI7KRZXFoRivEhP3JaZWkZ6p5VXsLKjPmNg9w3EJ_li-t1CfdIRlb11VGoC9K5w0LKBgZbq2ofHBFGuum8aVyETYqooSrjTZeb8SwThBn5ojKkoI9hsFCwPgy_XSq6o"/>
+</div>
+<div class="bg-white dark:bg-card-dark p-4 border border-gray-100 dark:border-gray-700 shadow-sm">
+<h4 class="font-display text-lg mb-1 text-charcoal dark:text-white">Eaning Waslite</h4>
+<p class="text-gray-500 dark:text-gray-400 text-sm font-light">₹ 15,900</p>
+</div>
+</div>
+<div class="group cursor-pointer">
+<div class="bg-gray-100 dark:bg-card-dark aspect-square overflow-hidden mb-4 relative">
+<img alt="Aurora Studs flower earrings" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCzbCGzc5XyRzAbXqZLIRUrYlgw4ZjqLly5SBQOS0Cmr2LulbsDHfPne2J6dlOZO-buLAfRkboQO7ob1M_sq_usPH5ag4qLy48Ztx1U8W1C9u72L_edFfHlS5KtVlXoJNP-DFr1mSTEGLzA-6rUg08EjoAfvbDkr5ELclk6JCYT7asqOPpzOpHOIAYGHxkYTC0r_dMe20qNWwgNxzX65F4L8sTsNi_DIDbrnnW5r6wK_F1rUafFKCRScM7xKnhKuIOE6eaLOtzNHfDg"/>
+</div>
+<div class="bg-white dark:bg-card-dark p-4 border border-gray-100 dark:border-gray-700 shadow-sm">
+<h4 class="font-display text-lg mb-1 text-charcoal dark:text-white">Aurora Studs</h4>
+<p class="text-gray-500 dark:text-gray-400 text-sm font-light">₹ 12,400</p>
+</div>
+</div>
+</div>
+</section>
+<section class="max-w-6xl mx-auto pb-24 px-4 md:px-8">
+<h3 class="font-display text-3xl md:text-4xl text-center mb-16 tracking-widest text-charcoal dark:text-white uppercase">Trending More</h3>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+<div class="group cursor-pointer">
+<div class="bg-gray-100 dark:bg-card-dark h-64 overflow-hidden mb-0 relative">
+<img alt="Heritage Link chain earrings" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBPomr9scrmG6vOsefYgSXfLxE_Q5PPdIlK9pO1NiED39ikj-nQxBvjTI9v3sGE5p1rOUNWxd1QtiF8KwLwB_WkCqBpaPdc-N_-U_KwFn-U67A3WS0iuM1WirBlUtKfuThKTGCx1QhyjcwGFMYcZo9dNW_PDEr59RKAlk6X4hayFoDH_4x_gUoSTh7CN88qy1T14C_dhnrbZr2YsEgOvDGbwxfBgjF2GChSLTZfgbuUkVLzvW5TUnrgLxuxdBjRzguEV0sd8qG13EeZ"/>
+</div>
+<div class="bg-white dark:bg-card-dark p-6 border border-gray-100 dark:border-gray-700 shadow-sm">
+<h4 class="font-display text-xl mb-2 text-charcoal dark:text-white">Heritage Link</h4>
+<p class="text-gray-500 dark:text-gray-400 font-light">₹ 32,560</p>
+</div>
+</div>
+<div class="group cursor-pointer">
+<div class="bg-gray-100 dark:bg-card-dark h-64 overflow-hidden mb-0 relative">
+<img alt="Dawn Develraps floral earrings" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDmWiShuSOxx26NlwAgQboD4Mddnya1ZXqR5UDl1W5epkTLGU1ose1BFd0D8WWPku8C08kOWqXSzTkL7DaTwTcD4JDqR6wurQj1zQXNrtNIJgQv9s1_H_Bq0eKgPWsdRaKiwuj1gOP2nM7i7AMdczHWVnlVmWPyKOji6rYXQ1aWV8xAO-qibgwbZVHSFZHqQyxZQ7eFbmb4a3tOj6BxtKaKY5JEZL_ecJ8rRuaWKbl8NXRugnbKXw8P-uHvdMF236NraG9Okt1ywQ2z"/>
+</div>
+<div class="bg-white dark:bg-card-dark p-6 border border-gray-100 dark:border-gray-700 shadow-sm">
+<h4 class="font-display text-xl mb-2 text-charcoal dark:text-white">Dawn Develraps</h4>
+<p class="text-gray-500 dark:text-gray-400 font-light">₹ 19,800</p>
+</div>
+</div>
+<div class="group cursor-pointer">
+<div class="bg-gray-100 dark:bg-card-dark h-64 overflow-hidden mb-0 relative">
+<img alt="Luna Crescent moon earrings" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCTTHblRaYj3qbN3y7JieryDZnZE9mGtYzLL4yRm532pjScBKtGE_rzoWLAySJaqhgTOGJWskaw-ZnyB2O83ddYtCiSdPIiygn10z6pD1a5btGDLdmFqflHcFx6YddXQ1eTLdUg1VfiSmMxgxBQX9xaIoji9jFOU7vCZPFMKndfKLZrtMNgzaUUrohLt2cg2HBEMMNUTL0hhha15ATIY9xTYhKyHEKHJSQMrkQ1lYZcas98_CW0lwRlOHorBM9aT-ir800yO9MwB3By"/>
+</div>
+<div class="bg-white dark:bg-card-dark p-6 border border-gray-100 dark:border-gray-700 shadow-sm">
+<h4 class="font-display text-xl mb-2 text-charcoal dark:text-white">Luna Crescent</h4>
+<p class="text-gray-500 dark:text-gray-400 font-light">₹ 21,000</p>
+</div>
+</div>
+</div>
+</section>
+<%- include('../partials/footer') %>
 
-    <!-- Welcome Section -->
-    <section class="welcome">
-        <div class="welcome-container">
-            <div class="welcome-image">
-                <img src="/Images/Main.jfif" alt="Model with palm leaf">
-            </div>
-            <div class="welcome-text">
-                <h1>WELCOME, ELARA</h1>
-                <p>where every piece is crafted to<br>illuminate your inner shine</p>
-            </div>
-        </div>
-    </section>
-
-    <!-- Featured Jewelry Images -->
-    <section class="featured-jewelry">
-        <div class="featured-container">
-            <div class="featured-item">
-                <img src="/Images/model3.jpg" alt="Earring closeup">
-            </div>
-            <div class="featured-item">
-                <img src="/Images/model5.jfif" alt="Earring closeup">
-            </div>
-            <div class="featured-item">
-                <img src="/Images/model1.jpeg" alt="Earring closeup">
-            </div>
-            <div class="featured-item">
-                <img src="/Images/model6.jpg" alt="Earring closeup">
-            </div>
-        </div>
-    </section>
-
-    <!-- New Arrivals Section -->
-    <section class="new-arrivals">
-        <h2 class="section-title">NEW ARRIVALS</h2>
-        <div class="products-grid">
-            <div class="product-card">
-                <div class="product-image">
-                    <img src="/Images/Gold Jewellery.jpg" alt="Golden Pearl Circle Studs">
-                </div>
-                <h3>Golden Pearl Circle Studs</h3>
-                <p class="price">₹1,299.00</p>
-            </div>
-            <div class="product-card">
-                <div class="product-image">
-                    <img src="/Images/landingpg-1.jpg" alt="Textured Drop Earrings">
-                </div>
-                <h3>Textured Drop Earrings</h3>
-                <p class="price">₹1,599.00</p>
-            </div>
-            <div class="product-card">
-                <div class="product-image">
-                    <img src="/Images/homepg2.jfif" alt="Rose Gold Stud Earrings">
-                </div>
-                <h3>Rose Gold Stud Earrings</h3>
-                <p class="price">₹2,199.00</p>
-            </div>
-            <div class="product-card">
-                <div class="product-image">
-                    <img src="/Images/homepg3.jpg" alt="Polygon Leaf Studs">
-                </div>
-                <h3>Polygon Leaf Studs</h3>
-                <p class="price">₹1,899.00</p>
-            </div>
-        </div>
-    </section>
-
-    <!-- Trending More Section -->
-    <section class="trending-more">
-        <h2 class="section-title">TRENDING MORE</h2>
-        <div class="products-grid three-cols">
-            <div class="product-card">
-                <div class="product-image">
-                    <img src="/Images/Circle Drop Earrings.jpg" alt="Golden Circles Studs">
-                </div>
-                <h3>Golden Circles Studs</h3>
-                <p class="price">₹1,499.00</p>
-            </div>
-            <div class="product-card">
-                <div class="product-image">
-                    <img src="/Images/homePg1.jfif" alt="Golden Pearl Mono Studs">
-                </div>
-                <h3>Golden Pearl Mono Studs</h3>
-                <p class="price">₹1,799.00</p>
-            </div>
-            <div class="product-card">
-                <div class="product-image">
-                    <img src="/Images/Lotus Studs.jfif" alt="Golden Lotus Studs">
-                </div>
-                <h3>Golden Lotus Studs</h3>
-                <p class="price">₹2,299.00</p>
-            </div>
-        </div>
-    </section>
-
-    <!-- Footer -->
-    <footer class="footer">
-        <div class="footer-container">
-            <div class="footer-column">
-                <h4>Exclusive</h4>
-                <p class="footer-subtitle">Subscribe</p>
-                <p class="small-text">Get 10% off on your first order</p>
-                <div class="subscribe-box">
-                    <input type="email" placeholder="Enter your email">
-                    <button>→</button>
-                </div>
-            </div>
-            <div class="footer-column">
-                <h4>Support</h4>
-                <p>9th Floor DRBR<br>Tharamani, Tamil Nadu<br>Chennai - 600113</p>
-                <p>elara@support.com</p>
-                <p>+91 88 4473 4581</p>
-            </div>
-            <div class="footer-column">
-                <h4>Account</h4>
-                <a href="#">My Account</a>
-                <a href="#">Login / Register</a>
-                <a href="#">Cart</a>
-                <a href="#">Wishlist</a>
-                <a href="#">Shop</a>
-            </div>
-            <div class="footer-column">
-                <h4>Quick Link</h4>
-                <a href="#">Privacy Policy</a>
-                <a href="#">Terms Of Use</a>
-                <a href="#">FAQ</a>
-                <a href="#">Contact</a>
-            </div>
-            <div class="footer-column download">
-                <h4>Download App</h4>
-                <p class="small-text">Save $3 with App New User Only</p>
-                <div class="app-download">
-                    <div class="qr-code"></div>
-                    <div class="app-badges">
-                        <div class="badge">Google Play</div>
-                        <div class="badge">App Store</div>
-                    </div>
-                </div>
-                <div class="social-icons">
-                    <a href="#">f</a>
-                    <a href="#">t</a>
-                    <a href="#">in</a>
-                    <a href="#">in</a>
-                </div>
-            </div>
-        </div>
-        <div class="footer-bottom">
-            <p>© Copyright ELARA 2024. All rights reserved</p>
-        </div>
-    </footer>
-</body>
-</html>
+</body></html>

@@ -17,20 +17,21 @@ passport.use(
         let user = await User.findOne({ googleId: profile.id });
 
         if (!user) {
-          // Check if user exists with the same email
+         
           user = await User.findOne({ email: profile.emails[0].value });
 
           if (user) {
-            // Update existing user with googleId
+            
             user.googleId = profile.id;
             await user.save();
           } else {
-            // Create new user
+         
             user = new User({
               fullName: profile.displayName,
               email: profile.emails[0].value,
               googleId: profile.id,
-              isVerified: true, // Google accounts are pre-verified
+              isVerified: true,
+              isBlocked:false 
             });
             await user.save();
           }

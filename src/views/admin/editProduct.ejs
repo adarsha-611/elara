@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Product - Elara Dashboard</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600&family=Poppins:wght@300;400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css">
+
+    <style>
+        :root {
+            --bg-main: #FAF7F5;
+            --bg-panel: #FFFFFF;
+            --text-dark: #4A302C;
+            --text-body: #5D4037;
+            --color-accent: #A17C6B;
+            --color-accent-hover: #8D6E63;
+            --border-color: #E0D6D0;
+            --font-serif: 'Playfair Display', serif;
+            --font-sans: 'Poppins', sans-serif;
+        }
+        body { margin: 0; padding: 40px 20px; background-color: var(--bg-main); font-family: var(--font-sans); color: var(--text-body); line-height: 1.6; }
+        h1, h2, h3 { font-family: var(--font-serif); color: var(--text-dark); font-weight: 600; }
+        h1 { text-align: center; font-size: 2.5rem; margin-bottom: 40px; }
+        h2 { font-size: 1.8rem; border-bottom: 1px solid var(--border-color); padding-bottom: 10px; margin-top: 0; margin-bottom: 20px; }
+        .container { max-width: 900px; margin: 0 auto; }
+        .form-section { background: var(--bg-panel); padding: 35px; border-radius: 4px; box-shadow: 0 4px 20px rgba(93, 64, 55, 0.05); margin-bottom: 30px; border: 1px solid var(--border-color); }
+        .form-group { margin-bottom: 25px; }
+        label { display: block; margin-bottom: 8px; font-weight: 500; color: var(--text-dark); font-size: 0.95rem; }
+        input[type="text"], input[type="number"], textarea, select { width: 100%; padding: 12px 15px; border: 1px solid var(--border-color); background-color: #FCFCFB; border-radius: 2px; font-family: var(--font-sans); font-size: 1rem; color: var(--text-body); box-sizing: border-box; transition: border-color 0.3s ease; }
+        input:focus, textarea:focus, select:focus { outline: none; border-color: var(--color-accent); background-color: #FFF; }
+        textarea { resize: vertical; height: 120px; }
+        .variant-header-flex { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 10px; margin-bottom: 25px; }
+        .variant-block { background-color: #FAF9F8; border: 1px dashed var(--border-color); padding: 25px; border-radius: 4px; margin-bottom: 25px; position: relative; animation: fadeIn 0.5s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .variant-remove-btn { position: absolute; top: 15px; right: 15px; background: none; border: none; color: #d9534f; cursor: pointer; font-size: 0.9rem; text-decoration: underline; }
+        .image-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-top: 10px; }
+        .image-upload-box { position: relative; width: 100%; padding-top: 100%; }
+        .upload-label, .preview-container { position: absolute; top: 0; left: 0; right: 0; bottom: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; background-color: #fff; border: 2px dashed var(--border-color); border-radius: 4px; cursor: pointer; transition: all 0.3s ease; color: #BCAAA4; overflow: hidden; }
+        .upload-label:hover { border-color: var(--color-accent); color: var(--color-accent); background-color: #FDFBF9; }
+        .preview-container { border-style: solid; display: none; }
+        .preview-container img { width: 100%; height: 100%; object-fit: cover; }
+        .remove-image-btn { position: absolute; top: 5px; right: 5px; background: rgba(255,255,255,0.9); border: none; color: #d9534f; border-radius: 50%; width: 24px; height: 24px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 14px; z-index: 2; }
+        .image-upload-box:first-child .upload-label, .image-upload-box:first-child .preview-container { border-color: var(--color-accent); }
+        .main-image-tag { position: absolute; top: 0; left: 0; background-color: var(--color-accent); color: white; font-size: 0.65rem; padding: 2px 8px; font-weight: 500; border-bottom-right-radius: 4px; z-index: 2; }
+        .variant-details-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; margin-top: 20px; }
+        .btn { padding: 12px 30px; font-family: var(--font-sans); font-weight: 500; text-transform: uppercase; letter-spacing: 1px; border: none; border-radius: 2px; cursor: pointer; transition: all 0.3s ease; font-size: 0.9rem; }
+        .btn-primary { background-color: var(--color-accent); color: white; }
+        .btn-primary:hover { background-color: var(--color-accent-hover); }
+        .btn-secondary { background-color: transparent; border: 1px solid var(--color-accent); color: var(--color-accent); }
+        .btn-secondary:hover { background-color: var(--color-accent); color: white; }
+        .form-actions { text-align: right; margin-top: 30px; }
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 1000; justify-content: center; align-items: center; }
+        .modal-content { background: white; padding: 20px; border-radius: 4px; max-width: 90%; width: 600px; max-height: 90vh; display: flex; flex-direction: column; }
+        .crop-container { height: 400px; background: #eee; margin-bottom: 20px; overflow: hidden; }
+        .crop-container img { max-width: 100%; }
+        .modal-actions { display: flex; justify-content: flex-end; gap: 10px; }
+        @media (max-width: 768px) {
+            .variant-details-grid { grid-template-columns: 1fr; }
+            .image-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Edit Jewelry Product</h1>
+
+    <form id="productForm" enctype="multipart/form-data">
+        
+        <section class="form-section">
+            <h2>Basic Information</h2>
+            <div class="form-group">
+                <label>Product Name</label>
+                <input type="text" name="name" value="<%= product.name %>" required>
+            </div>
+            <div class="form-group">
+                <label>Description</label>
+                <textarea name="description" required><%= product.description %></textarea>
+            </div>
+            <div class="form-group">
+                <label>Category</label>
+                <select name="category" id="categorySelect" required>
+                    <option value="" disabled>Loading categories...</option>
+                </select>
+            </div>
+        </section>
+
+        <section class="form-section">
+            <div class="variant-header-flex">
+                <h2>Product Variants</h2>
+                <button type="button" id="addVariantBtn" class="btn btn-secondary">+ Add Another Variant</button>
+            </div>
+            <div id="variantsContainer">
+                <% product.variants.forEach((variant, vIndex) => { %>
+                    <div class="variant-block" data-variant-index="<%= vIndex %>">
+                        <% if (vIndex > 0) { %>
+                            <button type="button" class="variant-remove-btn" onclick="removeVariant(this)">Remove Variant</button>
+                        <% } %>
+                        <h3>Variant #<%= vIndex + 1 %></h3>
+
+                        <div class="image-upload-container">
+                            <label>Variant Images (Max 4)</label>
+                            <div class="image-grid">
+                                <% for (let imgIndex = 0; imgIndex < 4; imgIndex++) { 
+                                    const hasImage = variant.images && variant.images[imgIndex];
+                                    const imgSrc = hasImage ? variant.images[imgIndex] : '';
+                                %>
+                                    <div class="image-upload-box" data-img-index="<%= imgIndex %>">
+                                        <input type="file" class="file-input" accept="image/*" style="display:none">
+                                        
+                                        <div class="upload-label" style="display: <%= hasImage ? 'none' : 'flex' %>;">
+                                            <%= imgIndex === 0 ? '<span class="main-image-tag">MAIN IMAGE</span>' : '' %>
+                                            <span style="font-size:24px; margin-bottom:5px;">+</span>
+                                            <span>Upload</span>
+                                        </div>
+
+                                        <div class="preview-container" style="display: <%= hasImage ? 'flex' : 'none' %>;">
+                                            <%= imgIndex === 0 ? '<span class="main-image-tag">MAIN IMAGE</span>' : '' %>
+                                            <img src="<%= imgSrc %>" alt="Preview" data-original="<%= imgSrc %>">
+                                            <button type="button" class="remove-image-btn" title="Remove Image">×</button>
+                                        </div>
+                                    </div>
+                                <% } %>
+                            </div>
+                            <small style="color:#BCAAA4; display:block; margin-top:8px;">* Click to replace. Crop enabled. Leave unchanged to keep original.</small>
+                        </div>
+
+                        <div class="variant-details-grid">
+                            <div class="form-group">
+                                <label>Price (₹)</label>
+                                <input type="number" name="variants[<%= vIndex %>][price]" value="<%= variant.price %>" step="0.01" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Color</label>
+                                <input type="text" name="variants[<%= vIndex %>][color]" value="<%= variant.color %>" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Stock</label>
+                                <input type="number" name="variants[<%= vIndex %>][stock]" value="<%= variant.stock %>" required>
+                            </div>
+                        </div>
+                    </div>
+                <% }); %>
+            </div>
+        </section>
+
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">UPDATE PRODUCT</button>
+        </div>
+    </form>
+</div>
+
+<div class="modal-overlay" id="cropModal">
+    <div class="modal-content">
+        <h3>Adjust Image</h3>
+        <div class="crop-container">
+            <img id="imageToCrop" src="" alt="Crop Preview">
+        </div>
+        <div class="modal-actions">
+            <button type="button" class="btn btn-secondary" id="cancelCropBtn">Cancel</button>
+            <button type="button" class="btn btn-primary" id="cropImageBtn">Crop & Save</button>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+let variantCount = <%= product.variants.length %>;
+let cropperInstance = null;
+let currentUploadTarget = null;
+
+const variantsContainer = document.getElementById('variantsContainer');
+const addVariantBtn   = document.getElementById('addVariantBtn');
+const cropModal       = document.getElementById('cropModal');
+const imageToCrop     = document.getElementById('imageToCrop');
+const cropImageBtn    = document.getElementById('cropImageBtn');
+const cancelCropBtn   = document.getElementById('cancelCropBtn');
+
+// ── Attach listeners to existing variant image boxes ────────────────────────────
+document.querySelectorAll('.image-upload-box').forEach(box => {
+    const fileInput = document.createElement('input');
+    fileInput.type = 'file';
+    fileInput.accept = 'image/*';
+    fileInput.style.display = 'none';
+    box.prepend(fileInput);
+
+    const label = box.querySelector('.upload-label');
+    if (label) label.addEventListener('click', () => fileInput.click());
+
+    fileInput.addEventListener('change', e => {
+        if (!e.target.files?.[0]) return;
+        const file = e.target.files[0];
+        currentUploadTarget = box;
+        const reader = new FileReader();
+        reader.onload = evt => {
+            imageToCrop.src = evt.target.result;
+            cropModal.style.display = 'flex';
+            if (cropperInstance) cropperInstance.destroy();
+            cropperInstance = new Cropper(imageToCrop, {
+                aspectRatio: 1,
+                viewMode: 1,
+                autoCropArea: 1
+            });
+        };
+        reader.readAsDataURL(file);
+        fileInput.value = '';
+    });
+
+    box.addEventListener('click', e => {
+        if (e.target.classList.contains('remove-image-btn')) {
+            const preview = box.querySelector('.preview-container');
+            const label   = box.querySelector('.upload-label');
+            preview.style.display = 'none';
+            if (label) label.style.display = 'flex';
+            fileInput.value = '';
+            // Optional: add hidden input name="variants[...][images][...]remove" if backend supports it
+        }
+    });
+});
+
+// ── Crop save ────────────────────────────────────────────────────────────────
+cropImageBtn.addEventListener('click', () => {
+    if (!cropperInstance || !currentUploadTarget) return;
+    const canvas = cropperInstance.getCroppedCanvas({ width: 600, height: 600 });
+    const url = canvas.toDataURL('image/jpeg', 0.85);
+    
+    const preview = currentUploadTarget.querySelector('.preview-container');
+    const label   = currentUploadTarget.querySelector('.upload-label');
+    const img     = preview.querySelector('img');
+
+    img.src = url;
+    if (label) label.style.display = 'none';
+    preview.style.display = 'flex';
+
+    closeModal();
+});
+
+function closeModal() {
+    cropModal.style.display = 'none';
+    if (cropperInstance) {
+        cropperInstance.destroy();
+        cropperInstance = null;
+    }
+}
+cancelCropBtn.addEventListener('click', closeModal);
+
+// ── Add new variant ──────────────────────────────────────────────────────────
+addVariantBtn.addEventListener('click', () => {
+    const vIndex = variantCount;
+    variantCount++;
+
+    const block = document.createElement('div');
+    block.className = 'variant-block';
+    block.dataset.variantIndex = vIndex;
+    block.innerHTML = `
+        <button type="button" class="variant-remove-btn" onclick="removeVariant(this)">Remove Variant</button>
+        <h3>Variant #${vIndex + 1}</h3>
+        <div class="image-upload-container">
+            <label>Variant Images (Max 4)</label>
+            <div class="image-grid">
+                ${[0,1,2,3].map(i => `
+                    <div class="image-upload-box" data-img-index="${i}">
+                        <input type="file" class="file-input" accept="image/*" style="display:none">
+                        <div class="upload-label">
+                            ${i===0 ? '<span class="main-image-tag">MAIN IMAGE</span>' : ''}
+                            <span style="font-size:24px; margin-bottom:5px;">+</span>
+                            <span>Upload</span>
+                        </div>
+                        <div class="preview-container" style="display:none;">
+                            ${i===0 ? '<span class="main-image-tag">MAIN IMAGE</span>' : ''}
+                            <img src="" alt="Preview">
+                            <button type="button" class="remove-image-btn" title="Remove Image">×</button>
+                        </div>
+                    </div>
+                `).join('')}
+            </div>
+            <small style="color:#BCAAA4; display:block; margin-top:8px;">* Click to upload. Crop functionality enabled.</small>
+        </div>
+        <div class="variant-details-grid">
+            <div class="form-group"><label>Price (₹)</label><input type="number" name="variants[${vIndex}][price]" step="0.01" required></div>
+            <div class="form-group"><label>Color</label><input type="text" name="variants[${vIndex}][color]" required></div>
+            <div class="form-group"><label>Stock</label><input type="number" name="variants[${vIndex}][stock]" required></div>
+        </div>
+    `;
+
+    variantsContainer.appendChild(block);
+
+    // Re-attach file listeners to new boxes
+    block.querySelectorAll('.image-upload-box').forEach(box => {
+        const fileInput = box.querySelector('.file-input');
+        const label = box.querySelector('.upload-label');
+        if (label) label.addEventListener('click', () => fileInput.click());
+
+        fileInput.addEventListener('change', e => {
+            if (!e.target.files?.[0]) return;
+            currentUploadTarget = box;
+            const reader = new FileReader();
+            reader.onload = evt => {
+                imageToCrop.src = evt.target.result;
+                cropModal.style.display = 'flex';
+                if (cropperInstance) cropperInstance.destroy();
+                cropperInstance = new Cropper(imageToCrop, {aspectRatio:1, viewMode:1, autoCropArea:1});
+            };
+            reader.readAsDataURL(fileInput.files[0]);
+            fileInput.value = '';
+        });
+
+        box.addEventListener('click', e => {
+            if (e.target.classList.contains('remove-image-btn')) {
+                box.querySelector('.preview-container').style.display = 'none';
+                box.querySelector('.upload-label').style.display = 'flex';
+                box.querySelector('.file-input').value = '';
+            }
+        });
+    });
+});
+
+window.removeVariant = function(btn) {
+    btn.closest('.variant-block').remove();
+};
+
+// ── Form submission ──────────────────────────────────────────────────────────
+document.getElementById('productForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+
+    const submitBtn = this.querySelector('button[type="submit"]');
+    submitBtn.innerText = 'UPDATING...';
+    submitBtn.disabled = true;
+
+    const formData = new FormData(this);
+
+    // Append only files that were actually selected/replaced
+    document.querySelectorAll('.image-upload-box .file-input').forEach(input => {
+        if (input.files && input.files[0]) {
+            const block = input.closest('.variant-block');
+            const vIndex = block.dataset.variantIndex;
+            const iIndex = input.closest('.image-upload-box').dataset.imgIndex;
+            const field = `variants[${vIndex}][images][${iIndex}]`;
+            formData.append(field, input.files[0]);
+        }
+    });
+
+    try {
+        const response = await fetch(`/admin/edit-product/<%= product._id %>`, {
+            method: 'POST',
+            body: formData
+        });
+
+        const result = await response.json();
+
+        if (response.ok && result.success !== false) {
+            Swal.fire({
+                title: 'Success',
+                text: 'Product updated successfully',
+                icon: 'success',
+                confirmButtonColor: '#A17C6B'
+            }).then(() => {
+                window.location.href = "/admin/products";
+            });
+        } else {
+            throw new Error(result.message || 'Update failed');
+        }
+    } catch (err) {
+        Swal.fire({
+            title: 'Error',
+            text: err.message || 'Failed to update product',
+            icon: 'error'
+        });
+    } finally {
+        submitBtn.innerText = 'UPDATE PRODUCT';
+        submitBtn.disabled = false;
+    }
+});
+
+// ── Load categories dynamically (same as add page) ───────────────────────────
+document.addEventListener('DOMContentLoaded', async () => {
+    const select = document.getElementById('categorySelect');
+    try {
+        const res = await fetch('/admin/categories/active');
+        const data = await res.json();
+        if (!data.success) throw new Error();
+
+        select.innerHTML = '<option value="" disabled selected>Select category...</option>';
+        data.categories.forEach(cat => {
+            const opt = document.createElement('option');
+            opt.value = cat._id;
+            opt.textContent = cat.name;
+            if (cat._id === '<%= product.category %>') opt.selected = true;
+            select.appendChild(opt);
+        });
+    } catch {
+        select.innerHTML = '<option value="" disabled selected>Failed to load categories</option>';
+    }
+});
+</script>
+</body>
+</html>

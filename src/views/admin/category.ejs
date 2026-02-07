@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ELARA Admin | Category Management</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/category.css">
+</head>
+<body>
+
+    
+    <%- include('../partials/adminSidebar') %>
+
+    <main class="main-content">
+        <header class="header">
+            <div class="header-left">
+                <h1>Manage your jewellery collections</h1>
+            </div>
+            <div class="header-right">
+  <form action="/admin/category" method="GET" class="search-form">
+    <input type="text" name="search" placeholder="Search..." class="search-bar">
+
+    <button type="submit" class="btn-filter">Search</button>
+
+    <a href="/admin/category" class="btn-clear">Clear</a>
+  </form>
+
+<a href="#add-category-modal" class="btn-add-category">+ Add Category</a>
+</div>
+
+        </header>
+
+        <section class="offer-card">
+            <div class="offer-container">
+                <select class="category-select">
+                    <option selected disabled>Select category</option>
+                    <option>Earrings</option>
+                    <option>Necklaces</option>
+                    <option>Rings</option>
+                </select>
+                <button class="btn-offer-add">Add Offer</button>
+                <button class="btn-offer-delete">Delete Offer</button>
+            </div>
+        </section>
+
+        <section class="table-container">
+            <table class="category-table">
+                <thead>
+                    <tr>
+                        <th>Category Name</th>
+                        <th>Description</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+         <% if (categories && categories.length > 0) { %>
+
+            <% categories.forEach(cat => { %>
+        <tr>
+            <td class="bold"><%= cat.name %></td>
+
+            <td class="text-muted">
+                <%= cat.description || "No description" %>
+            </td>
+
+          <td>
+  <form action="/admin/delete-category/<%= cat._id %>" method="POST">
+    <label class="toggle-switch">
+      <input 
+        type="checkbox"
+        onchange="this.form.submit()"
+        <%= cat.isActive ? "checked" : "" %>
+      >
+      <span class="slider"></span>
+    </label>
+  </form>
+</td>
+
+
+            <td>
+                <a href="#edit-category-modal"
+   class="edit-btn"
+   onclick="openEditModal(
+     '<%= cat._id %>',
+     '<%= cat.name %>',
+     `<%= cat.description %>`
+   )">
+   ✏️
+</a>
+
+            </td>
+        </tr>
+    <% }) %>
+
+<% } else { %>
+
+    <tr>
+        <td colspan="4" style="text-align:center;">No Categories Found</td>
+    </tr>
+
+<% } %>
+</tbody>
+    </table>
+    <div class="pagination">
+  <% if(currentPage > 1){ %>
+    <a href="?page=<%= currentPage-1 %>">Previous</a>
+  <% } %>
+
+  <% for(let i=1; i <= totalPages; i++){ %>
+    <a href="?page=<%= i %>" class="<%= i === currentPage ? 'active' : '' %>"><%= i %></a>
+  <% } %>
+
+  <% if(currentPage < totalPages){ %>
+    <a href="?page=<%= currentPage+1 %>">Next</a>
+  <% } %>
+</div>
+
+<style>
+.pagination {
+  margin-top: 20px;
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+}
+.pagination a {
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  text-decoration: none;
+  color: #333;
+}
+.pagination a.active {
+  background-color: #a68b7c;
+  color: white;
+  border-color: #a68b7c;
+}
+.pagination a:hover {
+  background-color: #8c7366;
+  color: white;
+  border-color: #8c7366;
+}
+</style>
+
+       
+  
+        </section>
+    </main>
+
+    <div id="add-category-modal" class="modal-overlay">
+        <div class="modal-card">
+            <a href="#" class="modal-close">&times;</a>
+            <h2 class="modal-title">Add New Category</h2>
+            <p class="modal-subtitle">Create a new product category for your store.</p>
+            
+     <form action="/admin/add-category" method="POST">
+    <div class="form-group">
+        <label>Category Name</label>
+        <input type="text" name="name" placeholder="e.g., Necklace" class="modal-input" required>
+    </div>
+
+    <div class="form-group">
+        <label>Description</label>
+        <textarea name="description" placeholder="Describe the product details..." class="modal-textarea"></textarea>
+    </div>
+
+    <div class="modal-actions">
+        <a href="#" class="btn-cancel">Cancel</a>
+        <button type="submit" class="btn-submit">Add Category</button>
+    </div>
+</form>
+
+        </div>
+    </div>
+
+    <div id="edit-category-modal" class="modal-overlay">
+  <div class="modal-card">
+    <a href="#" class="modal-close">&times;</a>
+    <h2 class="modal-title">Edit Category</h2>
+    <p class="modal-subtitle">Edit the product category for your store.</p>
+    
+    <form class="modal-form" action="/admin/edit-category" method="POST">
+      
+      <!-- Hidden ID -->
+      <input type="hidden" name="id" id="edit-id">
+
+      <div class="form-group">
+        <label>Category Name</label>
+        <input 
+          type="text"
+          name="name"
+          id="edit-name"
+          placeholder="e.g., Necklace"
+          class="modal-input"
+          required
+        >
+      </div>
+
+      <div class="form-group">
+        <label>Description</label>
+        <textarea 
+          name="description"
+          id="edit-description"
+          class="modal-textarea"
+        ></textarea>
+      </div>
+
+      <div class="modal-actions">
+        <a href="#" class="btn-cancel">Cancel</a>
+        <button type="submit" class="btn-submit">Save Changes</button>
+      </div>
+
+
+      <script>
+function openEditModal(id, name, description) {
+  document.getElementById("edit-id").value = id;
+  document.getElementById("edit-name").value = name;
+  document.getElementById("edit-description").value = description || "";
+}
+
+
+</script>
+</body>
+</html>

@@ -4,117 +4,309 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ELARA - Admin User Management</title>
-    <style>
-        body { font-family: Arial, sans-serif; background: #f9f9f9; margin: 0; }
-        .navbar { background: #333; color: white; padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; }
-        .navbar a { color: white; text-decoration: none; margin-left: 20px; }
-        .container { padding: 30px; max-width: 1200px; margin: 0 auto; }
-        .header-actions { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-        .search-form { display: flex; gap: 10px; }
-        input[type="text"] { padding: 8px; border: 1px solid #ddd; border-radius: 4px; width: 300px; }
-        .btn { padding: 8px 15px; border: none; border-radius: 4px; cursor: pointer; text-decoration: none; display: inline-block; font-size: 14px; }
-        .btn-primary { background: #007bff; color: white; }
-        .btn-danger { background: #dc3545; color: white; }
-        .btn-success { background: #28a745; color: white; }
-        .btn-secondary { background: #6c757d; color: white; }
-        table { width: 100%; border-collapse: collapse; background: white; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
-        th, td { padding: 12px 15px; text-align: left; border-bottom: 1px solid #eee; }
-        th { background: #f1f1f1; font-weight: 600; }
-        .status-active { color: #28a745; font-weight: bold; }
-        .status-blocked { color: #dc3545; font-weight: bold; }
-        .pagination { margin-top: 20px; display: flex; justify-content: center; gap: 10px; }
-        .page-link { padding: 8px 12px; border: 1px solid #ddd; background: white; text-decoration: none; color: #333; border-radius: 4px; }
-        .page-link.active { background: #007bff; color: white; border-color: #007bff; }
-        .alert { padding: 10px; margin-bottom: 20px; border-radius: 4px; }
-        .alert-success { background: #d4edda; color: #155724; }
-        .alert-error { background: #f8d7da; color: #721c24; }
-    </style>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+   <style>
+    /* Theme Variables based on ELARA brand references */
+    :root {
+        --bg-cream: #F9F6F2;
+        --text-charcoal: #1A1A1A;
+        --text-muted: #4A4A4A;
+        --accent-gold: #B59461;
+        --border-color: #E5DED4;
+        --white: #FFFFFF;
+    }
+
+    body { 
+        font-family: 'Inter', Arial, sans-serif; 
+        background: var(--bg-cream); 
+        margin: 0; 
+        display: flex; 
+        color: var(--text-charcoal);
+    }
+    
+    /* Layout Fix */
+    .main-content { 
+        flex: 1; 
+        margin-left: 260px; /* Width of the sidebar */
+        min-height: 100vh;
+    }
+
+    .navbar { 
+        background: var(--white); 
+        color: var(--text-charcoal); 
+        padding: 15px 40px; 
+        display: flex; 
+        justify-content: space-between; 
+        align-items: center; 
+        border-bottom: 1px solid var(--border-color);
+    }
+    
+    .navbar a { 
+        color: var(--text-muted); 
+        text-decoration: none; 
+        font-weight: 500;
+        font-size: 14px;
+        transition: color 0.2s;
+    }
+
+    .navbar a:hover { color: var(--accent-gold); }
+
+    .container { padding: 40px; max-width: 1200px; margin: 0 auto; }
+    
+    .header-actions { 
+        display: flex; 
+        justify-content: space-between; 
+        align-items: center; 
+        margin-bottom: 30px; 
+    }
+
+    .header-actions h1 {
+        font-size: 24px;
+        font-weight: 400;
+        letter-spacing: 1px;
+    }
+
+    .search-form { display: flex; gap: 10px; }
+
+    input[type="text"] { 
+        padding: 10px 15px; 
+        border: 1px solid var(--border-color); 
+        border-radius: 8px; 
+        width: 300px; 
+        background: var(--white);
+        outline: none;
+    }
+
+    input[type="text"]:focus { border-color: var(--accent-gold); }
+
+    /* Button Styling */
+    .btn { 
+        padding: 10px 20px; 
+        border: none; 
+        border-radius: 8px; 
+        cursor: pointer; 
+        text-decoration: none; 
+        display: inline-block; 
+        font-size: 14px; 
+        font-weight: 600;
+        transition: all 0.2s;
+    }
+
+    .btn-primary { background: var(--text-charcoal); color: var(--white); }
+    .btn-primary:hover { background: #333; }
+
+    .btn-danger { background: #fdf2f2; color: #dc3545; border: 1px solid #f8d7da; }
+    .btn-danger:hover { background: #dc3545; color: white; }
+
+    .btn-success { background: #f2fdf5; color: #28a745; border: 1px solid #d4edda; }
+    .btn-success:hover { background: #28a745; color: white; }
+
+    .btn-secondary { background: var(--border-color); color: var(--text-muted); }
+
+    /* Table Styling */
+    table { 
+        width: 100%; 
+        border-collapse: separate; 
+        border-spacing: 0;
+        background: var(--white); 
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.03); 
+        border: 1px solid var(--border-color);
+    }
+
+    th, td { padding: 16px 20px; text-align: left; border-bottom: 1px solid var(--border-color); }
+
+    th { 
+        background: #FAF9F6; 
+        font-weight: 600; 
+        text-transform: uppercase; 
+        font-size: 12px; 
+        letter-spacing: 1px;
+        color: var(--text-muted);
+    }
+
+    td { font-size: 14px; color: var(--text-muted); }
+
+    .status-active { 
+        background: #e6f4ea; 
+        color: #1e7e34; 
+        padding: 4px 12px; 
+        border-radius: 20px; 
+        font-size: 12px; 
+    }
+
+    .status-blocked { 
+        background: #fdf2f2; 
+        color: #dc3545; 
+        padding: 4px 12px; 
+        border-radius: 20px; 
+        font-size: 12px; 
+    }
+
+    /* Pagination */
+    .pagination { margin-top: 30px; display: flex; justify-content: center; gap: 8px; }
+
+    .page-link { 
+        padding: 8px 16px; 
+        border: 1px solid var(--border-color); 
+        background: var(--white); 
+        text-decoration: none; 
+        color: var(--text-muted); 
+        border-radius: 6px; 
+        font-size: 14px;
+    }
+
+    .page-link.active { 
+        background: var(--accent-gold); 
+        color: var(--white); 
+        border-color: var(--accent-gold); 
+    }
+
+    .alert { 
+        padding: 15px; 
+        margin-bottom: 25px; 
+        border-radius: 8px; 
+        font-size: 14px; 
+        border: 1px solid transparent;
+    }
+
+    .alert-success { background: #f2fdf5; color: #155724; border-color: #d4edda; }
+    .alert-error { background: #fdf2f2; color: #721c24; border-color: #f8d7da; }
+</style>
 </head>
 <body>
-    <nav class="navbar">
-        <div class="logo" style="font-weight: bold; font-size: 1.2em;">ELARA ADMIN</div>
-        <div>
-            <span style="margin-right: 20px;">User Management</span>
-            <a href="/admin/logout">Logout</a>
-        </div>
-    </nav>
-    
-    <div class="container">
-        <% if (success && success.length > 0) { %>
-            <div class="alert alert-success"><%= success %></div>
-        <% } %>
-        <% if (error && error.length > 0) { %>
-            <div class="alert alert-error"><%= error %></div>
-        <% } %>
 
-        <div class="header-actions">
-            <h1>User Management</h1>
-            <form action="/admin/users" method="GET" class="search-form">
-                <input type="text" name="search" placeholder="Search by name or email" value="<%= search || '' %>">
-                <button type="submit" class="btn btn-primary">Search</button>
-                <% if (search) { %>
-                    <a href="/admin/users" class="btn btn-secondary">Clear</a>
-                <% } %>
-            </form>
-        </div>
+    <%- include('../partials/adminSidebar') %>
 
-        <table>
-            <thead>
-                <tr>
-                    <th>Name</th>
-                    <th>Email</th>
-                    <th>Created</th>
-                    <th>Status</th>
-                    <th>Action</th>
-                </tr>
-            </thead>
-            <tbody>
-                <% if (users.length > 0) { %>
-                    <% users.forEach(user => { %>
-                        <tr>
-                            <td><%= user.fullName %></td>
-                            <td><%= user.email %></td>
-                            <td><%= new Date(user.createdAt).toLocaleDateString() %></td>
-                            <td>
-                                <% if (user.isBlocked) { %>
-                                    <span class="status-blocked">Blocked</span>
-                                <% } else { %>
-                                    <span class="status-active">Active</span>
-                                <% } %>
-                            </td>
-                            <td>
-                                <% if (user.isBlocked) { %>
-                                    <a href="/admin/users/block/<%= user._id %>" class="btn btn-success" onclick="return confirm('Are you sure you want to unblock this user?')">Unblock</a>
-                                <% } else { %>
-                                    <a href="/admin/users/block/<%= user._id %>" class="btn btn-danger" onclick="return confirm('Are you sure you want to block this user? This will prevent them from logging in.')">Block</a>
-                                <% } %>
-                            </td>
-                        </tr>
-                    <% }) %>
-                <% } else { %>
-                    <tr>
-                        <td colspan="5" style="text-align: center; padding: 20px;">No users found</td>
-                    </tr>
-                <% } %>
-            </tbody>
-        </table>
-
-        <!-- Pagination -->
-        <% if (totalPages > 1) { %>
-            <div class="pagination">
-                <% if (currentPage > 1) { %>
-                    <a href="/admin/users?page=<%= currentPage - 1 %>&search=<%= search || '' %>" class="page-link">&laquo; Prev</a>
-                <% } %>
-                
-                <% for(let i = 1; i <= totalPages; i++) { %>
-                    <a href="/admin/users?page=<%= i %>&search=<%= search || '' %>" class="page-link <%= currentPage === i ? 'active' : '' %>"><%= i %></a>
-                <% } %>
-
-                <% if (currentPage < totalPages) { %>
-                    <a href="/admin/users?page=<%= currentPage + 1 %>&search=<%= search || '' %>" class="page-link">Next &raquo;</a>
-                <% } %>
+    <div class="main-content">
+        <nav class="navbar">
+            <div class="logo" style="font-weight: bold; font-size: 1.2em;">ELARA ADMIN</div>
+            <div>
+                <span style="margin-right: 20px;">User Management</span>
+               
             </div>
-        <% } %>
+        </nav>
+        
+        <div class="container">
+            <% if (success && success.length > 0) { %>
+                <div class="alert alert-success"><%= success %></div>
+            <% } %>
+            <% if (error && error.length > 0) { %>
+                <div class="alert alert-error"><%= error %></div>
+            <% } %>
+
+            <div class="header-actions">
+                <h1>User Management</h1>
+                <form action="/admin/users" method="GET" class="search-form">
+                    <input type="text" name="search" placeholder="Search by name or email" value="<%= search || '' %>">
+                    <button type="submit" class="btn btn-primary">Search</button>
+                    <% if (search) { %>
+                        <a href="/admin/users" class="btn btn-secondary">Clear</a>
+                    <% } %>
+                </form>
+            </div>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Created</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% if (users.length > 0) { %>
+                        <% users.forEach(user => { %>
+                            <tr>
+                                <td><%= user.fullName %></td>
+                                <td><%= user.email %></td>
+                                <td><%= new Date(user.createdAt).toLocaleDateString() %></td>
+                                <td>
+                                    <% if (user.isBlocked) { %>
+                                        <span class="status-blocked">Blocked</span>
+                                    <% } else { %>
+                                        <span class="status-active">Active</span>
+                                    <% } %>
+                                </td>
+                                <td>
+                                    <% if (user.isBlocked) { %>
+                                        <a href="/admin/users/block/<%= user._id %>" class="btn btn-success unblock-btn">Unblock</a>
+                                    <% } else { %>
+                                        <a href="/admin/users/block/<%= user._id %>" class="btn btn-danger block-btn">Block</a>
+                                    <% } %>
+                                </td>
+                            </tr>
+                        <% }) %>
+                    <% } else { %>
+                        <tr>
+                            <td colspan="5" style="text-align: center; padding: 20px;">No users found</td>
+                        </tr>
+                    <% } %>
+                </tbody>
+            </table>
+
+            <% if (totalPages > 1) { %>
+                <div class="pagination">
+                    <% if (currentPage > 1) { %>
+                        <a href="/admin/users?page=<%= currentPage - 1 %>&search=<%= search || '' %>" class="page-link">&laquo; Prev</a>
+                    <% } %>
+                    <% for(let i = 1; i <= totalPages; i++) { %>
+                        <a href="/admin/users?page=<%= i %>&search=<%= search || '' %>" class="page-link <%= currentPage === i ? 'active' : '' %>"><%= i %></a>
+                    <% } %>
+                    <% if (currentPage < totalPages) { %>
+                        <a href="/admin/users?page=<%= currentPage + 1 %>&search=<%= search || '' %>" class="page-link">Next &raquo;</a>
+                    <% } %>
+                </div>
+            <% } %>
+        </div>
     </div>
+    <script>
+document.querySelectorAll('.block-btn').forEach(btn => {
+  btn.addEventListener('click', function (e) {
+    e.preventDefault();
+    const link = this.href;
+
+    Swal.fire({
+      title: 'Block User?',
+      text: "Are you sure you want to block this user?",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#dc3545',
+      cancelButtonColor: '#6c757d',
+      confirmButtonText: 'Yes, Block'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        window.location.href = link;
+      }
+    });
+  });
+});
+
+document.querySelectorAll('.unblock-btn').forEach(btn => {
+  btn.addEventListener('click', function (e) {
+    e.preventDefault();
+    const link = this.href;
+
+    Swal.fire({
+      title: 'Unblock User?',
+      text: "Are you sure you want to unblock this user?",
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonColor: '#28a745',
+      cancelButtonColor: '#6c757d',
+      confirmButtonText: 'Yes, Unblock'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        window.location.href = link;
+      }
+    });
+  });
+});
+</script>
+
 </body>
 </html>

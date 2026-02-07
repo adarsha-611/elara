@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Matte Mauve Circle | Elara Jewelry</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600&family=Poppins:wght@300;400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-main: #FAF7F5;
+            --text-dark: #4A302C;
+            --accent-tan: #A17C6B;
+            --border: #E0D6D0;
+            --font-serif: 'Playfair Display', serif;
+            --font-sans: 'Poppins', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-main);
+            color: var(--text-dark);
+            font-family: var(--font-sans);
+            margin: 0;
+            line-height: 1.6;
+        }
+
+        .container { 
+            max-width: 1200px; 
+            margin: 60px auto; 
+            padding: 0 20px; 
+        }
+
+        /* Product Section Layout */
+        .product-essential {
+            display: grid;
+            grid-template-columns: 1.2fr 0.8fr;
+            gap: 60px;
+            margin-bottom: 80px;
+        }
+
+        /* ── Image Gallery ── */
+        .main-image-zoom-container {
+            position: relative;
+            max-width: 520px;
+            margin: 0 auto;
+            background: #fff;
+            border-radius: 6px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(74, 48, 44, 0.06);
+        }
+
+        .img-zoom-wrapper {
+            position: relative;
+            width: 100%;
+            height: 0;
+            padding-bottom: 100%;
+            overflow: hidden;
+        }
+
+        .zoomable {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            transition: transform 0.25s ease;
+        }
+
+        .img-zoom-wrapper:hover .zoomable {
+            transform: scale(2.2);
+            cursor: zoom-in;
+        }
+
+        .thumbnail-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-top: 20px;
+            justify-content: center;
+        }
+
+        .thumbnail-grid img {
+            width: 80px;
+            height: 80px;
+            object-fit: cover;
+            cursor: pointer;
+            border: 2px solid transparent;
+            border-radius: 6px;
+            transition: all 0.25s ease;
+        }
+
+        .thumbnail-grid img.active,
+        .thumbnail-grid img:hover {
+            border-color: var(--accent-tan);
+            transform: scale(1.08);
+            box-shadow: 0 4px 12px rgba(161, 124, 107, 0.2);
+        }
+
+        /* ── Info Panel ── */
+        .breadcrumb { 
+            font-size: 0.8rem; 
+            text-transform: uppercase; 
+            letter-spacing: 1px; 
+            color: var(--accent-tan); 
+        }
+
+        .product-title { 
+            font-family: var(--font-serif); 
+            font-size: 2.8rem; 
+            margin: 10px 0; 
+        }
+
+        .product-price { 
+            font-size: 1.8rem; 
+            font-weight: 500; 
+            margin-bottom: 20px; 
+        }
+
+        .config-group { 
+            margin-bottom: 25px; 
+        }
+
+        .config-group label { 
+            display: block; 
+            font-weight: 500; 
+            margin-bottom: 8px; 
+            font-size: 0.9rem; 
+        }
+
+        .custom-select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--border);
+            background: white;
+            font-family: var(--font-sans);
+            border-radius: 4px;
+        }
+
+        .qty-stepper {
+            display: inline-flex;
+            border: 1px solid var(--border);
+            background: white;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .qty-stepper button {
+            border: none; 
+            background: none; 
+            padding: 10px 16px; 
+            cursor: pointer;
+            font-size: 1.1rem;
+        }
+
+        .qty-stepper input {
+            width: 60px; 
+            border: none; 
+            text-align: center; 
+            font-family: var(--font-sans);
+            font-size: 1rem;
+        }
+
+        .action-buttons { 
+            display: flex; 
+            gap: 15px; 
+            margin-top: 40px; 
+        }
+
+        .btn-primary {
+            flex: 1;
+            background: var(--accent-tan);
+            color: white;
+            border: none;
+            padding: 18px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-weight: 600;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: 0.3s;
+        }
+
+        .btn-primary:hover { 
+            background: var(--text-dark); 
+        }
+
+        .btn-wishlist {
+            width: 60px;
+            border: 1px solid var(--border);
+            background: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+
+        /* --- NEW ENHANCEMENTS & FIXES --- */
+
+        .status-container { display: flex; align-items: center; gap: 15px; margin-bottom: 15px; }
+        .stock-badge { font-size: 0.85rem; font-weight: 500; padding: 4px 12px; border-radius: 20px; text-transform: uppercase; }
+        .stock-in { background: #e8f5e9; color: #2e7d32; }
+        .stock-low { background: #fff3e0; color: #ef6c00; }
+        .stock-out { background: #ffebee; color: #c62828; }
+        .coupon-tag { background: #f4ece8; border: 1px dashed var(--accent-tan); color: var(--text-dark); padding: 5px 12px; font-size: 0.8rem; border-radius: 4px; }
+
+        .highlights-list { list-style: none; padding: 0; margin: 20px 0; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .highlights-list li { font-size: 0.85rem; display: flex; align-items: center; gap: 8px; }
+        .highlights-list li::before { content: "✓"; color: var(--accent-tan); font-weight: bold; }
+
+        /* FIXED REVIEWS LAYOUT */
+        .reviews-section { margin-top: 100px; border-top: 1px solid var(--border); padding-top: 60px; }
+        .reviews-section h2 { font-family: var(--font-serif); font-size: 2.2rem; text-align: center; margin-bottom: 40px; }
+        
+        .reviews-header { 
+            display: grid; 
+            grid-template-columns: 1fr 1fr; 
+            gap: 40px; 
+            margin-bottom: 50px; 
+            align-items: center; 
+            background: #fff;
+            padding: 40px;
+            border-radius: 8px;
+        }
+
+        .rating-summary h2 { font-family: var(--font-serif); font-size: 3.5rem; margin: 0; color: var(--accent-tan); }
+        .star-rating { color: #D4AF37; font-size: 1.2rem; }
+        
+        .progress-bar-container { margin: 12px 0; display: flex; align-items: center; gap: 15px; font-size: 0.9rem; }
+        .progress-bg { flex: 1; height: 8px; background: #eee; border-radius: 4px; overflow: hidden; }
+        .progress-fill { height: 100%; background: var(--accent-tan); border-radius: 4px; }
+
+        .review-card { background: white; padding: 30px; border-radius: 6px; margin-bottom: 20px; border: 1px solid var(--border); }
+        .review-meta { display: flex; justify-content: space-between; margin-bottom: 15px; }
+        .review-author { font-weight: 600; }
+        .review-date { font-size: 0.8rem; color: #888; }
+
+        /* FIXED RELATED PRODUCTS */
+        .related-products { margin: 100px 0; }
+        .section-title { font-family: var(--font-serif); font-size: 2.2rem; text-align: center; margin-bottom: 40px; }
+        .product-grid { 
+            display: grid; 
+            grid-template-columns: repeat(3, 1fr); 
+            gap: 30px; 
+        }
+        .p-card { transition: 0.3s; cursor: pointer; background: #fff; padding: 15px; border-radius: 6px; }
+        .p-card:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0,0,0,0.05); }
+        .p-card img { width: 100%; border-radius: 4px; }
+        .p-info { text-align: center; margin-top: 15px; }
+        .p-name { font-family: var(--font-serif); font-size: 1.1rem; margin-bottom: 5px; }
+        .p-price { color: var(--accent-tan); font-weight: 500; }
+
+        .btn-disabled { background: #ccc !important; cursor: not-allowed !important; }
+
+        @media (max-width: 768px) {
+            .product-essential, .reviews-header, .product-grid { 
+                grid-template-columns: 1fr; 
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <%- include('../partials/header') %>
+
+<div class="container">
+    <section class="product-essential">
+        <div class="product-gallery">
+            <div class="main-image-zoom-container">
+                <div class="img-zoom-wrapper">
+                    <img src="<%= product.variants[0].images[0] %>" id="current-img" alt="<%= product.name %>" class="zoomable">
+                </div>
+            </div>
+
+            <div class="thumbnail-grid" id="thumbnailGrid">
+                <% product.variants[0].images.forEach((img, index) => { %>
+                    <img src="<%= img %>" class="<%= index === 0 ? 'active' : '' %>" onclick="changeImage(this.src, this)" alt="Thumbnail <%= index + 1 %>">
+                <% }) %>
+            </div>
+        </div>
+
+        <div class="product-info-panel">
+            <nav class="breadcrumb">Home / <%= product.category %> / <%= product.name %></nav>
+            <h1 class="product-title text-dark"><%= product.name %></h1>
+
+            <div class="status-container">
+    <% const firstStock = product.variants[0].stock; %>
+
+    <span 
+        id="stock-status" 
+        class="stock-badge 
+        <%= firstStock === 0 ? 'stock-out' : 
+            firstStock <= 3 ? 'stock-low' : 'stock-in' %>">
+
+        <%= firstStock === 0 
+            ? 'Out of Stock' 
+            : firstStock <= 3 
+                ? 'Only ' + firstStock + ' left!' 
+                : 'In Stock' %>
+    </span>
+
+    <span class="coupon-tag">✨ Use ELARA10 for 10% OFF</span>
+</div>
+
+
+            <div class="product-price" id="price">
+                ₹<%= product.variants[0].price %> 
+                <span style="font-size: 1rem; color: #888; text-decoration: line-through; margin-left: 10px;">₹<%= (product.variants[0].price * 1.2).toFixed(0) %></span>
+            </div>
+
+            <div class="product-config">
+                <div class="config-group">
+                    <label>Select Metal Color</label>
+                    <select class="custom-select" id="colorSelect" onchange="changeVariant()">
+    <% product.variants.forEach((variant, i) => { %>
+       <option 
+  value="<%= i %>"
+  data-price="<%= variant.price %>"
+  data-stock="<%= variant.stock %>"
+  data-images='<%- JSON.stringify(variant.images) %>'>
+  <%= variant.color %>
+</option>
+
+    <% }) %>
+</select>
+
+                </div>
+
+                <div class="config-group">
+                    <label>Quantity</label>
+                    <div class="qty-stepper">
+                        <button type="button" onclick="decreaseQty()">−</button>
+                        <input type="number" value="1" id="qty" min="1">
+                        <button type="button" onclick="increaseQty()">+</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="product-description">
+                <h3>Description</h3>
+                <p><%= product.description %></p>
+            </div>
+
+            <ul class="highlights-list">
+                <li>Hypoallergenic</li>
+                <li>18K Gold Plated</li>
+                <li>Lightweight</li>
+                <li>Handcrafted</li>
+            </ul>
+
+            <div class="action-buttons">
+                <button class="btn-primary">Add to Cart</button>
+                <button class="btn-wishlist">♡</button>
+            </div>
+        </div>
+    </section>
+
+    <section class="reviews-section">
+        <h2>Customer Reviews</h2>
+        <div class="reviews-header">
+            <div class="rating-summary">
+                <h2>4.8 <span class="star-rating">★★★★★</span></h2>
+                <p>Based on 24 reviews</p>
+                <button class="btn-primary" style="padding: 12px 25px; margin-top: 20px; font-size: 0.8rem; width: auto; flex: none;">
+                    Write a Review
+                </button>
+            </div>
+            <div class="rating-bars">
+                <div class="progress-bar-container">
+                    <span>5★</span>
+                    <div class="progress-bg"><div class="progress-fill" style="width: 80%"></div></div>
+                    <span>80%</span>
+                </div>
+                <div class="progress-bar-container">
+                    <span>4★</span>
+                    <div class="progress-bg"><div class="progress-fill" style="width: 15%"></div></div>
+                    <span>15%</span>
+                </div>
+                <div class="progress-bar-container">
+                    <span>3★</span>
+                    <div class="progress-bg"><div class="progress-fill" style="width: 5%"></div></div>
+                    <span>5%</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="review-card">
+            <div class="review-meta">
+                <div>
+                    <div class="star-rating" style="font-size: 0.9rem;">★★★★★</div>
+                    <span class="review-author">Sophia R.</span>
+                </div>
+                <span class="review-date">Feb 02, 2026</span>
+            </div>
+            <p>The craftsmanship is incredible. They are even more beautiful in person and very lightweight!</p>
+        </div>
+    </section>
+
+  <section class="related-products">
+    <h2 class="section-title">You Might Also Like</h2>
+    <div class="product-grid">
+        <% relatedProducts.forEach(p => { %>
+            <div class="p-card">
+                <a href="/product/<%= p._id %>" class="block">
+                    <div class="main-image-zoom-container" style="max-width: 100%; box-shadow: none;">
+                        <div class="img-zoom-wrapper">
+                            <img 
+                                src="<%= p.variants?.[0]?.images?.[0] || '/images/placeholder.jpg' %>" 
+                                alt="<%= p.name %>" 
+                                style="object-fit: contain; width: 100%; height: auto;"
+                            >
+                        </div>
+                    </div>
+                </a>
+                
+                <div class="p-info">
+                    <a href="/product/<%= p._id %>" class="block text-center">
+                        <div class="p-name"><%= p.name %></div>
+                    </a>
+                    <div class="p-price">₹<%= p.variants?.[0]?.price || '—' %></div>
+                </div>
+            </div>
+        <% }) %>
+    </div>
+</section>
+<%- include('../partials/footer') %>
+</div>
+
+<script>
+function changeImage(src, clickedThumb) {
+    const mainImg = document.getElementById("current-img");
+    mainImg.src = src;
+    document.querySelectorAll('#thumbnailGrid img').forEach(img => img.classList.remove('active'));
+    if (clickedThumb) clickedThumb.classList.add('active');
+}
+
+function changeVariant() {
+    const select = document.getElementById("colorSelect");
+    const option = select.options[select.selectedIndex];
+
+    const price = option.getAttribute("data-price");
+    const images = JSON.parse(option.getAttribute("data-images") || "[]");
+
+    document.getElementById("price").innerHTML =
+        `₹${price} 
+        <span style="font-size: 1rem; color: #888; text-decoration: line-through; margin-left: 10px;">
+            ₹${(price * 1.2).toFixed(0)}
+        </span>`;
+
+    const mainImg = document.getElementById("current-img");
+    mainImg.src = images[0] || "";
+
+    const grid = document.getElementById("thumbnailGrid");
+    grid.innerHTML = "";
+    images.forEach((img, index) => {
+        const el = document.createElement("img");
+        el.src = img;
+        if (index === 0) el.classList.add("active");
+        el.onclick = () => changeImage(img, el);
+        grid.appendChild(el);
+    });
+
+    updateStockUI(); // ← no index needed now
+}
+
+function increaseQty() {
+    const qty = document.getElementById("qty");
+    qty.value = parseInt(qty.value) + 1;
+}
+
+function decreaseQty() {
+    const qty = document.getElementById("qty");
+    if (parseInt(qty.value) > 1) qty.value = parseInt(qty.value) - 1;
+}
+
+function updateStockUI() {
+    const select = document.getElementById("colorSelect");
+    const option = select.options[select.selectedIndex];
+
+    const stockCount = parseInt(option.getAttribute("data-stock")) || 0;
+
+    const stockStatus = document.getElementById('stock-status');
+    const addToCartBtn = document.querySelector('.btn-primary');
+
+    stockStatus.classList.remove("stock-in", "stock-low", "stock-out");
+
+    if (stockCount === 0) {
+        stockStatus.innerText = "Out of Stock";
+        stockStatus.classList.add("stock-out");
+
+        addToCartBtn.innerText = "Sold Out";
+        addToCartBtn.classList.add('btn-disabled');
+        addToCartBtn.disabled = true;
+
+    } else if (stockCount <= 3) {
+        stockStatus.innerText = `Only ${stockCount} left in stock`;
+        stockStatus.classList.add("stock-low");
+
+        addToCartBtn.innerText = "Add to Cart";
+        addToCartBtn.classList.remove('btn-disabled');
+        addToCartBtn.disabled = false;
+
+    } else {
+        stockStatus.innerText = "In Stock";
+        stockStatus.classList.add("stock-in");
+
+        addToCartBtn.innerText = "Add to Cart";
+        addToCartBtn.classList.remove('btn-disabled');
+        addToCartBtn.disabled = false;
+    }
+}
+
+window.addEventListener('DOMContentLoaded', updateStockUI);
+</script>
+
+
+</body>
+</html>

@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ELARA - Shop</title>
+    <link rel="stylesheet" href="/css/shop.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <%- include('../partials/header') %>
+
+    <div class="main-container">
+        <aside class="sidebar">
+            <div class="filter-section">
+                <h3>Sort By</h3>
+                <label><input type="radio" name="sort" value="low" <%= filters.sort === 'low' ? 'checked' : '' %>> Price: Low - High</label>
+                <label><input type="radio" name="sort" value="high" <%= filters.sort === 'high' ? 'checked' : '' %>> Price: High - Low</label>
+                <label><input type="radio" name="sort" value="az" <%= filters.sort === 'az' ? 'checked' : '' %>> Name: A-Z</label>
+                <label><input type="radio" name="sort" value="new" <%= filters.sort === 'new' ? 'checked' : '' %>> Newest</label>
+            </div>
+
+            <div class="filter-section">
+                <h3>Categories</h3>
+                <label><input type="checkbox" class="category" value="stud" <%= filters.category && filters.category.includes('stud') ? 'checked' : '' %>> Stud Earrings</label>
+                <label><input type="checkbox" class="category" value="hoop" <%= filters.category && filters.category.includes('hoop') ? 'checked' : '' %>> Hoop Earrings</label>
+                <label><input type="checkbox" class="category" value="drop" <%= filters.category && filters.category.includes('drop') ? 'checked' : '' %>> Drop Earrings</label>
+                <label><input type="checkbox" class="category" value="floral" <%= filters.category && filters.category.includes('floral') ? 'checked' : '' %>> Floral Earrings</label>
+            </div>
+
+            <div class="filter-section">
+                <h3>Price Range</h3>
+                <label><input type="checkbox" class="price" value="0-1000" <%= filters.price && filters.price.includes('0-1000') ? 'checked' : '' %>> ₹0 - ₹1000</label>
+                <label><input type="checkbox" class="price" value="1000-2000" <%= filters.price && filters.price.includes('1000-2000') ? 'checked' : '' %>> ₹1000 - ₹2000</label>
+                <label><input type="checkbox" class="price" value="2000-3000" <%= filters.price && filters.price.includes('2000-3000') ? 'checked' : '' %>> ₹2000 - ₹3000</label>
+            </div>
+
+            <div class="sidebar-buttons">
+                <button class="btn-clear">Clear</button>
+                <button class="btn-apply">Apply</button>
+            </div>
+        </aside>
+
+        <main class="content">
+            <div class="content-header">
+                <h1>Shop</h1>
+                <div class="search-bar">
+                    <input type="text" id="searchInput" placeholder="Search products..." value="<%= filters.search || '' %>" onkeypress="if(event.key==='Enter') applyFilters()">
+                    <button onclick="applyFilters()">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div class="product-grid">
+                <% if (products.length > 0) { %>
+                    <% products.forEach(product => { %>
+                    <a href="/productDetail/<%= product._id %>" class="product-link">
+                        <div class="product-card">
+                            <div class="img-container">
+                                <img 
+                                    src="<%= product.variants && product.variants.length > 0 && product.variants[0].images.length > 0 ? product.variants[0].images[0] : '/images/default.png' %>" 
+                                    alt="<%= product.name %>">
+                                <i class="fa-regular fa-heart wishlist-icon"></i>
+                            </div>
+                            <div class="product-info">
+                                <h4><%= product.name %></h4>
+                                <p class="price">₹ <%= product.variants[0].price %></p>
+                            </div>
+                        </div>
+                    </a>
+                    <% }) %>
+                <% } else { %>
+                    <p>No products found</p>
+                <% } %>
+            </div>
+        </main>
+    </div>
+
+    <%- include('../partials/footer') %>
+    <script>
+        function applyFilters() {
+            const search = document.getElementById("searchInput").value;
+            const sort = document.querySelector('input[name="sort"]:checked')?.value || "";
+            const categories = [...document.querySelectorAll('.category:checked')].map(el => el.value).join(',');
+            const prices = [...document.querySelectorAll('.price:checked')].map(el => el.value).join(',');
+            let url = `/shop?search=${encodeURIComponent(search)}&sort=${sort}&category=${categories}&price=${prices}`;
+            window.location.href = url;
+        }
+
+        document.querySelector('.btn-clear').onclick = () => {
+            window.location.href = "/shop";
+        };
+
+        // Auto-apply if "Apply" button clicked (optional: add click listener)
+        document.querySelector('.btn-apply').onclick = applyFilters;
+    </script>
+</body>
+</html>

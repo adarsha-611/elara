@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>ELARA</title>
+
+    <link rel="stylesheet"
+     href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+    <style>
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 18px 60px;
+            background: #f3f1ee;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .logo {
+            font-size: 32px;
+            letter-spacing: 3px;
+            color: #4b3621;
+            font-weight: 500;
+        }
+
+        .nav-menu {
+            display: flex;
+            gap: 40px;
+        }
+
+        .nav-menu a {
+            text-decoration: none;
+            color: #333;
+            font-size: 14px;
+            letter-spacing: 2px;
+        }
+
+        .icons {
+            display: flex;
+            gap: 28px;
+        }
+
+        .icons a {
+            font-size: 20px;
+            color: #5a3e2b;
+            text-decoration: none;
+            transition: 0.2s;
+        }
+
+        .icons a:hover {
+            color: #8b5e3c;
+        }
+
+        /* --- ADDED FOR LOGIN/SIGNUP --- */
+        .auth-buttons {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
+
+        .auth-link {
+            text-decoration: none;
+            color: #333;
+            font-size: 13px;
+            letter-spacing: 2px;
+            font-weight: 500;
+            transition: 0.2s;
+        }
+
+        .auth-link:hover {
+            color: #8b5e3c;
+        }
+
+        .signup-btn {
+            border: 1px solid #4b3621;
+            padding: 8px 18px;
+            transition: all 0.3s;
+        }
+
+        .signup-btn:hover {
+            background: #4b3621;
+            color: #fff !important;
+        }
+    </style>
+</head>
+
+<body>
+<header class="header">
+
+    <div class="logo">ELARA</div>
+
+    <nav class="nav-menu">
+        <a href="/">HOME</a>
+        <a href="/shop">SHOP</a>
+        <a href="/about">ABOUT US</a>
+        <a href="/contact">CONTACT</a>
+    </nav>
+
+    <% if (locals.user) { %>
+    <div class="icons">
+        <a href="/wishlist"><i class="fa-regular fa-heart"></i></a>
+        <a href="/profile"><i class="fa-regular fa-user"></i></a>
+        <a href="/cart"><i class="fa-solid fa-bag-shopping"></i></a>
+    </div>
+<% } else { %>
+    <div class="auth-buttons">
+        <a href="/login" class="auth-link">LOGIN</a>
+        <a href="/signup" class="auth-link signup-btn">SIGN UP</a>
+    </div>
+<% } %>
+
+</header>
+</body>
+</html>

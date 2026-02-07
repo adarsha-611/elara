@@ -71,13 +71,18 @@ const postChangePassword = async (req, res) => {
     try {
         const userId = req.session.userId;
         const { currentPassword, newPassword, confirmPassword } = req.body;
+        const user = await User.findById(userId);
 
+
+        if(user.authType !=="local"){
+            req.flash("error","cannot change password for Google User");
+            return res.redirect("/profile/change-password");
+        }
         if (newPassword !== confirmPassword) {
             req.flash("error", "New passwords do not match");
             return res.redirect("/profile/change-Password");
         }
 
-        const user = await User.findById(userId);
         const isMatch = await compareString(currentPassword, user.password);
 
         if (!isMatch) {
@@ -102,11 +107,17 @@ const requestEmailUpdate = async (req, res) => {
     try {
         const { newEmail } = req.body;
         const userId = req.session.userId;
+        const user = await User.findById(userId);
+
+        if(user.authType !=="local"){
+            req.flash("error","cannot change email for Google User");
+            return res.redirect("/profile/edit");
+        }
 
         const existingUser = await User.findOne({ email: newEmail });
         if (existingUser) {
             req.flash("error", "Email already in use");
-            return res.redirect("/profileEdit");
+            return res.redirect("/profile/edit");
         }
 
         const otp = Math.floor(100000 + Math.random() * 900000).toString();
@@ -126,20 +137,18 @@ const requestEmailUpdate = async (req, res) => {
 
         req.session.newEmail = newEmail;
 
-       const user = await User.findById(userId);
-
      return res.render("user/verify-email-otp", {
     user,
     newEmail,
     success: null,
-    error: "Invalid or expired OTP"
+    error: null
 });
 
 
     } catch (error) {
         console.log(error);
         req.flash("error", "Error sending OTP");
-        return res.redirect("/profileEdit");
+        return res.redirect("/profile/edit");
     }
 };
 
