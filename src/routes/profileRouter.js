@@ -4,6 +4,7 @@ import { isLoggedIn } from "../middlewares/authMiddleware.js";
 import profileController from "../controller/user/profileController.js";
 import addressController from "../controller/user/addressController.js";
 import logoutController from "../controller/user/logoutController.js";
+import orderController from "../controller/user/orderController.js";
 import upload from "../middlewares/multer.js";
 
 
@@ -23,6 +24,12 @@ router.post('/profile/address/add', isLoggedIn, addressController.addAddress);
 router.post('/profile/address/edit', isLoggedIn, addressController.editAddress); 
 router.get('/profile/address/delete/:addressId', isLoggedIn, addressController.deleteAddress); 
 router.get('/profile/address/setdefault/:addressId', isLoggedIn, addressController.setDefaultAddress);
+
+router.get('/profile/orders',isLoggedIn,orderController.getOrderlistPage)
+router.get('/profile/orders/:id',orderController.getOrderdetailPage);
+router.post('/profile/orders/:id/return',orderController.returnOrder);
+router.post('/profile/orders/:orderId/cancel', orderController.cancelOrder);
+router.get('/profile/orders/:id/invoice', orderController.downloadInvoice);
 
 router.get('/logout',logoutController.logoutUser)
 

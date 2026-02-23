@@ -59,7 +59,7 @@ app.use(passport.session());
 app.set("view engine","ejs");
 app.set("views", path.join(__dirname, "src/views"));
 app.use(express.static(path.join(__dirname,"src/public")));
-// app.use("/uploads", express.static(path.join(__dirname, "src/public/uploads")));
+app.use("/uploads", express.static(path.join(__dirname, "src/public/uploads")));
 
 
 app.use("/", signupRouter);

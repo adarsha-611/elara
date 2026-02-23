@@ -1,0 +1,249 @@
+:root {
+    --bg-cream: #FAF7F5;
+    --header-bronze: #4A302C;
+    --accent-tan: #A17C6B;
+    --text-main: #5D4037;
+    --border: #E0D6D0;
+    --font-serif: 'Playfair Display', serif;
+    --font-sans: 'Poppins', sans-serif;
+}
+
+body {
+    background-color: var(--bg-cream);
+    color: var(--text-main);
+    font-family: var(--font-sans);
+    margin: 0;
+}
+
+/* Header from Theme Reference */
+.admin-header {
+    background-color: var(--header-bronze);
+    padding: 15px 50px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: white;
+}
+
+.logo { font-family: var(--font-serif); font-size: 24px; letter-spacing: 2px; }
+nav span { margin-left: 25px; font-size: 13px; cursor: pointer; opacity: 0.8; }
+
+.details-container { max-width: 1200px; margin: 40px auto; padding: 0 20px; }
+
+.page-title { 
+    font-family: var(--font-serif); 
+    text-align: center; 
+    color: var(--header-bronze);
+    font-size: 2.2rem;
+}
+
+.btn-back {
+    padding: 8px 20px;
+    border: 1px solid var(--border);
+    background: white;
+    cursor: pointer;
+    margin-bottom: 20px;
+}
+
+/* Layout Grid */
+.details-layout { display: grid; grid-template-columns: 1fr 350px; gap: 30px; }
+
+.info-card, .timeline-card {
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 30px;
+}
+
+.grid-row { display: flex; justify-content: space-between; margin-bottom: 25px; }
+.info-item label { display: block; color: #999; font-size: 0.85rem; text-transform: capitalize; }
+.info-item span, .info-item strong { color: var(--text-main); font-weight: 500; }
+
+.shipping-section label { color: #333; font-weight: 600; text-transform: capitalize; }
+.shipping-section p { font-size: 0.9rem; margin-top: 5px; line-height: 1.5; }
+
+/* Table Styling */
+.items-section h2 { font-family: var(--font-serif); margin-top: 40px; }
+.order-table { width: 100%; border-collapse: collapse; background: white; border: 1px solid var(--border); }
+.order-table th { background: #E8E2DE; padding: 15px; text-align: left; font-size: 0.9rem; }
+.order-table td { padding: 15px; border-bottom: 1px solid var(--border); font-size: 0.85rem; }
+
+.badge-cancel { background: #FFDADA; color: #CC0000; padding: 2px 10px; border-radius: 12px; font-size: 0.75rem; }
+
+/* Timeline Styling */
+.timeline-card h3 { font-size: 1.1rem; margin-bottom: 25px; border-bottom: 1px solid var(--border); padding-bottom: 10px; }
+.timeline-item { display: flex; gap: 15px; margin-bottom: 25px; position: relative; }
+.timeline-item:not(:last-child)::after {
+    content: ''; position: absolute; left: 15px; top: 35px; bottom: -15px; width: 1px; border-left: 1px dashed #ccc;
+}
+
+.timeline-item .icon { 
+    width: 32px; height: 32px; background: #eee; border-radius: 50%; 
+    display: flex; align-items: center; justify-content: center; font-size: 14px; z-index: 1;
+}
+
+.timeline-item.completed .icon { background: #E8F5E9; }
+.timeline-item.active .icon { background: var(--accent-tan); color: white; }
+
+.timeline-item .content strong { display: block; font-size: 0.9rem; }
+.timeline-item .content p { font-size: 0.75rem; margin: 4px 0; color: #777; }
+.timeline-item .content small { font-size: 0.7rem; color: #bbb; }
+
+@media (max-width: 900px) {
+    .details-layout { grid-template-columns: 1fr; }
+}
+.order-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.order-table th {
+    background: #d8d2cc;
+    padding: 14px;
+    text-align: center;
+}
+
+.order-table td {
+    padding: 12px;
+    text-align: center;
+    border-bottom: 1px solid #eee;
+}
+
+.status-badge {
+    padding: 6px 10px;
+    border-radius: 6px;
+    font-size: 13px;
+    text-transform: capitalize;
+}
+
+.status-badge.delivered { background: #d4edda; color: #155724; }
+.status-badge.shipped { background: #cce5ff; color: #004085; }
+.status-badge.cancelled { background: #f8d7da; color: #721c24; }
+
+.badge-none {
+    background: #eee;
+    padding: 6px 10px;
+    border-radius: 6px;
+    font-size: 13px;
+}
+
+.badge-accepted {
+    background: #d4edda;
+    color: #155724;
+    padding: 6px 10px;
+    border-radius: 6px;
+}
+
+.badge-rejected {
+    background: #f8d7da;
+    color: #721c24;
+    padding: 6px 10px;
+    border-radius: 6px;
+}
+
+.btn-view {
+    padding: 6px 12px;
+    background: #8b5e3c;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.btn-view:hover {
+    opacity: 0.9;
+}
+/* adminOrderdetail.css */
+.modal {
+    display: none; /* hidden by default */
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0,0,0,0.5);
+    justify-content: center;
+    align-items: center;
+}
+
+.modal-content {
+    background: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    max-width: 500px;
+    width: 90%;
+    margin: auto;
+}
+.close-btn {
+    position: absolute;
+    right: 15px;
+    top: 10px;
+    cursor: pointer;
+    font-size: 20px;
+}
+
+.reason-box {
+    background: #f7f7f7;
+    padding: 10px;
+    border-radius: 6px;
+    margin-top: 5px;
+}
+/* Bigger Modal */
+.modal-large {
+  width: 600px;         /* bigger width */
+  max-width: 90%;
+  padding: 30px;
+  border-radius: 10px;
+  background-color: #fff;
+  position: relative;
+}
+
+/* Close button */
+.close-btn {
+  position: absolute;
+  top: 15px;
+  right: 20px;
+  font-size: 24px;
+  cursor: pointer;
+  color: #333;
+}
+
+/* Reason box */
+.reason-box {
+  padding: 10px;
+  background-color: #f4f4f4;
+  border-radius: 5px;
+  min-height: 50px;
+  margin-bottom: 20px;
+}
+
+/* Action buttons */
+.modal-actions {
+  text-align: right;
+  margin-top: 20px;
+}
+
+.btn-accept, .btn-reject {
+  padding: 8px 18px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-weight: 500;
+  margin-left: 10px;
+}
+
+.btn-accept {
+  background-color: #4CAF50;
+  color: white;
+}
+
+.btn-reject {
+  background-color: #f44336;
+  color: white;
+}
+
+.btn-accept:hover {
+  background-color: #45a049;
+}
+
+.btn-reject:hover {
+  background-color: #e53935;
+}

@@ -255,6 +255,30 @@
                 grid-template-columns: 1fr; 
             }
         }
+        .toast {
+  position: fixed;
+  bottom: 30px;
+  right: 30px;
+  background: #4A302C;
+  color: white;
+  padding: 14px 22px;
+  border-radius: 6px;
+  font-size: 14px;
+  opacity: 0;
+  transform: translateY(20px);
+  transition: all 0.3s ease;
+  z-index: 9999;
+}
+
+.toast.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.toast.error {
+  background: #c62828;
+}
+
     </style>
 </head>
 <body>
@@ -345,9 +369,14 @@
                 <li>Lightweight</li>
                 <li>Handcrafted</li>
             </ul>
-
+            
             <div class="action-buttons">
-                <button class="btn-primary">Add to Cart</button>
+             <button 
+                class="btn-primary" 
+                 onclick="addToCart('<%= product._id %>')">
+                         Add to Cart
+            </button>
+
                 <button class="btn-wishlist">♡</button>
             </div>
         </div>
@@ -421,95 +450,86 @@
         <% }) %>
     </div>
 </section>
-<%- include('../partials/footer') %>
+
 </div>
+<div id="toast" class="toast"></div>
+<%- include('../partials/footer') %>
 
 <script>
-function changeImage(src, clickedThumb) {
-    const mainImg = document.getElementById("current-img");
-    mainImg.src = src;
-    document.querySelectorAll('#thumbnailGrid img').forEach(img => img.classList.remove('active'));
-    if (clickedThumb) clickedThumb.classList.add('active');
+
+// ---------- TOAST FUNCTION (GLOBAL) ----------
+function showToast(message, type = "success") {
+  const toast = document.getElementById("toast");
+  if (!toast) return;
+
+  toast.innerText = message;
+  toast.className = "toast show";
+
+  if (type === "error") {
+    toast.classList.add("error");
+  }
+
+  setTimeout(() => {
+    toast.className = "toast";
+  }, 2500);
 }
 
-function changeVariant() {
-    const select = document.getElementById("colorSelect");
-    const option = select.options[select.selectedIndex];
 
-    const price = option.getAttribute("data-price");
-    const images = JSON.parse(option.getAttribute("data-images") || "[]");
+// ---------- QUANTITY BUTTONS ----------
+document.querySelectorAll(".qty-box").forEach(box => {
+  const minus = box.querySelector(".minus");
+  const plus = box.querySelector(".plus");
+  const input = box.querySelector(".qty-input");
 
-    document.getElementById("price").innerHTML =
-        `₹${price} 
-        <span style="font-size: 1rem; color: #888; text-decoration: line-through; margin-left: 10px;">
-            ₹${(price * 1.2).toFixed(0)}
-        </span>`;
+  if (!minus || !plus || !input) return;
 
-    const mainImg = document.getElementById("current-img");
-    mainImg.src = images[0] || "";
+  minus.addEventListener("click", () => {
+    let val = parseInt(input.value) || 1;
+    if (val > 1) input.value = val - 1;
+  });
 
-    const grid = document.getElementById("thumbnailGrid");
-    grid.innerHTML = "";
-    images.forEach((img, index) => {
-        const el = document.createElement("img");
-        el.src = img;
-        if (index === 0) el.classList.add("active");
-        el.onclick = () => changeImage(img, el);
-        grid.appendChild(el);
+  plus.addEventListener("click", () => {
+    let val = parseInt(input.value) || 1;
+    input.value = val + 1;
+  });
+});
+
+
+// ---------- ADD TO CART FUNCTION ----------
+async function addToCart(productId, variantId = null) {
+  try {
+
+    const qtyInput = document.querySelector(".qty-input");
+    const qty = qtyInput ? parseInt(qtyInput.value) : 1;
+
+    const res = await fetch("/cart/add", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        productId,
+        qty,
+        variantId
+      })
     });
 
-    updateStockUI(); // ← no index needed now
-}
+    const data = await res.json();
 
-function increaseQty() {
-    const qty = document.getElementById("qty");
-    qty.value = parseInt(qty.value) + 1;
-}
-
-function decreaseQty() {
-    const qty = document.getElementById("qty");
-    if (parseInt(qty.value) > 1) qty.value = parseInt(qty.value) - 1;
-}
-
-function updateStockUI() {
-    const select = document.getElementById("colorSelect");
-    const option = select.options[select.selectedIndex];
-
-    const stockCount = parseInt(option.getAttribute("data-stock")) || 0;
-
-    const stockStatus = document.getElementById('stock-status');
-    const addToCartBtn = document.querySelector('.btn-primary');
-
-    stockStatus.classList.remove("stock-in", "stock-low", "stock-out");
-
-    if (stockCount === 0) {
-        stockStatus.innerText = "Out of Stock";
-        stockStatus.classList.add("stock-out");
-
-        addToCartBtn.innerText = "Sold Out";
-        addToCartBtn.classList.add('btn-disabled');
-        addToCartBtn.disabled = true;
-
-    } else if (stockCount <= 3) {
-        stockStatus.innerText = `Only ${stockCount} left in stock`;
-        stockStatus.classList.add("stock-low");
-
-        addToCartBtn.innerText = "Add to Cart";
-        addToCartBtn.classList.remove('btn-disabled');
-        addToCartBtn.disabled = false;
-
+    if (data.success) {
+      showToast("Product added to cart 🛒");
     } else {
-        stockStatus.innerText = "In Stock";
-        stockStatus.classList.add("stock-in");
-
-        addToCartBtn.innerText = "Add to Cart";
-        addToCartBtn.classList.remove('btn-disabled');
-        addToCartBtn.disabled = false;
+      showToast(data.message || "Failed to add product", "error");
     }
+
+  } catch (error) {
+    console.error(error);
+    showToast("Server Error", "error");
+  }
 }
 
-window.addEventListener('DOMContentLoaded', updateStockUI);
 </script>
+
 
 
 </body>

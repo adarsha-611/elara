@@ -27,8 +27,7 @@ export const productsPage = async (page = 1, limit = 5) => {
 
 export const createProduct = async (data, files) => {
   try {
-     const { error } = validateProduct(data, files, []); 
-
+     
     const rawVariants = data.variants || {};
     const variantKeys = Object.keys(rawVariants);
 
@@ -48,12 +47,14 @@ export const createProduct = async (data, files) => {
     });
 
    
-    const product = new Product({
-      name: data.name,
-      description: data.description,
-      category: data.category,
-      variants
-    });
+   const product = new Product({
+  name: data.name,
+  description: data.description,
+  category: data.category,
+  variants,
+  isActive: true,
+  isDeleted: false
+});
 
  
     return await product.save();
@@ -83,9 +84,6 @@ export const updateProduct = async (id, data, files) => {
     if (!product) throw new Error("Product not found");
   
   const existingImages = product.variants.flatMap(v => v.images);
-
-  const { error } = validateProduct(data, files, existingImages);
-    if (error) throw new Error(error);
 
     product.name = data.name;
     product.description = data.description;

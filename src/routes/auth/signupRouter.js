@@ -6,7 +6,9 @@ import { redirectIfAuthenticated } from "../../middlewares/authMiddleware.js";
 
 
 
-router.get('/signup',redirectIfAuthenticated,signupController.getSignup)
+router.get("/signup", redirectIfAuthenticated, (req, res) => {
+    res.render("signup");
+});
 router.post('/signup',signupController.postSignup)
 router.post('/verify-otp',signupController.verifyOtp)
 router.post('/resend-otp',signupController.resendOtp)

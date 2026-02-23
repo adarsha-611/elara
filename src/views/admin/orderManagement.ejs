@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Management | Elara Admin</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+ <style>
+    :root {
+    --sidebar-tan: #B18E7B; /* Tan color from your 2nd image */
+    --main-bronze: #4A302C; /* Deep brown from theme */
+    --bg-light: #F9F9F9;
+    --text-main: #333;
+}
+
+body {
+    margin: 0;
+    font-family: 'Poppins', sans-serif;
+    background-color: var(--bg-light);
+}
+
+.admin-container {
+    display: flex;
+    min-height: 100vh;
+}
+
+
+
+/* Content Area */
+.content-area {
+    flex: 1;                         
+    padding: 40px;
+    margin-left: 260px;
+}
+
+.content-header h1 {
+    font-size: 28px;
+    color: var(--main-bronze);
+    margin-bottom: 30px;
+}
+
+/* Filter Bar from Ref 1 */
+.filter-bar {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 30px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.admin-input {
+    padding: 10px 15px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    background: white;
+}
+
+.search-id { width: 200px; }
+.date-input { width: 120px; }
+
+.btn-admin-action {
+    background-color: var(--sidebar-tan);
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.primary-action { opacity: 0.8; }
+
+/* Table Styling from Ref 1 */
+.table-container {
+    background: white;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+}
+
+.admin-table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+}
+
+.admin-table th {
+    background-color: #fcfcfc;
+    padding: 18px;
+    font-weight: 600;
+    font-size: 14px;
+    border-bottom: 1px solid #eee;
+}
+
+.admin-table td {
+    padding: 18px;
+    border-bottom: 1px solid #eee;
+    font-size: 14px;
+}
+
+/* Status Badges from Ref 1 */
+.status-badge {
+    padding: 6px 15px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.pending { background-color: #FFF9E6; color: #D4A017; }
+.delivered { background-color: #E8F5E9; color: #2E7D32; }
+.cancelled { background-color: #FFEBEE; color: #C62828; }
+.status-out-for-delivery {
+    background-color: #F3E5F5;
+    color: #6A1B9A;
+}
+
+.view-outline {
+    padding: 6px 14px;
+    border: 1px solid var(--sidebar-tan);
+    color: var(--sidebar-tan);
+    border-radius: 20px;
+    font-size: 12px;
+    text-decoration: none;
+    font-weight: 500;
+    transition: 0.2s ease;
+}
+
+.view-outline:hover {
+    background-color: var(--sidebar-tan);
+    color: white;
+}
+
+/* Pagination Styling from Ref 1 & 2 */
+.admin-pagination {
+    margin-top: 30px;
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+}
+
+.page-num, .page-arrow {
+    width: 35px;
+    height: 35px;
+    border: 1px solid #ddd;
+    background: white;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.page-num.active {
+    background-color: var(--sidebar-tan);
+    color: white;
+    border-color: var(--sidebar-tan);
+}
+/* Status Dropdown */
+.status-dropdown {
+    padding: 6px 12px;
+    border-radius: 20px;
+    border: none;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    outline: none;
+}
+
+/* Color Variants */
+.status-pending {
+    background-color: #FFF9E6;
+    color: #D4A017;
+}
+
+.status-shipped {
+    background-color: #E3F2FD;
+    color: #1565C0;
+}
+
+.status-out-for-delivery {
+    background-color: #F3E5F5;
+    color: #6A1B9A;
+}
+
+.status-delivered {
+    background-color: #E8F5E9;
+    color: #2E7D32;
+}
+
+.status-cancelled {
+    background-color: #FFEBEE;
+    color: #C62828;
+}
+ </style>
+</head>
+<body>
+
+    <div class="admin-layout">
+           <%- include('../partials/adminSidebar') %>
+
+
+        <main class="content-area">
+            <header class="content-header">
+                <h1>Order Management</h1>
+            </header>
+
+           <div class="filter-bar">
+    <select id="statusFilter" class="admin-input">
+        <option value="">All Statuses</option>
+        <option value="pending">Pending</option>
+        <option value="delivered">Delivered</option>
+        <option value="cancelled">Cancelled</option>
+    </select>
+
+    <input type="text" id="searchOrderId" placeholder="Search with order id" class="admin-input search-id">
+    <button id="searchBtn" class="btn-admin-action">Search</button> <!-- Added Search button -->
+
+    <!-- <div class="date-group">
+        <input type="date" id="startDate" class="admin-input date-input">
+        <input type="date" id="endDate" class="admin-input date-input">
+    </div> -->
+
+    <button id="sortBtn" class="btn-admin-action">Date (Newest First)</button>
+    <button class="btn-admin-action primary-action">Download order List</button>
+    <button id="clearFilters" class="btn-admin-action">Clear Filters</button>
+</div>
+
+            <div class="table-container">
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>Customer</th>
+                            <th>Email id</th>
+                            <th>Date</th>
+                            <th>Total</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                 <tbody>
+    <% orders.forEach(order => { %>
+        <tr>
+            <td><%= order.user?.fullName || "N/A" %></td>
+            <td><%= order.user?.email || "N/A" %></td>
+            <td><%= new Date(order.createdAt).toLocaleDateString() %></td>
+            <td>₹<%= order.totalAmount %></td>
+
+            <td>
+                <select 
+    class="status-dropdown status-<%= order.orderStatus %>"
+                    onchange="updateStatus('<%= order._id %>', this.value)"
+                    <%= ['delivered','cancelled'].includes(order.orderStatus) ? 'disabled' : '' %>
+                >
+
+     <% const flow = {
+  pending: ["pending","shipped","cancelled"],
+  shipped: ["shipped","out for delivery"],
+  "out for delivery": ["out for delivery","delivered"],
+  delivered: ["delivered"],
+  cancelled: ["cancelled"]
+}; %>
+          <% flow[order.orderStatus].forEach(status => { %>
+                        <option 
+                            value="<%= status %>" 
+                            <%= status === order.orderStatus ? "selected" : "" %>
+                        >
+                            <%= status.charAt(0).toUpperCase() + status.slice(1) %>
+                        </option>
+                    <% }) %>
+
+                </select>
+            </td>
+
+          <td>
+   <a href="/admin/orders/<%= order._id %>" class="view-outline">View</a>
+</td>
+        </tr>
+    <% }) %>
+</tbody>
+                </table>
+            </div>
+
+            <div class="admin-pagination">
+                <button class="page-arrow">‹</button>
+                <button class="page-num">1</button>
+                <button class="page-num active">2</button>
+                <button class="page-num">3</button>
+                <button class="page-num">4</button>
+                <button class="page-arrow">›</button>
+            </div>
+        </main>
+    </div>
+    <script>
+async function updateStatus(orderId, status) {
+
+    const response = await fetch(`/admin/orders/${orderId}/status`, {
+        method: "PATCH",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ status })
+    });
+
+    const data = await response.json();
+
+    if(data.success){
+        location.reload();
+    } else {
+        alert(data.message);
+    }
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+    const statusFilter = document.getElementById("statusFilter");
+    const searchOrderId = document.getElementById("searchOrderId");
+    const searchBtn = document.getElementById("searchBtn");
+    const startDate = document.getElementById("startDate");
+    const endDate = document.getElementById("endDate");
+    const sortBtn = document.getElementById("sortBtn");
+    const clearBtn = document.getElementById("clearFilters");
+    const tableBody = document.querySelector(".admin-table tbody");
+
+    let ordersData = <%- JSON.stringify(orders) %>; // all orders
+    let sortAsc = false;
+
+    function capitalize(str) {
+        return str.charAt(0).toUpperCase() + str.slice(1);
+    }
+
+    function statusOptions(currentStatus) {
+        const flow = {
+            pending: ["pending","shipped","cancelled"],
+            shipped: ["shipped","out for delivery"],
+            "out for delivery": ["out for delivery","delivered"],
+            delivered: ["delivered"],
+            cancelled: ["cancelled"]
+        };
+        return flow[currentStatus] || [currentStatus];
+    }
+
+    function renderTable(data) {
+        tableBody.innerHTML = "";
+        data.forEach(order => {
+            const dateStr = new Date(order.createdAt).toLocaleDateString();
+            const status = order.orderStatus;
+            tableBody.innerHTML += `
+            <tr>
+                <td>${order.user?.fullName || "N/A"}</td>
+                <td>${order.user?.email || "N/A"}</td>
+                <td>${dateStr}</td>
+                <td>₹${order.totalAmount}</td>
+                <td>
+                    <select class="status-dropdown status-${status}" 
+                        onchange="updateStatus('${order._id}', this.value)"
+                        ${['delivered','cancelled'].includes(status) ? 'disabled' : ''}>
+                        ${statusOptions(status).map(s => `<option value="${s}" ${s===status?'selected':''}>${capitalize(s)}</option>`).join("")}
+                    </select>
+                </td>
+                <td><a href="/admin/orders/${order._id}" class="view-outline">View</a></td>
+            </tr>
+            `;
+        });
+    }
+
+    function filterAndSort() {
+        let filtered = [...ordersData];
+
+        // Filter by status
+        if(statusFilter.value) {
+            filtered = filtered.filter(o => o.orderStatus === statusFilter.value);
+        }
+
+        // Filter by Order ID (only triggered by Search button)
+        if(searchOrderId.value.trim()) {
+            filtered = filtered.filter(o => o._id.includes(searchOrderId.value.trim()));
+        }
+
+        // Filter by date range
+        if(startDate.value) {
+            filtered = filtered.filter(o => new Date(o.createdAt) >= new Date(startDate.value));
+        }
+        if(endDate.value) {
+            filtered = filtered.filter(o => new Date(o.createdAt) <= new Date(endDate.value));
+        }
+
+        // Sort by date
+        filtered.sort((a,b) => sortAsc ? new Date(a.createdAt) - new Date(b.createdAt) : new Date(b.createdAt) - new Date(a.createdAt));
+
+        renderTable(filtered);
+    }
+
+    // Event Listeners
+    statusFilter.addEventListener("change", filterAndSort);
+    sortBtn.addEventListener("click", () => {
+        sortAsc = !sortAsc;
+        sortBtn.innerText = sortAsc ? "Date (Oldest First)" : "Date (Newest First)";
+        filterAndSort();
+    });
+    clearBtn.addEventListener("click", () => {
+        statusFilter.value = "";
+        searchOrderId.value = "";
+        startDate.value = "";
+        endDate.value = "";
+        sortAsc = false;
+        sortBtn.innerText = "Date (Newest First)";
+        renderTable(ordersData);
+    });
+
+    // Search button triggers filtering
+    searchBtn.addEventListener("click", filterAndSort);
+
+    // Initial render
+    renderTable(ordersData);
+});
+</script>
+
+</body>
+</html>

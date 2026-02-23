@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Orders | ELARA Luxury Jewelry</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+<style>
+:root {
+    --primary-taupe: #a3866a;
+    --dark-brown: #5a3e2b;
+    --bg-cream: #f6f3f0;
+    --sidebar-brown: #8a6d51;
+    --white: #ffffff;
+    --text-gray: #777;
+}
+
+body {
+    font-family: 'Lato', sans-serif;
+    background-color: var(--bg-cream);
+    margin: 0;
+    color: #333;
+}
+
+/* Layout */
+.account-container {
+    display: flex;
+    max-width: 1300px;
+    margin: 40px auto;
+    padding: 0 20px;
+    gap: 30px;
+}
+
+/* 🔥 FIXED SIDEBAR STYLING FOR YOUR EXISTING .sidebar */
+.sidebar {
+    width: 280px;
+    background-color: var(--sidebar-brown);
+    border-radius: 4px;
+    padding: 30px 0;
+    color: white;
+    height: fit-content;
+}
+
+/* User Info Section */
+.sidebar .user-info {
+    display: flex;
+    align-items: center;
+    padding: 0 25px 25px;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+    margin-bottom: 20px;
+}
+
+.sidebar .user-avatar {
+    width: 45px;
+    height: 45px;
+    background: rgba(255,255,255,0.2);
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-right: 15px;
+    font-size: 1.2rem;
+    overflow: hidden;
+}
+
+.sidebar .user-details h3 {
+    font-size: 1rem;
+    margin: 0;
+}
+
+.sidebar .user-details p {
+    font-size: 0.8rem;
+    opacity: 0.8;
+    margin: 2px 0 0;
+}
+
+/* Sidebar Menu */
+.sidebar-menu a {
+    display: block;
+    padding: 15px 25px;
+    color: rgba(255,255,255,0.8);
+    text-decoration: none;
+    font-size: 0.9rem;
+    transition: 0.3s;
+}
+
+.sidebar-menu a:hover,
+.sidebar-menu a.active {
+    background: rgba(0,0,0,0.15);
+    color: white;
+}
+
+/* Main Content */
+.orders-content {
+    flex: 1;
+}
+
+.section-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 2.2rem;
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+.orders-table-container {
+    background: var(--white);
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+}
+
+.orders-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.orders-table th {
+    text-align: left;
+    padding: 15px;
+    color: var(--text-gray);
+    font-weight: 400;
+    font-size: 0.9rem;
+    border-bottom: 1px solid #eee;
+}
+
+.orders-table td {
+    padding: 20px 15px;
+    border-bottom: 1px solid #f9f9f9;
+    font-size: 0.9rem;
+}
+
+.item-thumbnails {
+    display: flex;
+    gap: 5px;
+}
+
+.item-thumbnails img {
+    width: 45px;
+    height: 45px;
+    object-fit: cover;
+    border-radius: 4px;
+    background: #f0f0f0;
+}
+
+/* Status Badges */
+.status-badge {
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 500;
+}
+
+.status-badge.delivered { background: #e6f4ea; color: #1e7e34; }
+.status-badge.shipped { background: #e8f0fe; color: #1967d2; }
+.status-badge.processing { background: #fff9e6; color: #967000; }
+
+.view-link {
+    color: var(--primary-taupe);
+    text-decoration: none;
+    font-weight: 600;
+}
+
+
+/* Responsive */
+@media (max-width: 992px) {
+    .account-container { flex-direction: column; }
+    .sidebar { width: 100%; }
+}
+</style>
+</head>
+
+<body>
+
+<%- include('../partials/header') %>
+
+<main class="account-container">
+
+    <!-- Sidebar -->
+    <%- include('../partials/profileSidebar', { user, path: '/profile/orders' }) %>
+
+    <!-- Orders Section -->
+    <section class="orders-content">
+        <h1 class="section-title">My Orders</h1>
+
+        <div class="orders-table-container">
+            <table class="orders-table">
+                <thead>
+                    <tr>
+                        <th>Order Number</th>
+                        <th>Date</th>
+                        <th>Items</th>
+                        <th>Total</th>
+                        <th>Status</th>
+                        <th></th>
+                    </tr>
+                </thead>
+               <tbody>
+<% if (orders.length > 0) { %>
+  <% orders.forEach(order => { %>
+    <tr>
+      <td>#<%= order._id.toString().slice(-6).toUpperCase() %></td>
+
+      <td>
+        <%= new Date(order.createdAt).toLocaleDateString("en-IN", {
+            year: "numeric",
+            month: "long",
+            day: "numeric"
+        }) %>
+      </td>
+
+      <td>
+        <div class="item-thumbnails">
+          <% order.items.slice(0,2).forEach(item => { %>
+<% if(
+    item.productDetails &&
+    item.productDetails.images &&
+    item.productDetails.images.length > 0
+){ %>
+              <img src="/uploads/products/<%= item.productDetails.images[0] %>" alt="Item">
+            <% } %>
+          <% }) %>
+        </div>
+      </td>
+
+      <td>₹ <%= order.totalAmount.toLocaleString() %></td>
+
+      <td>
+        <span class="status-badge <%= order.orderStatus.toLowerCase() %>">
+          <%= order.orderStatus %>
+        </span>
+      </td>
+
+      <td>
+        <a href="/profile/orders/<%= order._id %>" class="view-link">
+          View
+        </a>
+      </td>
+    </tr>
+  <% }) %>
+<% } else { %>
+  <tr>
+    <td colspan="6" style="text-align:center;">No orders found</td>
+  </tr>
+<% } %>
+</tbody>
+    
+            </table>
+        </div>
+
+    </section>
+</main>
+<%- include('../partials/footer') %>
+
+</body>
+</html>

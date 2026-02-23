@@ -6,7 +6,9 @@ import passport from "passport";
 import { redirectIfAuthenticated } from "../../middlewares/authMiddleware.js";
 
 
-router.get('/login',redirectIfAuthenticated, loginController.getLogin)
+router.get("/login", redirectIfAuthenticated, (req, res) => {
+    res.render("login");
+});
 router.post('/login',loginController.postLogin)
 
 router.get('/forgot-password',forgotPasswordController.getForgotPassword);

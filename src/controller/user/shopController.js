@@ -2,7 +2,9 @@ import { getAllProducts, getProductById, getRelatedProducts } from "../../servic
 
 const getShopPage = async (req, res) => {
   try {
-
+    const page = parseInt(req.query.page)||1;
+    const limit =3;
+    const skip = (page-1)*limit;
     
     const filters = {
       search: req.query.search || "",
@@ -10,13 +12,20 @@ const getShopPage = async (req, res) => {
       sort: req.query.sort || "",
       price: req.query.price || ""
     };
-
+    
  
     const products = await getAllProducts(filters);
 
+    const totalProducts = products.length;
+    const totalPages = Math.ceil(totalProducts/limit);
+
+    const paginatedProducts = products.slice(skip,skip+limit);
+
     return res.render("user/shop", {
-      products,
-      filters
+      products:paginatedProducts,
+      filters,
+      currentPage:page,
+      totalPages
     });
 
   } catch (error) {

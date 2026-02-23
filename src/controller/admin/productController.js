@@ -63,32 +63,44 @@ const getEditProductPage = async (req, res) => {
 const postEditProduct = async (req, res) => {
   try {
     const product = await getProductById(req.params.id);
+
     if (!product) {
       return res.status(404).json({ success: false, message: "Product not found" });
     }
 
+    // 🔽 SAFETY FIX
+    if (!req.body.variants || req.body.variants === "") {
+      req.body.variants = {};
+    }
+
     const existingImages = product.variants.flatMap(v => v.images || []);
 
-    const { error } = validateProduct(req.body, req.files || [], existingImages);
+    const { error } = validateProduct(
+      req.body,
+      req.files || [],
+      existingImages
+    );
 
     if (error) {
-      return res.status(400).json({ success: false, message: error.details?.[0]?.message || error.message || error });
+      return res.status(400).json({
+        success: false,
+        message: error
+      });
     }
 
     await updateProduct(req.params.id, req.body, req.files || []);
-    return res.redirect("/admin/products");
-    return res.status(200).json({ 
-      success: true, 
-      message: "Product updated successfully" 
+
+    return res.status(200).json({
+      success: true,
+      message: "Product updated successfully"
     });
 
   } catch (err) {
     console.error("Update product error:", err);
 
-    
-    return res.status(500).json({ 
-      success: false, 
-      message: err.message || "Failed to update product" 
+    return res.status(500).json({
+      success: false,
+      message: err.message || "Failed to update product"
     });
   }
 };

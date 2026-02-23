@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checkout | ELARA Luxury Jewelry</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-gold: #a3866a;
+            --dark-gold:   #8a7055;
+            --bg-cream:     #f8f5f2;
+            --charcoal:     #2d2d2d;
+            --border:       #e0d9ce;
+            --error:        #c94b4b;
+            --success:      #4a7043;
+            --gray:         #6b6b6b;
+            --light:        #ffffff;
+        }
+
+        * { box-sizing: border-box; }
+        body {
+            font-family: 'Lato', sans-serif;
+            background: var(--bg-cream);
+            color: var(--charcoal);
+            margin: 0;
+            line-height: 1.6;
+        }
+
+        .checkout-header {
+            background: var(--light);
+            border-bottom: 1px solid var(--border);
+            padding: 1rem 5%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo {
+            font-family: 'Playfair Display', serif;
+            font-size: 2rem;
+            letter-spacing: 3px;
+            color: #3f2a1d;
+            text-decoration: none;
+        }
+
+        .secure-badge {
+            font-size: 0.95rem;
+            color: var(--gray);
+        }
+
+        .secure-badge i { color: var(--success); margin-right: 6px; }
+
+        .container {
+            max-width: 1180px;
+            margin: 40px auto;
+            padding: 0 20px;
+            display: grid;
+            grid-template-columns: 1fr 380px;
+            gap: 50px;
+        }
+
+        h1.page-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.4rem;
+            margin: 0 0 1.8rem;
+            color: #3f2a1d;
+        }
+
+        .section {
+            background: var(--light);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 28px;
+            margin-bottom: 28px;
+        }
+
+        .section-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.55rem;
+            margin: 0 0 1.4rem;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .address-list {
+            display: grid;
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .address-card {
+            padding: 18px;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.18s;
+            position: relative;
+        }
+
+        .address-card:hover,
+        .address-card.selected {
+            border-color: var(--primary-gold);
+            box-shadow: 0 0 0 3px rgba(163,134,106,0.15);
+        }
+
+        .address-card input[type="radio"] {
+            position: absolute;
+            opacity: 0;
+        }
+
+        .address-card label {
+            display: block;
+            cursor: pointer;
+        }
+
+        .address-name {
+            font-weight: 700;
+            font-size: 1.05rem;
+            margin-bottom: 6px;
+        }
+
+        .address-meta {
+            color: #555;
+            font-size: 0.94rem;
+        }
+
+        .address-actions {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            display: flex;
+            gap: 10px;
+        }
+
+        .action-btn {
+            background: #f8f5f2;
+            border: none;
+            width: 36px;
+            height: 36px;
+            border-radius: 6px;
+            cursor: pointer;
+            color: #555;
+            transition: all 0.2s;
+        }
+
+        .action-btn:hover { background: #e8e2d9; color: #222; }
+
+        .add-address-btn {
+            background: var(--primary-gold);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .add-address-btn:hover { background: var(--dark-gold); }
+
+        /* Payment */
+        .payment-option {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 16px;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            margin-bottom: 12px;
+            cursor: pointer;
+            transition: all 0.18s;
+        }
+
+        .payment-option:hover,
+        .payment-option.selected {
+            border-color: var(--primary-gold);
+            background: rgba(163,134,106,0.04);
+        }
+
+        .payment-option input[type="radio"] { margin: 0; }
+
+        .payment-label {
+            font-weight: 600;
+        }
+
+        /* Order Summary */
+        .order-summary {
+            position: sticky;
+            top: 100px;
+            align-self: start;
+        }
+
+        .summary-inner {
+            background: var(--light);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 28px;
+        }
+
+        .summary-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.45rem;
+            margin: 0 0 20px;
+        }
+
+        .summary-item {
+            display: flex;
+            gap: 14px;
+            margin-bottom: 18px;
+        }
+
+        .item-thumb {
+            width: 64px;
+            height: 64px;
+            border-radius: 6px;
+            overflow: hidden;
+            flex-shrink: 0;
+            background: #f0ece5;
+        }
+
+        .item-thumb img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .item-info h4 {
+            margin: 0 0 4px;
+            font-size: 0.98rem;
+        }
+
+        .item-qty {
+            font-size: 0.86rem;
+            color: #666;
+        }
+
+        .summary-line {
+            display: flex;
+            justify-content: space-between;
+            margin: 10px 0;
+            font-size: 0.96rem;
+        }
+
+        .grand-total {
+            font-size: 1.28rem;
+            font-weight: 700;
+            border-top: 1px solid var(--border);
+            padding-top: 16px;
+            margin-top: 12px;
+        }
+
+        .place-order-btn {
+            background: var(--primary-gold);
+            color: white;
+            border: none;
+            width: 100%;
+            padding: 16px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            border-radius: 8px;
+            cursor: pointer;
+            margin: 24px 0 16px;
+            transition: background 0.2s;
+        }
+
+        .place-order-btn:hover { background: var(--dark-gold); }
+
+        .return-link {
+            color: var(--primary-gold);
+            text-decoration: none;
+            font-size: 0.95rem;
+            display: inline-block;
+        }
+
+        .return-link:hover { text-decoration: underline; }
+
+        /* Modal */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.55);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .modal-content {
+            background: white;
+            width: 100%;
+            max-width: 620px;
+            max-height: 92vh;
+            overflow-y: auto;
+            border-radius: 12px;
+            padding: 32px;
+            position: relative;
+        }
+
+        .close-modal {
+            position: absolute;
+            top: 20px;
+            right: 24px;
+            font-size: 32px;
+            background: none;
+            border: none;
+            cursor: pointer;
+        }
+
+        .form-group {
+            margin-bottom: 18px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 7px;
+            font-weight: 600;
+            font-size: 0.92rem;
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 12px 14px;
+            border: 1px solid #d3ccc1;
+            border-radius: 6px;
+            font-size: 0.97rem;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 18px;
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 8px;
+        }
+
+        .modal-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 16px;
+            margin-top: 28px;
+        }
+
+        .btn-secondary {
+            background: #f0ece5;
+            color: #444;
+            border: none;
+            padding: 12px 28px;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        .btn-primary {
+            background: var(--primary-gold);
+            color: white;
+            border: none;
+            padding: 12px 32px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        @media (max-width: 980px) {
+            .container {
+                grid-template-columns: 1fr;
+                gap: 32px;
+            }
+            .order-summary {
+                position: static;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .form-row { grid-template-columns: 1fr; }
+            .section { padding: 20px; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header (you can keep your partial) -->
+    <header class="checkout-header">
+        <a href="/" class="logo">ELARA</a>
+        <div class="secure-badge">
+            <i class="fas fa-lock"></i> Secure Checkout
+        </div>
+    </header>
+
+    <div class="container">
+
+        <main>
+
+            <h1 class="page-title">Checkout</h1>
+
+            <!-- Messages -->
+            <% if (success && success.length) { %>
+                <div style="background:#e8f5e9; color:#2e7d32; padding:14px; border-radius:6px; margin-bottom:24px;">
+                    <%= success %>
+                </div>
+            <% } %>
+            <% if (error && error.length) { %>
+                <div style="background:#ffebee; color:#c62828; padding:14px; border-radius:6px; margin-bottom:24px;">
+                    <%= error %>
+                </div>
+            <% } %>
+
+            <!-- 1. Delivery Address -->
+            <section class="section">
+                <h2 class="section-title">1. Delivery Address</h2>
+
+                <% if (addresses?.length > 0) { %>
+                    <div class="address-list">
+                        <% addresses.forEach(addr => { %>
+                            <div class="address-card <%= addr.isDefault ? 'selected' : '' %>">
+                                <input type="radio" name="addressId" value="<%= addr._id %>"
+                                       id="addr-<%= addr._id %>"
+                                       <%= addr.isDefault ? 'checked' : '' %>>
+                                <label for="addr-<%= addr._id %>">
+                                    <div class="address-name"><%= addr.fullName %></div>
+                                    <div class="address-meta">
+                                        <%= addr.street %>, <%= addr.city %>, <%= addr.state %> <%= addr.pincode %><br>
+                                        Phone: <%= addr.phoneNumber %>
+                                    </div>
+                                </label>
+
+                                <div class="address-actions">
+                                    <button class="action-btn" onclick='openEditModal(<%- JSON.stringify(addr) %>)'>
+                                        <i class="fa-solid fa-pen"></i>
+                                    </button>
+                                    <form action="/checkout/address/delete/<%= addr._id %>" method="POST" style="display:inline;">
+                                        <button type="submit" class="action-btn">
+                                            <i class="fa-solid fa-trash"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        <% }) %>
+                    </div>
+                <% } else { %>
+                    <p style="color:#666; text-align:center; padding:20px 0;">
+                        No saved addresses yet. Please add one below.
+                    </p>
+                <% } %>
+
+                <button type="button" class="add-address-btn" id="addNewAddress">
+                    + Add New Address
+                </button>
+            </section>
+
+            <!-- 2. Payment Method -->
+            <section class="section">
+                <h2 class="section-title">2. Payment Method</h2>
+
+                <div class="payment-option" data-value="razorpay">
+                    <input type="radio" name="payment" value="razorpay" id="pay-razorpay">
+                    <label for="pay-razorpay" class="payment-label">Pay with Razorpay (UPI, Cards, Netbanking)</label>
+                </div>
+
+                <div class="payment-option" data-value="wallet">
+                    <input type="radio" name="payment" value="wallet" id="pay-wallet">
+                    <label for="pay-wallet" class="payment-label">Wallet Payment</label>
+                </div>
+
+                <div class="payment-option" data-value="cod">
+                    <input type="radio" name="payment" value="cod" id="pay-cod" checked>
+                    <label for="pay-cod" class="payment-label">Cash on Delivery</label>
+                </div>
+            </section>
+
+        </main>
+
+        <!-- Order Summary – Sticky on desktop -->
+        <aside class="order-summary">
+            <div class="summary-inner">
+                <h2 class="summary-title">Order Summary</h2>
+
+                <div class="summary-items">
+                    <% cartItems.forEach(item => { %>
+                        <div class="summary-item">
+                           <div class="item-thumb">
+ <img src="/<%= item.product.image %>" 
+     alt="<%= item.product.name %>">
+
+</div>
+
+                            <div class="item-info">
+                                <h4><%= item.product.name %></h4>
+<div class="item-qty">
+  Qty: <%= item.quantity %> × ₹<%= (item.product?.price || 0).toLocaleString('en-IN') %>
+</div>
+                            </div>
+                        </div>
+                    <% }) %>
+                </div>
+
+                <div class="summary-totals">
+                    <div class="summary-line">
+                        <span>Subtotal</span>
+                        <span>₹ <%= subtotal.toLocaleString('en-IN') %></span>
+                    </div>
+                    <!-- You can add shipping, discount, tax here later -->
+                    <div class="summary-line grand-total">
+                        <span>Total</span>
+                        <span>₹ <%= subtotal.toLocaleString('en-IN') %></span>
+                    </div>
+                </div>
+
+                <form action="/checkout/place-order" method="POST">
+                    <input type="hidden" name="addressId"    id="selectedAddress"   required>
+                    <input type="hidden" name="paymentMethod" id="selectedPayment" required>
+                    <button type="submit" class="place-order-btn">Place Order →</button>
+                </form>
+
+                <a href="/cart" class="return-link">← Return to Cart</a>
+            </div>
+        </aside>
+
+    </div>
+
+    <!-- Address Modal (same structure, just better spacing) -->
+    <div id="addressModal" class="modal-overlay">
+        <div class="modal-content">
+            <button class="close-modal" onclick="closeModal()">×</button>
+
+            <h2 id="modalTitle">Add New Address</h2>
+            <p style="color:#666; margin:0 0 28px;">Enter your shipping details below.</p>
+
+            <form id="addressForm" action="/checkout/address/add" method="POST">
+
+                <input type="hidden" name="addressId" id="addressId">
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Full Name *</label>
+                        <input type="text" name="fullName" id="fullName" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Phone Number *</label>
+                        <input type="tel" name="phoneNumber" id="phoneNumber" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Street Address *</label>
+                    <textarea name="street" id="street" rows="3" required></textarea>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>City *</label>
+                        <input type="text" name="city" id="city" required>
+                    </div>
+                    <div class="form-group">
+                        <label>State *</label>
+                        <input type="text" name="state" id="state" required>
+                    </div>
+                </div>
+
+                <div class="form-row">
+
+    <!-- Pincode -->
+    <div class="form-group">
+        <label>Pincode *</label>
+        <input type="text" name="pincode" id="pincode" required>
+    </div>
+
+    <!-- Address Type -->
+    <div class="form-group">
+        <label>Address Type</label>
+
+        <div style="display:flex; align-items:center; gap:20px; margin-top:10px;">
+            <label style="display:flex; align-items:center; gap:6px; font-weight:500;">
+                <input type="radio" name="addressType" value="Home" required>
+                Home
+            </label>
+
+            <label style="display:flex; align-items:center; gap:6px; font-weight:500;">
+                <input type="radio" name="addressType" value="Work" required>
+                Work
+            </label>
+        </div>
+    </div>
+
+</div>
+
+
+
+                <div class="form-group checkbox-group" style="margin-top:10px;">
+    <label style="display:flex; align-items:center; gap:10px; cursor:pointer;">
+        <input type="checkbox" id="makeDefault" name="isDefault">
+        Make this my default address
+    </label>
+</div>
+
+                <div class="modal-actions">
+                    <button type="button" class="btn-secondary" onclick="closeModal()">Cancel</button>
+                    <button type="submit" class="btn-primary" id="submitBtn">Save Address</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const modal = document.getElementById("addressModal");
+
+        document.getElementById("addNewAddress").onclick = () => {
+            modal.style.display = "flex";
+            document.getElementById("modalTitle").textContent = "Add New Address";
+            document.getElementById("submitBtn").textContent = "Save Address";
+            document.getElementById("addressForm").action = "/checkout/address/add";
+            document.getElementById("addressForm").reset();
+            document.getElementById("addressId").value = "";
+        };
+
+        function closeModal() {
+            modal.style.display = "none";
+        }
+
+        modal.onclick = e => { if (e.target === modal) closeModal(); };
+
+        function openEditModal(addr) {
+    const modal = document.getElementById("addressModal");
+
+    modal.style.display = "flex";
+
+    // Change modal title & button text
+    document.getElementById("modalTitle").textContent = "Edit Address";
+    document.getElementById("submitBtn").textContent = "Update Address";
+    document.getElementById("addressForm").action = "/checkout/address/edit";
+
+    // Fill input values
+    document.getElementById("addressId").value = addr._id;
+    document.getElementById("fullName").value = addr.fullName;
+    document.getElementById("phoneNumber").value = addr.phoneNumber;
+    document.getElementById("street").value = addr.street;
+    document.getElementById("city").value = addr.city;
+    document.getElementById("state").value = addr.state;
+    document.getElementById("pincode").value = addr.pincode;
+
+    // ✅ Set Address Type radio button
+    document.querySelectorAll('input[name="addressType"]').forEach(radio => {
+        radio.checked = radio.value === addr.addressType;
+    });
+
+    // Set default checkbox
+    document.getElementById("makeDefault").checked = addr.isDefault;
+}
+
+        // Sync selected values to hidden inputs
+        function updateSelected() {
+            const addr = document.querySelector('input[name="addressId"]:checked');
+            document.getElementById('selectedAddress').value = addr ? addr.value : '';
+
+            document.querySelectorAll('.address-card').forEach(c => c.classList.remove('selected'));
+            if (addr) addr.closest('.address-card').classList.add('selected');
+        }
+
+        function updatePayment() {
+            const pay = document.querySelector('input[name="payment"]:checked');
+            document.getElementById('selectedPayment').value = pay ? pay.value : '';
+        }
+
+        document.querySelectorAll('input[name="addressId"]').forEach(r => {
+            r.addEventListener('change', updateSelected);
+        });
+
+        document.querySelectorAll('input[name="payment"], .payment-option').forEach(el => {
+            el.addEventListener('change', e => {
+                document.querySelectorAll('.payment-option').forEach(p => p.classList.remove('selected'));
+                if (e.target.closest('.payment-option')) {
+                    e.target.closest('.payment-option').classList.add('selected');
+                }
+                updatePayment();
+            });
+        });
+
+        // Auto-select defaults
+        updateSelected();
+        updatePayment();   // selects COD by default
+
+        // Optional: click anywhere on payment-option selects it
+        document.querySelectorAll('.payment-option').forEach(opt => {
+            opt.addEventListener('click', () => {
+                const radio = opt.querySelector('input[type="radio"]');
+                if (radio) {
+                    radio.checked = true;
+                    updatePayment();
+                }
+            });
+        });
+    </script>
+
+</body>
+</html>

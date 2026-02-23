@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thank You for Your Order | Elara</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600&family=Poppins:wght@300;400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+    --bg-main: #FAF7F5;
+    --bg-card: #FFFFFF;
+    --text-dark: #4A302C; /* Theme Bronze */
+    --text-muted: #5D4037;
+    --accent-tan: #A17C6B; /* Button Color */
+    --accent-tan-hover: #8D6E63;
+    --font-serif: 'Playfair Display', serif;
+    --font-sans: 'Poppins', sans-serif;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    background-color: var(--bg-main);
+    font-family: var(--font-sans);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+}
+
+.success-wrapper {
+    padding: 20px;
+    width: 100%;
+    max-width: 550px;
+}
+
+.success-card {
+    background: var(--bg-card);
+    padding: 60px 40px;
+    border-radius: 4px;
+    text-align: center;
+    box-shadow: 0 10px 30px rgba(74, 48, 44, 0.05);
+    border: 1px solid #E0D6D0;
+}
+
+/* Checkmark Animation Styling */
+.checkmark-container {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 30px;
+}
+
+.checkmark-circle {
+    width: 80px;
+    height: 80px;
+    background-color: var(--text-dark); /* Bronze circle from ref */
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.checkmark {
+    width: 40px;
+    height: 40px;
+    stroke: white;
+    stroke-width: 3;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.checkmark-check {
+    stroke-dasharray: 48;
+    stroke-dashoffset: 48;
+    animation: stroke 0.6s cubic-bezier(0.65, 0, 0.45, 1) forwards 0.3s;
+}
+
+@keyframes stroke {
+    100% { stroke-dashoffset: 0; }
+}
+
+/* Typography */
+.success-title {
+    font-family: var(--font-serif);
+    color: var(--text-dark);
+    font-size: 2.2rem;
+    margin: 0 0 15px 0;
+}
+
+.success-message {
+    color: var(--text-muted);
+    font-size: 0.95rem;
+    line-height: 1.6;
+    margin-bottom: 30px;
+}
+
+.order-number-box {
+    margin-bottom: 40px;
+    font-size: 1rem;
+}
+
+.order-number-box .label {
+    color: #999;
+}
+
+.order-number-box .number {
+    color: var(--text-dark);
+    font-weight: 500;
+    margin-left: 5px;
+}
+
+/* Buttons */
+.action-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.btn {
+    padding: 15px 30px;
+    text-decoration: none;
+    font-size: 0.9rem;
+    font-weight: 500;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    transition: all 0.3s ease;
+    border-radius: 2px;
+}
+
+.btn-primary {
+    background-color: var(--accent-tan);
+    color: white;
+    border: 1px solid var(--accent-tan);
+}
+
+.btn-primary:hover {
+    background-color: var(--accent-tan-hover);
+    border-color: var(--accent-tan-hover);
+}
+
+.btn-secondary {
+    background-color: transparent;
+    color: var(--text-dark);
+    border: 1px solid #E0D6D0;
+}
+
+.btn-secondary:hover {
+    background-color: #FDFBF9;
+    border-color: var(--accent-tan);
+}
+
+@media (max-width: 480px) {
+    .success-card { padding: 40px 20px; }
+    .success-title { font-size: 1.8rem; }
+}
+    </style>
+</head>
+<body>
+
+    <div class="success-wrapper">
+        <div class="success-card">
+            <div class="checkmark-container">
+                <div class="checkmark-circle">
+                    <svg class="checkmark" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52">
+                        <circle class="checkmark-circle-stroke" cx="26" cy="26" r="25" fill="none"/>
+                        <path class="checkmark-check" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8"/>
+                    </svg>
+                </div>
+            </div>
+
+            <h1 class="success-title">Thank you for your order!</h1>
+            <p class="success-message">Your order has been successfully placed.</p>
+            
+            <div class="order-number-box">
+                <span class="label">Order Number:</span>
+                <span class="number">#<%= orderId %></span>
+            </div>
+
+            <div class="action-buttons">
+                <a href="/profile/orders/<%= order._id %>" class="btn btn-primary">Order Detail</a>
+                <a href="/shop" class="btn btn-secondary">Back To Shopping</a>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>

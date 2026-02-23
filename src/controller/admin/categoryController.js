@@ -21,13 +21,7 @@ const getCategoryPage = async (req, res) => {
 
     const totalPages = Math.ceil(totalCategories / limit);
 
-    console.log("Found users:", users.map(u => ({
-            id: u._id,
-            fullName: u.fullName,
-            email: u.email,
-            authType: u.authType,
-            isBlocked: u.isBlocked
-        })));
+    
 
     res.render("admin/category", {
       categories,

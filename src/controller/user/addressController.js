@@ -2,22 +2,38 @@ import User from "../../model/userSchema.js";
 import { validateAddress } from "../../utils/validators/joi_address.js";
 
 const getAddresses = async (req, res) => {
-    try {
-        const userId = req.session.userId;
-        const user = await User.findById(userId).lean();
-        return res.render("user/address", { 
-            user, 
-            success: req.flash('success'), 
-            error: req.flash('error'),
-            validationErrors: req.flash('validationErrors'),  
-            oldInput: req.flash('oldInput'),
-            showModalAfterError: req.flash('showModalAfterError'),
-            formMode: req.flash('formMode')
-        });
-    } catch (error) {
-        console.error("Error fetching addresses:", error);
-        return res.status(500).send("Server Error");
-    }
+  try {
+    const userId = req.session.userId;
+    const page = parseInt(req.query.page) || 1; 
+    const limit = 3; 
+    const skip = (page - 1) * limit;
+
+    const user = await User.findById(userId).lean();
+   
+   
+    const totalAddresses = user.addresses.length;
+    const totalPages = Math.ceil(totalAddresses / limit);
+
+   
+    const paginatedAddresses = user.addresses.slice(skip, skip + limit);
+
+    return res.render("user/address", {
+      user,
+      addresses: paginatedAddresses,
+      currentPage: page,
+      totalPages,
+      success: req.flash('success'),
+      error: req.flash('error'),
+      validationErrors: req.flash('validationErrors'),
+      oldInput: req.flash('oldInput'),
+      showModalAfterError: req.flash('showModalAfterError'),
+      formMode: req.flash('formMode')
+    });
+
+  } catch (error) {
+    console.error("Error fetching addresses:", error);
+    return res.status(500).send("Server Error");
+  }
 };
 
 

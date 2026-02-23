@@ -245,11 +245,23 @@ cropImageBtn.addEventListener('click', () => {
 
     const canvas = cropperInstance.getCroppedCanvas({ width: 600, height: 600 });
     const croppedDataUrl = canvas.toDataURL('image/jpeg', 0.85);
+    canvas.toBlob(blob => {
+    const file = new File([blob], "cropped.jpg", { type: "image/jpeg" });
+
+    const fileInput = currentUploadTarget.querySelector('.file-input');
+
+    const dataTransfer = new DataTransfer();
+    dataTransfer.items.add(file);
+
+    fileInput.files = dataTransfer.files;
+});
+
 
     const previewContainer = currentUploadTarget.querySelector('.preview-container');
     const uploadLabel = currentUploadTarget.querySelector('.upload-label');
     const previewImg = previewContainer.querySelector('img');
 
+    
     previewImg.src = croppedDataUrl;
     uploadLabel.style.display = 'none';
     previewContainer.style.display = 'flex';

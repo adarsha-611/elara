@@ -10,7 +10,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    
+    <script src="https://unpkg.com/lucide@latest"></script>
     <style>
         body {
             font-family: 'Inter', sans-serif;
@@ -73,31 +73,37 @@
                 <div id="err2" class="text-red-500 text-xs mt-1"></div>
             </div>
             
-            <div class="mb-5">
-                <label for="password" class="block text-gray-600 text-sm font-medium mb-2">
-                    Password
-                </label>
-                <input 
-                    type="password" 
-                    id="password" 
-                    name="password" 
-                    class="w-full px-4 py-2.5 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#a98968] focus:border-transparent transition"
-                >
-                <div id="err3" class="text-red-500 text-xs mt-1"></div>
-            </div>
+           <div class="mb-5">
+    <label for="password" class="block text-gray-600 text-sm font-medium mb-2">Password</label>
+   <div class="relative">
+    <input 
+        type="password" 
+        id="password" 
+        name="password" 
+        class="w-full px-4 py-2.5 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#a98968] focus:border-transparent transition"
+    >
+    <button type="button" onclick="togglePass('password', this)" class="absolute inset-y-0 right-0 px-3 flex items-center text-gray-400 hover:text-[#a98968] z-10">
+        <i data-lucide="eye" class="w-5 h-5"></i>
+    </button>
+</div>
+    <div id="err3" class="text-red-500 text-xs mt-1"></div>
+</div>
             
-            <div class="mb-6">
-                <label for="confirmPassword" class="block text-gray-600 text-sm font-medium mb-2">
-                    Confirm password
-                </label>
-                <input 
-                    type="password" 
-                    id="confirmPassword" 
-                    name="confirmPassword" 
-                    class="w-full px-4 py-2.5 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#a98968] focus:border-transparent transition"
-                >
-                <div id="err4" class="text-red-500 text-xs mt-1"></div>
-            </div>
+           <div class="mb-6">
+    <label for="confirmPassword" class="block text-gray-600 text-sm font-medium mb-2">Confirm password</label>
+    <div class="relative">
+    <input 
+        type="password" 
+        id="confirmPassword" 
+        name="confirmPassword" 
+        class="w-full px-4 py-2.5 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#a98968] focus:border-transparent transition"
+    >
+    <button type="button" onclick="togglePass('confirmPassword', this)" class="absolute inset-y-0 right-0 px-3 flex items-center text-gray-400 hover:text-[#a98968] z-10">
+        <i data-lucide="eye" class="w-5 h-5"></i>
+    </button>
+</div>
+    <div id="err4" class="text-red-500 text-xs mt-1"></div>
+</div>
             
             <div class="mb-6">
                 <button 
@@ -227,6 +233,26 @@
                 e.preventDefault();
             }
         });
+        
     </script>
+    <script>
+    // Initialize icons
+    lucide.createIcons();
+
+    function togglePass(inputId, btn) {
+        const input = document.getElementById(inputId);
+        const icon = btn.querySelector('svg') || btn.querySelector('i');
+        
+        if (input.type === 'password') {
+            input.type = 'text';
+            icon.setAttribute('data-lucide', 'eye-off');
+        } else {
+            input.type = 'password';
+            icon.setAttribute('data-lucide', 'eye');
+        }
+        // Force Lucide to re-scan the button for the new attribute
+        lucide.createIcons();
+    }
+</script>
 </body>
 </html>

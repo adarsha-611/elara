@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wishlist | ELARA</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600&family=Poppins:wght@300;400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+    --bg-color: #FAF7F5;
+    --text-dark: #4A302C;
+    --accent-gold: #A17C6B;
+    --border-color: #E0D6D0;
+    --white: #FFFFFF;
+}
+
+body {
+    margin: 0;
+    font-family: 'Poppins', sans-serif;
+    background-color: var(--bg-color);
+    color: var(--text-dark);
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 60px 20px;
+}
+
+/* Header/Navigation */
+header {
+    background-color: var(--white);
+    border-bottom: 1px solid var(--border-color);
+    padding: 20px 0;
+}
+
+.nav-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 20px;
+}
+
+.logo {
+    font-family: 'Playfair Display', serif;
+    letter-spacing: 2px;
+    font-size: 24px;
+}
+
+nav a {
+    text-decoration: none;
+    color: var(--text-dark);
+    margin: 0 15px;
+    font-size: 13px;
+    letter-spacing: 1px;
+}
+
+/* Wishlist Header */
+.wishlist-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 40px;
+}
+
+.page-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 32px;
+    font-weight: 400;
+}
+
+.search-bar {
+    display: flex;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    overflow: hidden;
+    background: var(--white);
+}
+
+.search-bar input {
+    border: none;
+    padding: 10px 15px;
+    outline: none;
+}
+
+/* Product Cards */
+.product-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 25px;
+}
+
+.product-card {
+    background: var(--white);
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(74, 48, 44, 0.05);
+    transition: transform 0.3s ease;
+}
+
+.product-card:hover {
+    transform: translateY(-5px);
+}
+
+.img-container {
+    position: relative;
+    background: #F0EBE7; /* Soft base for images */
+}
+
+.img-container img {
+    width: 100%;
+    display: block;
+    aspect-ratio: 1/1;
+    object-fit: cover;
+}
+
+.wishlist-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: var(--white);
+    border: none;
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    color: #e74c3c;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.product-info {
+    padding: 20px;
+    text-align: center;
+}
+
+.product-info h3 {
+    font-size: 14px;
+    font-weight: 500;
+    margin-bottom: 8px;
+}
+
+.price {
+    color: var(--accent-gold);
+    font-weight: 600;
+    margin-bottom: 15px;
+}
+
+.add-to-cart {
+    background-color: var(--accent-gold);
+    color: var(--white);
+    border: none;
+    width: 100%;
+    padding: 10px 0;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+/* Footer Style from Theme */
+footer {
+    background-color: var(--text-dark);
+    color: var(--bg-color);
+    padding: 80px 0 20px;
+}
+
+.footer-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 40px;
+    padding: 0 20px;
+}
+
+.footer-col h4 {
+    font-family: 'Playfair Display', serif;
+    font-size: 18px;
+    margin-bottom: 25px;
+}
+
+.footer-col p {
+    font-size: 13px;
+    margin-bottom: 15px;
+    opacity: 0.8;
+}
+
+.subscribe-box {
+    display: flex;
+    border-bottom: 1px solid var(--accent-gold);
+    padding-bottom: 5px;
+}
+
+.subscribe-box input {
+    background: transparent;
+    border: none;
+    color: var(--white);
+    outline: none;
+}
+
+.pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 15px;
+    margin-top: 60px;
+}
+
+.pagination span {
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.pagination .active {
+    background-color: var(--accent-gold);
+    color: var(--white);
+    padding: 5px 12px;
+    border-radius: 4px;
+}
+    </style>
+</head>
+<body>
+
+  <%- include('../partials/header') %>
+
+
+    <main class="container">
+        <div class="wishlist-header">
+            <h2 class="page-title">Wishlist</h2>
+            <div class="search-bar">
+                <input type="text" placeholder="Search products...">
+                <button>search</button>
+            </div>
+        </div>
+
+        <section class="product-grid">
+            <div class="product-card">
+                <div class="img-container">
+                    <img src="square-hoop.jpg" alt="Square Gold Hoop">
+                    <button class="wishlist-btn active">❤</button>
+                </div>
+                <div class="product-info">
+                    <h3>Square Gold Hoop</h3>
+                    <p class="price">₹ 2570.00</p>
+                    <button class="add-to-cart">Add to Cart</button>
+                </div>
+            </div>
+
+            <div class="product-card">
+                <div class="img-container">
+                    <img src="layered-hoop.jpg" alt="Triple Layered Luxe Hoop">
+                    <button class="wishlist-btn active">❤</button>
+                </div>
+                <div class="product-info">
+                    <h3>Triple Layered Luxe Hoop</h3>
+                    <p class="price">₹ 799.00</p>
+                    <button class="add-to-cart">Add to Cart</button>
+                </div>
+            </div>
+
+            <div class="product-card">
+                <div class="img-container">
+                    <img src="crystal-stud.jpg" alt="Crystal Loop Stud">
+                    <button class="wishlist-btn active">❤</button>
+                </div>
+                <div class="product-info">
+                    <h3>Crystal Loop Stud</h3>
+                    <p class="price">₹ 599.00</p>
+                    <button class="add-to-cart">Add to Cart</button>
+                </div>
+            </div>
+
+            <div class="product-card">
+                <div class="img-container">
+                    <img src="bold-hoop.jpg" alt="Gold Bold Hoop Earrings">
+                    <button class="wishlist-btn active">❤</button>
+                </div>
+                <div class="product-info">
+                    <h3>Gold Bold Hoop Earrings</h3>
+                    <p class="price">₹ 599.00</p>
+                    <button class="add-to-cart">Add to Cart</button>
+                </div>
+            </div>
+        </section>
+
+        <div class="pagination">
+            <span class="arrow">‹</span>
+            <span>1</span>
+            <span class="active">2</span>
+            <span>3</span>
+            <span>4</span>
+            <span class="arrow">›</span>
+        </div>
+    </main>
+
+        <%- include('../partials/footer') %>
+
+
+</body>
+</html>

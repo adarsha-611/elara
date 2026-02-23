@@ -1,0 +1,740 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Details | ELARA Luxury Jewelry</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+   <style>
+    :root {
+    --primary-taupe: #a3866a;
+    --dark-brown: #5a3e2b;
+    --bg-cream: #f6f3f0;
+    --sidebar-brown: #8a6d51;
+    --white: #ffffff;
+    --border-color: #e0dcd0;
+}
+
+body {
+    font-family: 'Lato', sans-serif;
+    background-color: var(--bg-cream);
+    margin: 0;
+    color: #333;
+}
+
+/* Reusing shared layouts from My Orders */
+.account-container {
+    display: flex;
+    max-width: 1200px;
+    margin: 40px auto;
+    padding: 0 20px;
+    gap: 40px;
+}
+
+.details-content { flex: 1; }
+
+.section-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 2rem;
+    margin-bottom: 30px;
+    text-align: center;
+}
+
+/* Card Styling */
+.card {
+    background: var(--white);
+    padding: 25px;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    margin-bottom: 25px;
+}
+
+.card h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.1rem;
+    margin-top: 0;
+    margin-bottom: 20px;
+    color: var(--dark-brown);
+}
+
+/* Stepper / Status Timeline */
+/* Stepper / Status Timeline */
+.stepper {
+    position: relative;
+    margin-left: 20px;
+    padding-left: 40px;
+    display: flex;
+    flex-direction: column;
+    gap: 60px;
+}
+
+/* Vertical Line */
+.stepper::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 17px;
+    width: 2px;
+    height: 100%;
+    background: #ddd;
+}
+
+/* Each Step */
+.step {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 25px;   /* increase this */
+}
+
+/* Step Icon */
+.step-icon {
+    position: absolute;
+    left: -40px;
+    width: 35px;
+    height: 35px;
+    border: 2px solid #ccc;
+    border-radius: 50%;
+    background: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 0.9rem;
+    color: #999;
+    z-index: 2;
+}
+
+/* Completed Step */
+.step.completed .step-icon {
+    background: var(--primary-taupe);
+    border-color: var(--primary-taupe);
+    color: white;
+}
+
+/* Step Text */
+.step-text strong {
+    display: block;
+    font-size: 1rem;
+}
+
+.step-text span {
+    font-size: 0.85rem;
+    color: #888;
+}
+/* Order Items */
+.order-item {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    padding: 15px 0;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.order-item:last-child { border-bottom: none; }
+
+.order-item img {
+    width: 60px;
+    height: 60px;
+    object-fit: cover;
+    border-radius: 4px;
+    background: #eee;
+}
+
+.item-info { flex: 1; }
+.item-info strong { display: block; font-size: 0.95rem; margin-bottom: 4px; }
+.item-info span { font-size: 0.85rem; color: #777; }
+.item-price { font-weight: 600; font-size: 0.95rem; }
+
+/* Info Grid */
+.info-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+.address-text, .payment-text {
+    font-size: 0.9rem;
+    line-height: 1.6;
+    color: #555;
+}
+
+/* Summary Card */
+.summary-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.9rem;
+    margin-bottom: 10px;
+}
+
+.summary-row.total {
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 1px solid #eee;
+    font-weight: 700;
+    font-size: 1.1rem;
+}
+
+/* Action Buttons */
+.detail-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 20px;
+}
+
+.btn-primary, .btn-secondary {
+    padding: 12px;
+    border-radius: 4px;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    transition: 0.3s;
+}
+
+.btn-primary {
+    background: var(--primary-taupe);
+    color: white;
+}
+
+.btn-secondary {
+    background: #d9c8b8; 
+    color: #5a3e2b;
+}
+
+.btn-primary:hover { opacity: 0.9; }
+.btn-secondary:hover { background: #cfbaa6; }
+
+.account-container {
+    display: flex;
+}
+.sidebar {
+    width: 280px;
+    background-color: var(--sidebar-brown);
+    border-radius: 4px;
+    padding: 30px 0;
+    color: white;
+    height: fit-content;
+}
+
+.sidebar .user-info {
+    display: flex;
+    align-items: center;
+    padding: 0 25px 25px;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+    margin-bottom: 20px;
+}
+
+.sidebar .user-avatar {
+    width: 45px;
+    height: 45px;
+    background: rgba(255,255,255,0.2);
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-right: 15px;
+    font-size: 1.2rem;
+    overflow: hidden;
+}
+
+.sidebar-menu a {
+    display: block;
+    padding: 15px 25px;
+    color: rgba(255,255,255,0.8);
+    text-decoration: none;
+    font-size: 0.9rem;
+}
+
+.sidebar-menu a:hover,
+.sidebar-menu a.active {
+    background: rgba(0,0,0,0.15);
+    color: white;
+}
+@media (min-width: 768px) {
+    .detail-actions {
+        flex-direction: row;
+        justify-content: center;
+        gap: 20px;
+    }
+    .btn-primary, .btn-secondary {
+        width: 250px;
+    }
+}
+/* Modal Overlay */
+.custom-modal {
+    display: none;
+    position: fixed;
+    z-index: 9999;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.6);
+    overflow-y: auto;
+    padding: 40px 0;
+}
+
+/* Modal Box */
+.custom-modal-content {
+    background: var(--bg-cream);
+    margin: auto;
+    width: 90%;
+    max-width: 900px;
+    border-radius: 8px;
+    position: relative;
+    animation: fadeIn 0.3s ease;
+}
+
+/* Close Button */
+.close-btn {
+    position: absolute;
+    right: 20px;
+    top: 15px;
+    font-size: 28px;
+    cursor: pointer;
+    color: var(--primary-dark);
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+/* Return Modal Content Styling */
+
+.return-container {
+    padding: 40px;
+}
+
+.return-header {
+    margin-bottom: 30px;
+}
+
+.page-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 28px;
+    margin-bottom: 10px;
+    color: var(--dark-brown);
+}
+
+.subtitle {
+    font-size: 14px;
+    color: #666;
+}
+
+.item-selection-card {
+    padding: 20px;
+    border-radius: 8px;
+}
+
+.order-items-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+
+.reason-section {
+    margin-top: 25px;
+}
+
+.input-label {
+    font-weight: 600;
+    display: block;
+    margin-bottom: 8px;
+}
+
+.reason-section textarea {
+    width: 100%;
+    padding: 12px;
+    border-radius: 6px;
+    border: 1px solid var(--border-color);
+    font-family: 'Lato', sans-serif;
+    resize: none;
+}
+
+.action-section {
+    margin-top: 25px;
+    text-align: right;
+}
+
+.btn-submit {
+    background: var(--primary-taupe);
+    color: white;
+    border: none;
+    padding: 12px 25px;
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.btn-submit:hover {
+    opacity: 0.9;
+}
+.item-row img {
+    width: 70px;
+    height: 70px;
+    object-fit: cover;
+    border-radius: 6px;
+}
+   </style>
+</head>
+<body>
+
+   <%- include('../partials/header') %>
+
+    <main class="account-container">
+            <%- include('../partials/profileSidebar', { user, path: '/profile/orders' }) %>
+
+
+        <section class="details-content">
+            <h1 class="section-title">Order Details</h1>
+
+            <div class="card status-card">
+                <h3>Order Status</h3>
+                <div class="stepper">
+
+  <div class="step completed">
+    <div class="step-icon"><i class="fa-solid fa-box-open"></i></div>
+    <div class="step-text">
+      <strong>Order Placed</strong>
+      <span>
+        <%= new Date(order.createdAt).toLocaleDateString("en-IN") %>
+      </span>
+    </div>
+  </div>
+
+  <div class="step <%= ["confirmed","shipped","delivered"].includes(order.orderStatus) ? "completed" : "" %>">
+    <div class="step-icon"><i class="fa-solid fa-gears"></i></div>
+    <div class="step-text">
+      <strong>Processing</strong>
+    </div>
+  </div>
+
+  <div class="step <%= ["shipped","delivered"].includes(order.orderStatus) ? "completed" : "" %>">
+    <div class="step-icon"><i class="fa-solid fa-truck"></i></div>
+    <div class="step-text">
+      <strong>Shipped</strong>
+    </div>
+  </div>
+
+  <div class="step <%= ["out_for_delivery","delivered"].includes(order.orderStatus) ? "completed" : "" %>">
+  <div class="step-icon"><i class="fa-solid fa-motorcycle"></i></div>
+  <div class="step-text">
+    <strong>Out for Delivery</strong>
+  </div>
+</div>
+
+  <div class="step <%= order.orderStatus === "delivered" ? "completed" : "" %>">
+    <div class="step-icon"><i class="fa-solid fa-house-chimney"></i></div>
+    <div class="step-text">
+      <strong>Delivered</strong>
+    </div>
+  </div>
+
+</div>
+            </div>
+
+            <div class="card items-card">
+  <h3>Items in your order</h3>
+
+  <% order.items.forEach(item => { %>
+
+    <div class="order-item">
+
+      <% if (item.productDetails?.images?.length > 0) { %>
+        <img 
+          src="/uploads/products/<%= item.productDetails.images[0] %>" 
+          alt="Product"
+        >
+      <% } %>
+
+      <div class="item-info">
+        <strong>
+          <%= item.productDetails?.name || "Product unavailable" %>
+        </strong>
+        <span>Qty: <%= item.quantity %></span>
+        <span>Color: <%= item.variantColor %></span>
+      </div>
+
+      <div class="item-price">
+        ₹ <%= item.total.toLocaleString() %>
+      </div>
+
+    </div>
+
+  <% }) %>
+</div>
+
+            <div class="info-grid">
+                <div class="card">
+                    <h3>Shipping Address</h3>
+                    <p class="address-text">
+  <strong><%= order.shippingAddress.fullName %></strong><br>
+  <%= order.shippingAddress.street %><br>
+  <%= order.shippingAddress.city %>, <%= order.shippingAddress.state %><br>
+  <%= order.shippingAddress.pincode %><br>
+  Phone: <%= order.shippingAddress.phoneNumber %>
+</p>
+                </div>
+                <div class="card">
+                    <h3>Payment Method</h3>
+            <p class="payment-text">
+      <strong>Payment Method :</strong> <%= order.paymentMethod.toUpperCase() %><br>
+  <strong>Status :</strong> <%= order.paymentStatus %>
+</p>
+                </div>
+            </div>
+
+           <div class="card summary-card">
+    <h3>Order Summary</h3>
+
+    <% let subtotal = 0; %>
+    <% order.items.forEach(item => { subtotal += item.total }) %>
+
+    <div class="summary-row">
+        <span>Subtotal</span>
+        <span>₹ <%= subtotal.toLocaleString() %></span>
+    </div>
+
+    <div class="summary-row">
+        <span>Shipping</span>
+        <span>₹ 0</span>
+    </div>
+
+    <div class="summary-row">
+        <span>Tax</span>
+        <span>₹ 0</span>
+    </div>
+
+    <div class="summary-row total">
+        <span>Total</span>
+        <span>₹ <%= order.totalAmount.toLocaleString() %></span>
+    </div>
+</div>
+
+           <div class="detail-actions">
+
+  <% if (order.orderStatus === 'delivered') { %>
+<button type="button" onclick="openReturnModal()" class="btn-secondary">
+    Return Order
+</button>
+  <% } else if (order.orderStatus !== 'cancelled') { %>
+
+      <!-- Cancel Button -->
+      <form action="/profile/orders/<%= order._id %>/cancel" method="POST">
+         <!-- Use onclick, no type="submit" -->
+<button type="button" 
+        class="btn-secondary" 
+        onclick="cancelOrder('<%= order._id %>')">
+    Cancel Order
+</button>
+      </form>
+
+  <% } %>
+<a href="/profile/orders/<%= order._id %>/invoice"
+   class="btn-primary">
+   Download Invoice
+</a>
+
+</div>
+        </section>
+    </main>
+
+   
+>
+
+      <!-- Return Modal -->
+<div id="returnModal" class="custom-modal">
+  <div class="custom-modal-content">
+
+    <span class="close-btn" onclick="closeReturnModal()">&times;</span>
+
+    <div class="return-container">
+
+      <header class="return-header">
+        <h1 class="page-title">Returns & Exchanges</h1>
+        <p class="subtitle">
+          We want you to love your jewellery. If you're not completely satisfied, we're here to help.
+        </p>
+      </header>
+
+      <section class="return-form-section">
+<form id="returnForm" action="/profile/orders/<%= order._id %>/return" method="POST">
+          <div class="card item-selection-card">
+            <h3 class="card-title">Select Items</h3>
+
+            <div class="order-items-list">
+              <% order.items.forEach(item => { %>
+               <label class="item-row" style="display:flex; align-items:center; gap:15px;">
+
+  <input 
+    type="checkbox" 
+    name="selectedItems" 
+    value="<%= item._id %>"
+  >
+
+ <% 
+    const variant = item.product?.variants?.find(
+        v => v.color === item.variantColor
+    );
+%>
+
+<% if (variant && variant.images && variant.images.length > 0) { %>
+    <img src="<%= variant.images[0] %>" alt="product image">
+<% } else { %>
+    <img src="/images/no-image.png" alt="no image">
+<% } %>
+
+  <div class="item-details" style="flex:1;">
+    <span class="item-name">
+      <%= item.productDetails?.productName || "Product" %>
+    </span>
+    <br>
+    <span class="item-meta">
+      Color: <%= item.variantColor %> | Qty: <%= item.quantity %>
+    </span>
+  </div>
+
+  <div class="item-price">
+    ₹ <%= item.total.toLocaleString() %>
+  </div>
+
+</label>
+
+              <% }) %>
+              <p id="itemError" style="color:red; display:none; margin-top:10px;"></p>
+            </div>
+          </div>
+
+          <div class="reason-section">
+            <label class="input-label">Reason for return :</label>
+            <textarea 
+              name="reason"
+              rows="4"
+              required
+              placeholder="Please describe why you wish to return these items..."
+            ></textarea>
+          </div>
+
+          <div class="action-section">
+            <button type="submit" class="btn-submit">Submit</button>
+          </div>
+
+        </form>
+      </section>
+
+    </div>
+  </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    const modal = document.getElementById("returnModal");
+    const form = document.getElementById("returnForm");
+    const errorMsg = document.getElementById("itemError");
+    const checkboxes = document.querySelectorAll("input[name='selectedItems']");
+
+    // OPEN MODAL
+    window.openReturnModal = function () {
+        modal.style.display = "block";
+    };
+
+    // CLOSE MODAL
+    window.closeReturnModal = function () {
+        modal.style.display = "none";
+        errorMsg.style.display = "none"; // reset error
+    };
+
+    // CLOSE WHEN CLICK OUTSIDE
+    window.addEventListener("click", function (event) {
+        if (event.target === modal) {
+            modal.style.display = "none";
+            errorMsg.style.display = "none";
+        }
+    });
+
+    // FORM VALIDATION
+    form.addEventListener("submit", function (e) {
+
+        const checkedItems = document.querySelectorAll("input[name='selectedItems']:checked");
+
+        if (checkedItems.length === 0) {
+            e.preventDefault(); // stop submission
+            errorMsg.style.display = "block";
+            errorMsg.textContent = "Please select at least one item.";
+        } else {
+            errorMsg.style.display = "none";
+        }
+    });
+
+    // HIDE ERROR WHEN USER SELECTS CHECKBOX
+    checkboxes.forEach(function (checkbox) {
+        checkbox.addEventListener("change", function () {
+            if (document.querySelectorAll("input[name='selectedItems']:checked").length > 0) {
+                errorMsg.style.display = "none";
+            }
+        });
+    });
+
+});
+
+
+</script>
+</script>
+<script>
+function cancelOrder(orderId) {
+  Swal.fire({
+    title: 'Are you sure?',
+    text: 'Do you want to cancel this order?',
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonText: 'Yes, Cancel',
+    cancelButtonText: 'No',
+  }).then((result) => {
+    if (result.isConfirmed) {
+      Swal.fire({
+        title: 'Processing...',
+        allowOutsideClick: false,
+        didOpen: () => Swal.showLoading()
+      });
+
+      fetch(`/profile/orders/${orderId}/cancel`, { method: 'POST' })
+        .then(res => res.json())
+        .then(data => {
+          Swal.close();
+          if (!data.success) throw new Error(data.message);
+          Swal.fire({
+            icon: 'success',
+            title: 'Cancelled!',
+            text: data.message,
+            timer: 1500,
+            showConfirmButton: false
+          });
+          setTimeout(() => location.reload(), 1600);
+        })
+        .catch(err => {
+          Swal.close();
+          Swal.fire('Error', err.message || 'Something went wrong', 'error');
+        });
+    }
+  });
+}
+</script>
+
+<% if (returnSuccess) { %>
+<script>
+Swal.fire({
+    icon: 'success',
+    title: 'Return Request Submitted',
+    text: 'Your return request has been submitted successfully.',
+    confirmButtonColor: '#a3866a'
+});
+</script>
+<% } %>
+
+</body>
+</html>

@@ -1,34 +1,38 @@
 import mongoose, { Query } from "mongoose";
 import Product from "../../model/productSchema.js";
+import Category from "../../model/categorySchema.js"
 
 export async function getAllProducts(filters = {}) {
   try {
 
-   
-    let query = {
-      isActive: true,
-      isDeleted: false
-    };
+  
+    const activeCategoryIds = await Category.distinct("_id", {
+      isActive: true
+    });
 
   
+    let query = {
+      isActive: true,
+      isDeleted: false,
+      category: { $in: activeCategoryIds } 
+    };
+
+    
     if (filters.search) {
       query.name = { $regex: filters.search, $options: "i" };
     }
 
-   
-    if (filters.category) {
-      query.category = { $in: filters.category.split(",") };
+    if (filters.category && activeCategoryIds.includes(filters.category)) {
+      query.category = filters.category;
     }
 
- 
+   
     let sortOption = {};
-
     if (filters.sort === "low") sortOption["variants.price"] = 1;
     if (filters.sort === "high") sortOption["variants.price"] = -1;
     if (filters.sort === "az") sortOption.name = 1;
     if (filters.sort === "new") sortOption.createdAt = -1;
 
- 
     let products = await Product.find(query).sort(sortOption);
 
     if (filters.price) {
