@@ -77,17 +77,20 @@ const returnOrder = async(req,res)=>{
 
 const cancelOrder = async (req, res) => {
   try {
-    const { orderId } = req.params;
-    await cancelOrderService(orderId);
+
+    const { orderId, itemId } = req.params;
+
+    await cancelOrderItemService(orderId, itemId);
 
     return res.status(200).json({
       success: true,
-      message: 'Order cancelled successfully'
+      message: "Item cancelled successfully"
     });
+
   } catch (err) {
     return res.status(500).json({
       success: false,
-      message: err.message || 'Failed to cancel order'
+      message: err.message
     });
   }
 };

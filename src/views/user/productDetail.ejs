@@ -257,24 +257,29 @@
         }
         .toast {
   position: fixed;
-  bottom: 30px;
-  right: 30px;
-  background: #4A302C;
+  top: 30px;
+  left: 80%;
+  transform: translateX(-50%) translateY(-20px);
+  
+  background: #16a34a; 
   color: white;
-  padding: 14px 22px;
-  border-radius: 6px;
-  font-size: 14px;
+  
+  padding: 18px 35px;   
+  font-size: 16px;      
+  font-weight: 500;
+  
+  border-radius: 10px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+  
   opacity: 0;
-  transform: translateY(20px);
   transition: all 0.3s ease;
   z-index: 9999;
 }
 
 .toast.show {
   opacity: 1;
-  transform: translateY(0);
+  transform: translateX(-50%) translateY(0);
 }
-
 .toast.error {
   background: #c62828;
 }
@@ -348,14 +353,7 @@
 
                 </div>
 
-                <div class="config-group">
-                    <label>Quantity</label>
-                    <div class="qty-stepper">
-                        <button type="button" onclick="decreaseQty()">−</button>
-                        <input type="number" value="1" id="qty" min="1">
-                        <button type="button" onclick="increaseQty()">+</button>
-                    </div>
-                </div>
+             
             </div>
 
             <div class="product-description">
@@ -363,12 +361,7 @@
                 <p><%= product.description %></p>
             </div>
 
-            <ul class="highlights-list">
-                <li>Hypoallergenic</li>
-                <li>18K Gold Plated</li>
-                <li>Lightweight</li>
-                <li>Handcrafted</li>
-            </ul>
+          
             
             <div class="action-buttons">
              <button 
@@ -528,6 +521,62 @@ async function addToCart(productId, variantId = null) {
   }
 }
 
+</script>
+<script>
+const currentImg = document.getElementById("current-img");
+const thumbnailGrid = document.getElementById("thumbnailGrid");
+const colorSelect = document.getElementById("colorSelect");
+const priceEl = document.getElementById("price");
+const stockStatus = document.getElementById("stock-status");
+
+// ---------- Function to change subimage ----------
+function changeImage(src, thumb) {
+    currentImg.src = src;
+
+    // remove active from all thumbnails
+    thumbnailGrid.querySelectorAll("img").forEach(img => img.classList.remove("active"));
+
+    // add active to clicked thumbnail
+    thumb.classList.add("active");
+}
+
+// ---------- Function to change variant ----------
+function changeVariant() {
+    const selectedOption = colorSelect.options[colorSelect.selectedIndex];
+    const images = JSON.parse(selectedOption.dataset.images);
+    const price = selectedOption.dataset.price;
+    const stock = selectedOption.dataset.stock;
+
+    // Update main image
+    currentImg.src = images[0];
+
+    // Update price
+    priceEl.innerHTML = `₹${price} <span style="font-size: 1rem; color: #888; text-decoration: line-through; margin-left: 10px;">₹${(price * 1.2).toFixed(0)}</span>`;
+
+    // Update stock badge
+    stockStatus.className = "stock-badge"; // reset
+    if (stock == 0) {
+        stockStatus.classList.add("stock-out");
+        stockStatus.innerText = "Out of Stock";
+    } else if (stock <= 3) {
+        stockStatus.classList.add("stock-low");
+        stockStatus.innerText = `Only ${stock} left!`;
+    } else {
+        stockStatus.classList.add("stock-in");
+        stockStatus.innerText = "In Stock";
+    }
+
+    // Update thumbnails
+    thumbnailGrid.innerHTML = "";
+    images.forEach((img, index) => {
+        const thumb = document.createElement("img");
+        thumb.src = img;
+        thumb.alt = `Thumbnail ${index+1}`;
+        if(index === 0) thumb.classList.add("active");
+        thumb.onclick = () => changeImage(img, thumb);
+        thumbnailGrid.appendChild(thumb);
+    });
+}
 </script>
 
 

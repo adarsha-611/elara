@@ -127,20 +127,36 @@ export const requestReturn = async(orderId, itemId, reason) => {
     }
   );
 }
+export const acceptReturnReq = async (orderId, itemId) => {
 
-export const acceptReturnReq = async(orderId, itemId) => {
-  await Order.updateOne(
-    { _id: orderId, "items._id": itemId },
-    {
-      $set: {
-        "items.$.returnRequest.status": "accepted",
-        "items.$.returnRequest.processedAt": new Date(),
-        "items.$.status": "returned"
-      }
-    }
+  const order = await Order.findById(orderId);
+  if (!order) throw new Error("Order not found");
+
+  const item = order.items.id(itemId);
+  if (!item) throw new Error("Item not found");
+
+  if (item.returnRequest.status !== "pending") {
+    throw new Error("Return already processed");
+  }
+
+  // ✅ Update return request
+  item.returnRequest.status = "accepted";
+  item.returnRequest.processedAt = new Date();
+
+  // ✅ FIXED FIELD NAME
+  item.itemStatus = "returned";
+
+  // ✅ Check if all items returned
+  const allReturned = order.items.every(
+    i => i.itemStatus === "returned"
   );
-}
 
+  if (allReturned) {
+    order.orderStatus = "cancelled"; // or create new "returned" status
+  }
+
+  await order.save();
+};
 
 
 export const rejectReturnReq = async(orderId, itemId) => {
@@ -150,10 +166,9 @@ export const rejectReturnReq = async(orderId, itemId) => {
       $set: {
         "items.$.returnRequest.status": "rejected",
         "items.$.returnRequest.processedAt": new Date(),
-        "items.$.status": "delivered"
+        "items.$.itemStatus": "delivered"
       }
     }
   );
 }
-
 

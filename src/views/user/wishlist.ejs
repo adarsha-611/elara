@@ -224,6 +224,31 @@ footer {
     padding: 5px 12px;
     border-radius: 4px;
 }
+.toast {
+    position: fixed;
+    top: 30px;
+    left: 80%;
+    transform: translateX(-50%) translateY(-20px);
+
+    background: #28a745;   
+    color: #fff;
+
+    padding: 18px 35px;    
+    font-size: 16px;
+    font-weight: 500;
+
+    border-radius: 10px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+
+    opacity: 0;
+    transition: all 0.3s ease;
+    z-index: 9999;
+}
+
+.toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+}
     </style>
 </head>
 <body>
@@ -240,55 +265,51 @@ footer {
             </div>
         </div>
 
-        <section class="product-grid">
-            <div class="product-card">
-                <div class="img-container">
-                    <img src="square-hoop.jpg" alt="Square Gold Hoop">
-                    <button class="wishlist-btn active">❤</button>
-                </div>
-                <div class="product-info">
-                    <h3>Square Gold Hoop</h3>
-                    <p class="price">₹ 2570.00</p>
-                    <button class="add-to-cart">Add to Cart</button>
-                </div>
-            </div>
+       <section class="product-grid">
 
-            <div class="product-card">
-                <div class="img-container">
-                    <img src="layered-hoop.jpg" alt="Triple Layered Luxe Hoop">
-                    <button class="wishlist-btn active">❤</button>
-                </div>
-                <div class="product-info">
-                    <h3>Triple Layered Luxe Hoop</h3>
-                    <p class="price">₹ 799.00</p>
-                    <button class="add-to-cart">Add to Cart</button>
-                </div>
-            </div>
+<% if (!wishlistItems || wishlistItems.length === 0) { %>
+    <p>Your wishlist is empty ❤️</p>
+<% } %>
 
-            <div class="product-card">
-                <div class="img-container">
-                    <img src="crystal-stud.jpg" alt="Crystal Loop Stud">
-                    <button class="wishlist-btn active">❤</button>
-                </div>
-                <div class="product-info">
-                    <h3>Crystal Loop Stud</h3>
-                    <p class="price">₹ 599.00</p>
-                    <button class="add-to-cart">Add to Cart</button>
-                </div>
-            </div>
+<% wishlistItems.forEach(product => { %>
 
-            <div class="product-card">
-                <div class="img-container">
-                    <img src="bold-hoop.jpg" alt="Gold Bold Hoop Earrings">
-                    <button class="wishlist-btn active">❤</button>
-                </div>
-                <div class="product-info">
-                    <h3>Gold Bold Hoop Earrings</h3>
-                    <p class="price">₹ 599.00</p>
-                    <button class="add-to-cart">Add to Cart</button>
-                </div>
-            </div>
-        </section>
+    <div class="product-card">
+        <div class="img-container">
+            <img 
+              src="<%= product.variants?.[0]?.images?.[0] %>" 
+              alt="<%= product.name %>">
+
+            <button 
+              class="wishlist-btn"
+              data-id="<%= product._id %>">
+              ❤
+            </button>
+        </div>
+
+        <div class="product-info">
+            <h3><%= product.name %></h3>
+
+            <p class="price">
+                ₹ <%= product.price || product.variants?.[0]?.price %>
+            </p>
+
+            <form action="/wishlist/addtocart/<%= product._id %>" method="POST">
+                <button type="submit" class="add-to-cart">
+                    Add to Cart
+                </button>
+            </form>
+        </div>
+    </div>
+
+<% }) %>   <!-- ✅ CLOSE LOOP HERE -->
+
+</section>
+
+<% if (successMessage) { %>
+    <div id="toast" class="toast">
+        <%= successMessage %>
+    </div>
+<% } %>
 
         <div class="pagination">
             <span class="arrow">‹</span>
@@ -299,9 +320,34 @@ footer {
             <span class="arrow">›</span>
         </div>
     </main>
+    <script>
+document.querySelectorAll(".wishlist-btn").forEach(btn => {
+    btn.addEventListener("click", async function () {
 
-        <%- include('../partials/footer') %>
+        const productId = this.dataset.id;
 
+        const res = await fetch(`/wishlist/toggle/${productId}`, {
+            method: "POST"
+        });
 
+        const data = await res.json();
+
+        if (data.status === "removed") {
+            this.closest(".product-card").remove();
+        }
+    });
+});
+</script>
+<script>
+    const toast = document.getElementById("toast");
+
+    if (toast) {
+        toast.classList.add("show");
+
+        setTimeout(() => {
+            toast.classList.remove("show");
+        }, 3000);
+    }
+</script>
 </body>
 </html>

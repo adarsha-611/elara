@@ -15,7 +15,7 @@
     }
 
     .login-card {
-        background: #f7f1eb; /* soft beige card */
+        background: #ffffff; /* soft beige card */
         padding: 40px;
         border-radius: 8px;
         box-shadow: 0 4px 6px rgba(0,0,0,0.1);
@@ -74,9 +74,9 @@
 <body>
     <div class="login-card">
         <h2>Admin Login</h2>
-        <% if (error && error.length > 0) { %>
-            <div class="error"><%= error %></div>
-        <% } %>
+      <% if (error && error.length > 0) { %>
+    <div class="error"><%= error[0] %></div>
+<% } %>
         <form action="/admin/login" method="POST">
             <div class="form-group">
                 <label>Email</label>
@@ -89,5 +89,13 @@
             <button type="submit">Login</button>
         </form>
     </div>
+    <script>
+setTimeout(()=>{
+    const err = document.querySelector(".error");
+    if(err){
+        err.style.display="none";
+    }
+},3000)
+</script>
 </body>
 </html>

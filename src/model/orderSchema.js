@@ -6,6 +6,14 @@ const orderItemSchema = new mongoose.Schema({
     ref: "Product",
     required: true,
   },
+   productName: {          
+    type: String,
+    required: true
+  },
+
+  productImage: {         
+    type: String
+  },
 
   variantColor: {
     type: String,
@@ -38,7 +46,6 @@ const orderItemSchema = new mongoose.Schema({
       "out for delivery",
       "delivered",
       "cancelled",
-      "return requested",
       "returned"
     ],
     default: "pending",

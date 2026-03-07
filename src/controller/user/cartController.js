@@ -8,7 +8,11 @@ const getCartPage = async (req, res) => {
     const cart = await cartSchema.findOne({ userId });
 
     let cartItems = [];
+    const successMessage = req.session.successMessage || null;
 
+        if (req.session.successMessage) {
+            delete req.session.successMessage;
+        }
     if (cart) {
       const productIds = cart.items.map(i => i.productId);
 
@@ -25,9 +29,10 @@ const getCartPage = async (req, res) => {
   const product = productMap[item.productId.toString()];
 
   return {
-    productId: item.productId,   
+    productId: item.productId,
     quantity: item.quantity,
     price: item.price,
+    stock: product?.variants?.[0]?.stock || 0,
     name: product?.name || "No Name",
     image: product?.variants?.[0]?.images?.[0] || "/images/default.png"
   };
@@ -35,7 +40,7 @@ const getCartPage = async (req, res) => {
 
     }
 
-    return res.render("user/cart", { cartItems });
+    return res.render("user/cart", { cartItems,successMessage });
 
   } catch (error) {
     console.log(error);
@@ -71,6 +76,7 @@ const removeCartItem = async(req,res)=>{
     const {productId} = req.params;
 
     await removeFromCart(userId, productId);
+    req.session.successMessage = "Item removed from cart successfully!";
 
     return res.redirect("/cart");
 
@@ -82,9 +88,49 @@ const removeCartItem = async(req,res)=>{
   }
 }
 
+const updateQuantity = async (req, res) => {
+  try {
+    const userId = req.session.userId;
+    const { productId, quantity } = req.body;
 
+    const product = await Product.findById(productId);
+
+    if(!product){
+      return res.status(404).json({success:false});
+    }
+    const variant = product.variants[0];
+    const availableStock = variant.stock;
+    if(quantity<1){
+      return res.status(400).json({
+        success:false,
+        message:"Minimum quantity is 1"
+      });
+    }
+
+    if(quantity > availableStock){
+      return res.status(400).json({
+        success:false,
+        message:`Only ${availableStock}items available`
+      });
+    }
+    await cartSchema.updateOne(
+      { userId, "items.productId": productId },
+      { $set: { "items.$.quantity": Number(quantity) } }
+    );
+
+    return res.json({ success: true });
+
+  } catch (error) {
+    console.log("Update error:", error);
+    return res.status(400).json({
+      success: false,
+      message: error.message
+    });
+  }
+};
 export default {
     getCartPage,
     addCartItem,
-    removeCartItem
+    removeCartItem,
+    updateQuantity,
 };

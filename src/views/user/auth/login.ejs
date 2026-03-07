@@ -3,123 +3,129 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Login to your account">
-    <title>Welcome Back</title>
-    
+    <title>Login - ELARA</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600&family=Montserrat:wght@300;500&family=Inter:wght@400&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .brand-logo { font-family: 'Cinzel', serif; letter-spacing: 0.4em; }
+        .welcome-header { font-family: 'Montserrat', sans-serif; letter-spacing: 0.05em; }
+        .image-overlay {
+            background: linear-gradient(to bottom, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0) 40%);
+        }
+    </style>
 </head>
-<body class="bg-[#E8E3DD] min-h-screen flex items-center justify-center p-4">
-    
-    <div class="w-full max-w-6xl">
+<body class="bg-[#F2EFE9] min-h-screen flex items-center justify-center p-4">
+
+    <div class="bg-white rounded-[2rem] shadow-2xl w-full max-w-4xl flex flex-col md:flex-row overflow-hidden border border-white/50">
         
-        <div class="mb-8">
-            <h1 class="text-[#B08968] text-3xl md:text-4xl font-semibold">Login</h1>
+        <div class="w-full md:w-1/2 p-6 md:p-10 flex items-center justify-center bg-[#FAF9F6]">
+            <div class="aspect-square w-full max-w-[340px] rounded-[2rem] overflow-hidden relative shadow-xl group">
+                <div class="absolute inset-x-0 top-8 z-10 text-center">
+                    <h1 class="brand-logo text-white text-2xl drop-shadow-lg">ELARA</h1>
+                </div>
+                <div class="absolute inset-0 image-overlay"></div>
+                <img src="/Images/download (3).jfif" 
+                     alt="Luxury Brand Visual" 
+                     class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110">
+            </div>
         </div>
-        
-        <div class="bg-white rounded-2xl border border-gray-200 p-8 md:p-12 shadow-sm max-w-xl mx-auto">
-            
-            <div class="text-center mb-8">
-                <h2 class="text-3xl md:text-4xl font-semibold text-gray-800 mb-3">Welcome Back</h2>
-                <p class="text-gray-500 text-sm">Please enter your details to Login</p>
-            </div>
 
-            <% if (locals.error && error.length > 0) { %>
-                <div class="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg mb-6 text-sm text-center">
-                    <%= error %>
-                </div>
-            <% } %>
+        <div class="w-full md:w-1/2 p-8 md:p-12 flex flex-col justify-center">
+            <div class="max-w-sm mx-auto w-full">
+                
+                <h2 class="welcome-header text-gray-800 text-2xl font-light text-center mb-1">
+                    Welcome <span class="font-medium text-[#B8966E]">Back</span>
+                </h2>
+                <p class="text-gray-400 text-[11px] uppercase tracking-widest text-center mb-8">Please enter your details to Login</p>
 
-            <% if (locals.success && success.length > 0) { %>
-                <div class="bg-green-50 border border-green-200 text-green-600 px-4 py-3 rounded-lg mb-6 text-sm text-center">
-                    <%= success %>
+                <% if (locals.error && error.length > 0) { %>
+                    <div class="bg-red-50 border border-red-100 text-red-600 px-4 py-2.5 rounded-lg mb-6 text-[11px] text-center italic">
+                        <%= error %>
+                    </div>
+                <% } %>
+
+                <% if (locals.success && success.length > 0) { %>
+                    <div class="bg-green-50 border border-green-100 text-green-600 px-4 py-2.5 rounded-lg mb-6 text-[11px] text-center italic">
+                        <%= success %>
+                    </div>
+                <% } %>
+
+                <form id="loginForm" action="/login" method="POST" novalidate class="space-y-5">
+                    
+                    <div>
+                        <label for="email" class="block text-gray-400 text-[10px] font-semibold mb-1 uppercase tracking-tighter">Email address</label>
+                        <input type="email" id="email" name="email" placeholder="Enter your email"
+                               class="w-full px-4 py-2.5 border border-gray-100 rounded-lg focus:outline-none focus:ring-1 focus:ring-[#B8966E] bg-gray-50/50 text-sm transition-all">
+                        <div id="emailError" class="text-red-400 text-[10px] mt-1 min-h-[12px]"></div>
+                    </div>
+
+                    <div class="relative">
+                        <div class="flex justify-between items-center mb-1">
+                            <label for="password" class="block text-gray-400 text-[10px] font-semibold uppercase tracking-tighter">Password</label>
+                            <a href="/forgot-password" class="text-[10px] text-[#B8966E] hover:underline uppercase tracking-tighter font-bold">Forgot?</a>
+                        </div>
+                        <div class="relative">
+                            <input type="password" id="password" name="password" placeholder="Enter your password"
+                                   class="w-full px-4 py-2.5 border border-gray-100 rounded-lg focus:outline-none focus:ring-1 focus:ring-[#B8966E] bg-gray-50/50 text-sm transition-all">
+                            <button type="button" onclick="togglePasswordVisibility()" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-300 hover:text-[#B8966E]">
+                                <i id="toggleIcon" data-lucide="eye" class="w-4 h-4"></i>
+                            </button>
+                        </div>
+                        <div id="passwordError" class="text-red-400 text-[10px] mt-1 min-h-[12px]"></div>
+                    </div>
+
+                    <button type="submit" class="w-full bg-[#3D2D21] hover:bg-[#2A1F17] text-white text-xs font-medium py-3.5 rounded-lg transition-all shadow-lg mt-2 uppercase tracking-[0.2em]">
+                        Login
+                    </button>
+                </form>
+
+                <div class="mt-8 text-center">
+                    <p class="text-gray-400 text-xs">Don't have an account? 
+                        <a href="/signup" class="text-[#B8966E] font-medium ml-1 hover:underline">Sign up</a>
+                    </p>
                 </div>
-            <% } %>
-            
-            <form id="loginForm" action="/login" method="POST" class="space-y-6" novalidate>
-                
-                <div>
-                    <label for="email" class="block text-gray-700 text-sm font-medium mb-2">
-                        Email Address
-                    </label>
-                    <input 
-                        type="email" 
-                        id="email" 
-                        name="email" 
-                        placeholder="Enter your email"
-                        class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg text-gray-700 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[#B08968] focus:border-transparent"
-                    >
-                    <div id="emailError" class="text-red-500 text-xs mt-1 min-h-[1.25rem]"></div>
+
+                <div class="relative my-6 flex items-center">
+                    <div class="flex-grow border-t border-gray-100"></div>
+                    <span class="px-3 text-[10px] text-gray-300 uppercase">or</span>
+                    <div class="flex-grow border-t border-gray-100"></div>
                 </div>
-                
-               <div>
-    <div class="flex items-center justify-between mb-2">
-        <label for="password" class="block text-gray-700 text-sm font-medium">
-            Password
-        </label>
-        <a href="/forgot-password" class="text-sm text-[#D4A59A] hover:text-[#B08968] transition-colors">
-            Forgot password?
-        </a>
-    </div>
-    <div class="relative">
-        <input 
-            type="password" 
-            id="password" 
-            name="password" 
-            placeholder="Enter your password"
-            class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg text-gray-700 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[#B08968] focus:border-transparent"
-        >
-        <button type="button" onclick="togglePasswordVisibility()" class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-[#B08968]">
-            <i id="toggleIcon" data-lucide="eye" class="w-5 h-5"></i>
-        </button>
-    </div>
-    <div id="passwordError" class="text-red-500 text-xs mt-1 min-h-[1.25rem]"></div>
-</div>
-                <button 
-                    type="submit" 
-                    class="w-full bg-[#B08968] text-white py-3.5 rounded-lg font-medium text-base hover:bg-[#9d7557] transition-colors duration-200"
-                >
-                    Login
-                </button>
-                
-            </form>
-            
-            <div class="text-center mt-6">
-                <p class="text-gray-600 text-sm">
-                    Don't have an account? 
-                    <a 
-                        href="/signup" 
-                        class="text-[#D4A59A] hover:text-[#B08968] font-medium transition-colors ml-1"
-                    >
-                        Sign up
-                    </a>
-                </p>
-            </div>
-            
-            <div class="mt-6">
-                <a 
-                    href="/auth/google" 
-                    class="w-full flex items-center justify-center gap-3 bg-gray-50 border border-gray-200 text-gray-700 py-3.5 rounded-lg font-medium text-base transition-colors duration-200 hover:bg-gray-100"
-                >
-                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M19.9895 10.1871C19.9895 9.36767 19.9214 8.76973 19.7742 8.14966H10.1992V11.848H15.8195C15.7062 12.7671 15.0943 14.1512 13.7346 15.0813L13.7155 15.2051L16.7429 17.4969L16.9527 17.5174C18.879 15.7789 19.9895 13.221 19.9895 10.1871Z" fill="#4285F4"/>
-                        <path d="M10.1993 19.9313C12.9527 19.9313 15.2643 19.0454 16.9527 17.5174L13.7346 15.0813C12.8734 15.6682 11.7176 16.0779 10.1993 16.0779C7.50243 16.0779 5.21352 14.3395 4.39759 11.9366L4.27799 11.9465L1.13003 14.3273L1.08887 14.4391C2.76588 17.6945 6.21061 19.9313 10.1993 19.9313Z" fill="#34A853"/>
-                        <path d="M4.39748 11.9366C4.18219 11.3166 4.05759 10.6521 4.05759 9.96565C4.05759 9.27909 4.18219 8.61473 4.38615 7.99466L4.38045 7.8626L1.19304 5.44366L1.08875 5.49214C0.397576 6.84305 0.000976562 8.36008 0.000976562 9.96565C0.000976562 11.5712 0.397576 13.0882 1.08875 14.4391L4.39748 11.9366Z" fill="#FBBC05"/>
-                        <path d="M10.1993 3.85336C12.1142 3.85336 13.406 4.66168 14.1425 5.33717L17.0207 2.59107C15.253 0.985496 12.9527 0 10.1993 0C6.2106 0 2.76588 2.23672 1.08887 5.49214L4.38626 7.99466C5.21352 5.59183 7.50242 3.85336 10.1993 3.85336Z" fill="#EB4335"/>
+
+                <a href="/auth/google" class="flex items-center justify-center w-full bg-white border border-gray-100 text-gray-500 text-[10px] font-semibold uppercase tracking-widest py-3 rounded-lg hover:bg-gray-50 transition-colors">
+                    <svg class="w-4 h-4 mr-2" viewBox="0 0 24 24">
+                        <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                        <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                        <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                        <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
                     </svg>
-                    <span>Google</span>
+                    Google
                 </a>
             </div>
-            
         </div>
-        
     </div>
-    
+
     <script>
+        
+        lucide.createIcons();
+
+       
+        function togglePasswordVisibility() {
+            const passwordInput = document.getElementById('password');
+            const icon = document.getElementById('toggleIcon');
+            
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                icon.setAttribute('data-lucide', 'eye-off');
+            } else {
+                passwordInput.type = 'password';
+                icon.setAttribute('data-lucide', 'eye');
+            }
+            lucide.createIcons();
+        }
+
+        // Form Validation Logic from your old code
         document.addEventListener('DOMContentLoaded', function() {
             const loginForm = document.getElementById('loginForm');
             const emailInput = document.getElementById('email');
@@ -127,7 +133,6 @@
             const emailError = document.getElementById('emailError');
             const passwordError = document.getElementById('passwordError');
 
-            // Auto-focus on email
             if (emailInput && !emailInput.value) {
                 emailInput.focus();
             }
@@ -135,11 +140,11 @@
             loginForm.addEventListener('submit', function(e) {
                 let isValid = true;
 
-                // Reset error messages
+                // Reset
                 emailError.textContent = '';
                 passwordError.textContent = '';
-                emailInput.classList.remove('border-red-500');
-                passwordInput.classList.remove('border-red-500');
+                emailInput.classList.remove('border-red-400');
+                passwordInput.classList.remove('border-red-400');
 
                 // Email Validation
                 const emailValue = emailInput.value.trim();
@@ -147,18 +152,18 @@
                 
                 if (!emailValue) {
                     emailError.textContent = 'Email address is required';
-                    emailInput.classList.add('border-red-500');
+                    emailInput.classList.add('border-red-400');
                     isValid = false;
                 } else if (!emailRegex.test(emailValue)) {
                     emailError.textContent = 'Please enter a valid email address';
-                    emailInput.classList.add('border-red-500');
+                    emailInput.classList.add('border-red-400');
                     isValid = false;
                 }
 
                 // Password Validation
                 if (!passwordInput.value) {
                     passwordError.textContent = 'Password is required';
-                    passwordInput.classList.add('border-red-500');
+                    passwordInput.classList.add('border-red-400');
                     isValid = false;
                 }
 
@@ -167,37 +172,15 @@
                 }
             });
 
-            // Optional: Clear errors on input
+            // Clear errors on input
             [emailInput, passwordInput].forEach(input => {
                 input.addEventListener('input', () => {
                     const errorDiv = document.getElementById(`${input.id}Error`);
                     errorDiv.textContent = '';
-                    input.classList.remove('border-red-500');
+                    input.classList.remove('border-red-400');
                 });
             });
         });
     </script>
-    <script>
-    // Initialize icons
-    lucide.createIcons();
-
-    function togglePasswordVisibility() {
-        const passwordInput = document.getElementById('password');
-        const icon = document.getElementById('toggleIcon');
-        
-        if (passwordInput.type === 'password') {
-            // Show password: Change icon to eye-off
-            passwordInput.type = 'text';
-            icon.setAttribute('data-lucide', 'eye-off');
-        } else {
-            // Hide password: Change icon to eye
-            passwordInput.type = 'password';
-            icon.setAttribute('data-lucide', 'eye');
-        }
-        
-        // Refresh Lucide to render the new icon
-        lucide.createIcons();
-    }
-</script>
 </body>
 </html>

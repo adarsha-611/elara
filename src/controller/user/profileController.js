@@ -18,7 +18,11 @@ const getProfile = async (req, res) => {
   try {
     const userId = req.session.userId;
     const user = await User.findById(userId);
-    return res.render("user/profile", { user, success: req.flash('success'), error: req.flash('error') });
+   return res.render("user/profile", { 
+  user,
+  success: req.flash("success"),
+  error: req.flash("error")
+});
   } catch (error) {
     console.log(error);
    return  res.status(500).send("Server Error");
@@ -60,7 +64,7 @@ const getChangePassword = async (req, res) => {
     try {
         const userId = req.session.userId;
         const user = await User.findById(userId);
-        res.render("user/changePassword", { user, success: req.flash('success'), error: req.flash('error') });
+      return res.render("user/changePassword", { user, success: req.flash('success'), error: req.flash('error') });
     } catch (error) {
         console.log(error);
         res.status(500).send("Server Error");
@@ -73,21 +77,28 @@ const postChangePassword = async (req, res) => {
         const { currentPassword, newPassword, confirmPassword } = req.body;
         const user = await User.findById(userId);
 
+        if (!user) {
+            req.flash("error", "User not found.");
+            return res.redirect("/login");
+        }
 
-        if(user.authType !=="local"){
-            req.flash("error","cannot change password for Google User");
+        if (user.authType !== "local") {
+            req.flash("error",
+                "Password cannot be changed for accounts created using Google login.");
             return res.redirect("/profile/change-password");
         }
+
+       
         if (newPassword !== confirmPassword) {
             req.flash("error", "New passwords do not match");
-            return res.redirect("/profile/change-Password");
+            return res.redirect("/profile/change-password");
         }
 
         const isMatch = await compareString(currentPassword, user.password);
 
         if (!isMatch) {
             req.flash("error", "Current password is incorrect");
-            return res.redirect("/profile/change-Password");
+            return res.redirect("/profile/change-password");
         }
 
         const hashedPassword = await hashString(newPassword);
@@ -95,11 +106,11 @@ const postChangePassword = async (req, res) => {
         await user.save();
 
         req.flash("success", "Password changed successfully");
-        res.redirect("/profile");
+       return res.redirect("/profile");
     } catch (error) {
         console.log(error);
         req.flash("error", "Error changing password");
-        res.redirect("/profile/change-Password");
+        return res.redirect("/profile/change-password");
     }
 };
 
@@ -110,10 +121,10 @@ const requestEmailUpdate = async (req, res) => {
         const user = await User.findById(userId);
 
         if(user.authType !=="local"){
-            req.flash("error","cannot change email for Google User");
+            req.flash("error","Email cannot be changed for accounts created using Google login.");
             return res.redirect("/profile/edit");
         }
-
+        console.log("User AuthType:", user.authType);
         const existingUser = await User.findOne({ email: newEmail });
         if (existingUser) {
             req.flash("error", "Email already in use");
@@ -161,6 +172,12 @@ const verifyEmailUpdate = async (req, res) => {
 
         
         const user = await User.findById(userId);
+
+         if (user.authType !== "local") {
+            req.flash("error", "Email cannot be changed for accounts created using Google login.");
+            return res.redirect("/profile");
+        }
+
 
         if (!newEmail) {
             return res.render("user/verify-email-otp", {

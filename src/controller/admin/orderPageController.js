@@ -23,7 +23,8 @@ const getOrderPage = async(req,res)=>{
         currentPage,
         search,
         status,
-        sort
+        sort,
+        sidebarPage:"Orders list"
     })
     } catch (error) {
         console.log(error);

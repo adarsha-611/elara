@@ -1,18 +1,19 @@
 import Joi from "joi";
 
 export const signupSchema = Joi.object({
-  fullName: Joi.string()
-    .min(3)
-    .max(50)
-    .pattern(/^[A-Za-z ]+$/) 
-    .required()
-    .messages({
-      "string.empty": "Full name is required",
-      "string.min": "Full name must be at least 3 characters",
-      "string.max": "Full name cannot exceed 50 characters",
-      "string.pattern.base": "Full name must contain only letters and spaces",
-      "any.required": "Full name is required"
-    }),
+ fullName: Joi.string()
+  .trim()  
+  .min(3)
+  .max(50)
+  .pattern(/^[A-Za-z\s]+$/)
+  .required()
+  .messages({
+    "string.empty": "Full name is required",
+    "string.min": "Full name must be at least 3 characters",
+    "string.max": "Full name cannot exceed 50 characters",
+    "string.pattern.base": "Full name must contain only letters and spaces",
+    "any.required": "Full name is required"
+  }),
 
   email: Joi.string()
     .email()

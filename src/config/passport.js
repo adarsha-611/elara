@@ -21,23 +21,26 @@ passport.use(
           user = await User.findOne({ email: profile.emails[0].value });
 
           if (user) {
-            
-            user.googleId = profile.id;
-            await user.save();
+        user.googleId = profile.id;
+        user.authType = "google";   
+        await user.save();
+
           } else {
          
-            user = new User({
-              fullName: profile.displayName,
-              email: profile.emails[0].value,
-              googleId: profile.id,
-              isVerified: true,
-              isBlocked:false 
-            });
+          user = new User({
+          fullName: profile.displayName,
+          email: profile.emails[0].value,
+          googleId: profile.id,
+          authType: "google",   
+          isVerified: true,
+          isBlocked:false 
+});
             await user.save();
           }
         }
         return done(null, user);
-      } catch (error) {
+      } 
+    catch (error) {
         return done(error, null);
       }
     }

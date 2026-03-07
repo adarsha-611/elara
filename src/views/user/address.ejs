@@ -6,6 +6,18 @@
     <title>ELARA - My Addresses</title>
     <link rel="stylesheet" href="/css/profile.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+tailwind.config = {
+  theme: {
+    extend: {
+      colors: {
+        'elara-brown': '#7A5C4D'
+      }
+    }
+  }
+}
+</script>
 
     <style>
         .address-container {
@@ -538,6 +550,7 @@
             }
         }
     </script>
+<%- include('../partials/footer') %>
 
 </body>
 </html>

@@ -87,22 +87,52 @@
 
             <div class="product-grid">
                 <% if (products.length > 0) { %>
-                    <% products.forEach(product => { %>
-                    <a href="/productDetail/<%= product._id %>" class="product-link">
-                        <div class="product-card">
-                            <div class="img-container">
-                                <img 
-                                    src="<%= product.variants && product.variants.length > 0 && product.variants[0].images.length > 0 ? product.variants[0].images[0] : '/images/default.png' %>" 
-                                    alt="<%= product.name %>">
-                                <i class="fa-regular fa-heart wishlist-icon"></i>
-                            </div>
-                            <div class="product-info">
-                                <h4><%= product.name %></h4>
-                                <p class="price">₹ <%= product.variants[0].price %></p>
-                            </div>
-                        </div>
-                    </a>
-                    <% }) %>
+                   <% products.forEach(product => { %>
+
+<%
+  let displayVariant = null;
+
+  if (product.variants && product.variants.length > 0) {
+    displayVariant =
+      product.variants.find(v => v.stock > 0) || product.variants[0];
+  }
+%>
+
+<div class="product-card">
+
+  <div class="img-container">
+
+    <!-- Clickable Image -->
+    <a href="/productDetail/<%= product._id %>">
+      <img 
+        src="<%= displayVariant && displayVariant.images.length > 0
+              ? displayVariant.images[0]
+              : '/images/default.png' %>" 
+        alt="<%= product.name %>">
+    </a>
+
+    <!-- Heart Button -->
+    <i 
+      class="fa-regular fa-heart wishlist-icon"
+      data-id="<%= product._id %>">
+    </i>
+
+  </div>
+
+  <div class="product-info">
+    <h4>
+      <a href="/productDetail/<%= product._id %>">
+        <%= product.name %>
+      </a>
+    </h4>
+
+    <p class="price">
+      ₹ <%= displayVariant ? displayVariant.price : 'N/A' %>
+    </p>
+  </div>
+
+</div>
+<% }) %>
                 <% } else { %>
                     <p>No products found</p>
                 <% } %>
@@ -144,5 +174,37 @@
         // Auto-apply if "Apply" button clicked (optional: add click listener)
         document.querySelector('.btn-apply').onclick = applyFilters;
     </script>
+    <script>
+document.querySelectorAll(".wishlist-icon").forEach(icon => {
+
+    icon.addEventListener("click", async function (e) {
+
+        e.stopPropagation(); // prevent link click
+        e.preventDefault();
+
+        const productId = this.dataset.id;
+
+        const res = await fetch(`/wishlist/toggle/${productId}`, {
+            method: "POST"
+        });
+
+        const data = await res.json();
+
+        if (data.status === "added") {
+
+            this.classList.remove("fa-regular");
+            this.classList.add("fa-solid");
+
+        } else if (data.status === "removed") {
+
+            this.classList.remove("fa-solid");
+            this.classList.add("fa-regular");
+
+        }
+
+    });
+
+});
+</script>
 </body>
 </html>

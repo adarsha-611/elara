@@ -5,8 +5,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Order Details | ELARA Luxury Jewelry</title>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-   <style>
+<script src="https://cdn.tailwindcss.com"></script>
+    <script>
+tailwind.config = {
+  theme: {
+    extend: {
+      colors: {
+        'elara-brown': '#7A5C4D'
+      }
+    }
+  }
+}
+</script>   <style>
     :root {
     --primary-taupe: #a3866a;
     --dark-brown: #5a3e2b;
@@ -390,51 +400,96 @@ body {
 
         <section class="details-content">
             <h1 class="section-title">Order Details</h1>
+<div class="card status-card">
+    <h3>Order Status</h3>
 
-            <div class="card status-card">
-                <h3>Order Status</h3>
-                <div class="stepper">
+    <% 
+        const someReturnPending = order.items.some(
+            i => i.returnRequest && i.returnRequest.status === "pending"
+        );
 
-  <div class="step completed">
-    <div class="step-icon"><i class="fa-solid fa-box-open"></i></div>
-    <div class="step-text">
-      <strong>Order Placed</strong>
-      <span>
-        <%= new Date(order.createdAt).toLocaleDateString("en-IN") %>
-      </span>
-    </div>
-  </div>
+        const someReturnAccepted = order.items.some(
+            i => i.returnRequest && i.returnRequest.status === "accepted"
+        );
+    %>
 
-  <div class="step <%= ["confirmed","shipped","delivered"].includes(order.orderStatus) ? "completed" : "" %>">
-    <div class="step-icon"><i class="fa-solid fa-gears"></i></div>
-    <div class="step-text">
-      <strong>Processing</strong>
-    </div>
-  </div>
+    <div class="stepper">
 
-  <div class="step <%= ["shipped","delivered"].includes(order.orderStatus) ? "completed" : "" %>">
-    <div class="step-icon"><i class="fa-solid fa-truck"></i></div>
-    <div class="step-text">
-      <strong>Shipped</strong>
-    </div>
-  </div>
-
-  <div class="step <%= ["out_for_delivery","delivered"].includes(order.orderStatus) ? "completed" : "" %>">
-  <div class="step-icon"><i class="fa-solid fa-motorcycle"></i></div>
-  <div class="step-text">
-    <strong>Out for Delivery</strong>
-  </div>
-</div>
-
-  <div class="step <%= order.orderStatus === "delivered" ? "completed" : "" %>">
-    <div class="step-icon"><i class="fa-solid fa-house-chimney"></i></div>
-    <div class="step-text">
-      <strong>Delivered</strong>
-    </div>
-  </div>
-
-</div>
+        <!-- Order Placed -->
+        <div class="step completed">
+            <div class="step-icon"><i class="fa-solid fa-box-open"></i></div>
+            <div class="step-text">
+                <strong>Order Placed</strong>
+                <span>
+                    <%= new Date(order.createdAt).toLocaleDateString("en-IN") %>
+                </span>
             </div>
+        </div>
+
+        <!-- Processing -->
+        <div class="step <%= ["confirmed","shipped","out for delivery","delivered"].includes(order.orderStatus) ? "completed" : "" %>">
+            <div class="step-icon"><i class="fa-solid fa-gears"></i></div>
+            <div class="step-text">
+                <strong>Processing</strong>
+            </div>
+        </div>
+
+        <!-- Shipped -->
+        <div class="step <%= ["shipped","out for delivery","delivered"].includes(order.orderStatus) ? "completed" : "" %>">
+            <div class="step-icon"><i class="fa-solid fa-truck"></i></div>
+            <div class="step-text">
+                <strong>Shipped</strong>
+            </div>
+        </div>
+
+        <!-- Out for Delivery -->
+        <div class="step <%= ["out for delivery","delivered"].includes(order.orderStatus) ? "completed" : "" %>">
+            <div class="step-icon"><i class="fa-solid fa-motorcycle"></i></div>
+            <div class="step-text">
+                <strong>Out for Delivery</strong>
+            </div>
+        </div>
+
+        <!-- Delivered -->
+        <div class="step <%= order.orderStatus === "delivered" || someReturnPending || someReturnAccepted ? "completed" : "" %>">
+            <div class="step-icon"><i class="fa-solid fa-house-chimney"></i></div>
+            <div class="step-text">
+                <strong>Delivered</strong>
+            </div>
+        </div>
+
+        <!-- Return Requested -->
+        <% if (someReturnPending) { %>
+            <div class="step completed">
+                <div class="step-icon"><i class="fa-solid fa-rotate-left"></i></div>
+                <div class="step-text">
+                    <strong>Return Requested</strong>
+                </div>
+            </div>
+        <% } %>
+
+        <!-- Return Accepted -->
+        <% if (someReturnAccepted) { %>
+            <div class="step completed">
+                <div class="step-icon"><i class="fa-solid fa-check"></i></div>
+                <div class="step-text">
+                    <strong>Return Approved</strong>
+                </div>
+            </div>
+        <% } %>
+
+        <!-- Cancelled -->
+        <% if(order.orderStatus === "cancelled") { %>
+            <div class="step completed">
+                <div class="step-icon">❌</div>
+                <div class="step-text">
+                    <strong>Order Cancelled</strong>
+                </div>
+            </div>
+        <% } %>
+
+    </div>
+</div>
 
             <div class="card items-card">
   <h3>Items in your order</h3>
@@ -443,16 +498,22 @@ body {
 
     <div class="order-item">
 
-      <% if (item.productDetails?.images?.length > 0) { %>
-        <img 
-          src="/uploads/products/<%= item.productDetails.images[0] %>" 
-          alt="Product"
-        >
-      <% } %>
+   <%
+let variant = item.product.variants.find(
+  v => v.color === item.variantColor
+);
+%>
+
+<% if (variant && variant.images && variant.images.length > 0) { %>
+    <img src="<%= variant.images[0] %>" width="80">
+<% } else { %>
+    <p>No image</p>
+<% } %>
+<!-- <pre><%= JSON.stringify(item.product, null, 2) %></pre> -->
 
       <div class="item-info">
         <strong>
-          <%= item.productDetails?.name || "Product unavailable" %>
+<%= item.product?.name || "Product unavailable" %>
         </strong>
         <span>Qty: <%= item.quantity %></span>
         <span>Color: <%= item.variantColor %></span>
@@ -523,14 +584,15 @@ body {
   <% } else if (order.orderStatus !== 'cancelled') { %>
 
       <!-- Cancel Button -->
-      <form action="/profile/orders/<%= order._id %>/cancel" method="POST">
-         <!-- Use onclick, no type="submit" -->
-<button type="button" 
-        class="btn-secondary" 
-        onclick="cancelOrder('<%= order._id %>')">
-    Cancel Order
-</button>
-      </form>
+      <% order.items.forEach(item => { %>
+
+<form action="/profile/orders/<%= order._id %>/cancel/<%= item._id %>" method="POST">
+    <button type="submit" class="btn-secondary">
+        Cancel Item
+    </button>
+</form>
+
+<% }) %>
 
   <% } %>
 <a href="/profile/orders/<%= order._id %>/invoice"
@@ -589,8 +651,7 @@ body {
 
   <div class="item-details" style="flex:1;">
     <span class="item-name">
-      <%= item.productDetails?.productName || "Product" %>
-    </span>
+   <%= item.product?.name || "Product" %>    </span>
     <br>
     <span class="item-meta">
       Color: <%= item.variantColor %> | Qty: <%= item.quantity %>
@@ -735,6 +796,8 @@ Swal.fire({
 });
 </script>
 <% } %>
+
+<%- include('../partials/footer') %>
 
 </body>
 </html>

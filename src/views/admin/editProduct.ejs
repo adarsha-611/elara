@@ -110,8 +110,8 @@
 
                                         <% if (hasImage) { %>
                                             <input type="hidden" 
-                                                   name="variants[<%= vIndex %>][images][<%= i %>]" 
-                                                   value="<%= src %>">
+                                                 name="variants[<%= vIndex %>][existingImages][<%= i %>]" 
+                                                     value="<%= src %>">
                                         <% } %>
 
                                         <div class="upload-label" style="display: <%= hasImage ? 'none' : 'flex' %>;">
@@ -121,8 +121,8 @@
                                         </div>
 
                                         <div class="preview-container" style="display: <%= hasImage ? 'flex' : 'none' %>;">
-                                            <%= i === 0 ? '<span class="main-image-tag">MAIN</span>' : '' %>
-                                            <img src="<%= src %>" alt="Variant image" data-original="<%= src %>">
+                                    <%- i === 0 ? '<span class="main-image-tag">MAIN</span>' : '' %>   
+                                        <img src="<%= src %>" alt="Variant image" data-original="<%= src %>">
                                             <button type="button" class="remove-image-btn" title="Remove">×</button>
                                         </div>
                                     </div>
@@ -232,27 +232,35 @@ function attachImageListeners(container = document) {
 attachImageListeners();
 
 // ── Crop handling ────────────────────────────────────────────────────────────
+// ── Crop handling ─────────────────────────────────────────────
 cropAndSaveBtn.addEventListener('click', () => {
     if (!cropper || !currentCropTarget) return;
 
     const canvas = cropper.getCroppedCanvas({ width: 800, height: 800 });
-    const url = canvas.toDataURL('image/jpeg', 0.88);
 
-    const preview = currentCropTarget.querySelector('.preview-container');
-    const label   = currentCropTarget.querySelector('.upload-label');
-    const img     = preview.querySelector('img');
+    canvas.toBlob(blob => {
+        const file = new File([blob], "cropped.jpg", { type: "image/jpeg" });
 
-    img.src = url;
-    label.style.display = 'none';
-    preview.style.display = 'flex';
+        const fileInput = currentCropTarget.querySelector('.file-input');
 
-    // Remove old hidden input when replacing
-    const oldHidden = currentCropTarget.querySelector('input[type="hidden"]');
-    if (oldHidden) oldHidden.remove();
+        // Create DataTransfer to assign file
+        const dataTransfer = new DataTransfer();
+        dataTransfer.items.add(file);
+        fileInput.files = dataTransfer.files;
 
-    closeCropModal();
+        const preview = currentCropTarget.querySelector('.preview-container');
+        const label   = currentCropTarget.querySelector('.upload-label');
+        const img     = preview.querySelector('img');
+
+        img.src = URL.createObjectURL(file);
+        label.style.display = 'none';
+        preview.style.display = 'flex';
+
+        closeCropModal();
+    }, "image/jpeg", 0.88);
 });
 
+// Properly defined outside
 function closeCropModal() {
     cropModal.style.display = 'none';
     if (cropper) {

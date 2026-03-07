@@ -30,7 +30,6 @@ export const createProduct = async (data, files) => {
      
     const rawVariants = data.variants || {};
     const variantKeys = Object.keys(rawVariants);
-
    
     const variants = variantKeys.map((key) => {
       const variant = rawVariants[key];
@@ -40,11 +39,13 @@ export const createProduct = async (data, files) => {
 
       return {
         color: variant.color,
+        // metal: variant.metalType,
         price: Number(variant.price),
         stock: Number(variant.stock),
         images
       };
     });
+    
 
    
    const product = new Product({
@@ -55,6 +56,8 @@ export const createProduct = async (data, files) => {
   isActive: true,
   isDeleted: false
 });
+
+  console.log(product);
 
  
     return await product.save();
@@ -82,34 +85,53 @@ export const updateProduct = async (id, data, files) => {
   try {
     const product = await Product.findById(id);
     if (!product) throw new Error("Product not found");
-  
-  const existingImages = product.variants.flatMap(v => v.images);
 
     product.name = data.name;
     product.description = data.description;
     product.category = data.category;
 
     const rawVariants = data.variants || {};
-    const updatedVariants = Object.values(rawVariants).map((variant, index) => {
-      
-      const newImages = files
-        .filter(file => file.fieldname.startsWith(`variants[${index}][images]`))
-        .map(file => "/uploads/products/" + file.filename);
 
-      return {
-        color: variant.color,
-        price: Number(variant.price),
-        stock: Number(variant.stock),
-        images: newImages.length ? newImages : product.variants[index]?.images || []
-      };
-    });
+    const updatedVariants = [];
 
+    for (const key in rawVariants) {
+
+      const vIndex = parseInt(key);
+      const incoming = rawVariants[key];
+
+      let images = incoming.existingImages
+        ? Object.values(incoming.existingImages)
+        : [];
+
+     
+      files.forEach(file => {
+        const match = file.fieldname.match(/variants\[(\d+)\]\[images\]\[(\d+)\]/);
+        if (!match) return;
+
+        const fileVIdx = parseInt(match[1]);
+        const imgIdx   = parseInt(match[2]);
+
+        if (fileVIdx === vIndex) {
+          images[imgIdx] = "/uploads/products/" + file.filename;
+        }
+      });
+
+      updatedVariants.push({
+        color: incoming.color,
+        price: Number(incoming.price),
+        stock: Number(incoming.stock),
+        images: images
+      });
+    }
+
+    // Replace full variant array safely
     product.variants = updatedVariants;
 
-    return await product.save();
+    await product.save();
+    return product;
 
   } catch (error) {
-    console.log("Error updating product:", error);
+    console.log("Update error:", error);
     throw new Error("Failed to update product");
   }
 };

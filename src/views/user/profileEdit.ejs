@@ -4,31 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ELARA - Edit Profile</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="/css/profile.css">
 </head>
 <body>
-    <header class="navbar">
-        <div class="nav-container">
-            <div class="logo">ELARA</div>
-            <nav class="nav-links">
-                <a href="/home">HOME</a>
-                <a href="#shop">SHOP</a>
-                <a href="#about">ABOUT US</a>
-                <a href="#contact">CONTACT</a>
-            </nav>
-            <div class="nav-icons">
-                <a href="/wishlist">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
-                </a>
-                <a href="/profile">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
-                </a>
-                <a href="/cart">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
-                </a>
-            </div>
-        </div>
-    </header>
+      <%- include('../partials/header') %>
+
 
     <div class="page-header">
         <h2>Edit Profile</h2>
@@ -36,7 +18,7 @@
 
     <main class="main-content">
         <div class="content-wrapper">
-    <%- include('../partials/profileSidebar', { user: user, path: '/profile/edit' }) %>
+       <%- include('../partials/profileSidebar', { user, path: '/profile' }) %>
 
             <!-- Main Content: Single Merged Card -->
             <div class="edit-profile-container" style="max-width: 800px; margin: 0 auto; width: 100%;">
@@ -127,8 +109,26 @@
     </div>
     </form>
     <% } else { %>
-    <p>Email: <%= user.email %></p>
-    <p>Password: Managed by <%= user.authType %></p>
+    <div class="form-group">
+    <label>Email</label>
+    <input 
+        type="email" 
+        value="<%= user.email %>" 
+        disabled 
+        class="disabled-input"
+    >
+</div>
+
+<div class="oauth-info-box">
+    <div class="oauth-icon">🔒</div>
+    <div>
+        <p class="oauth-title">Managed by Google</p>
+        <p class="oauth-desc">
+            Your email and password are managed by your Google account.
+            To change them, please update them in Google settings.
+        </p>
+    </div>
+</div>
         <% } %>
 
                 </section>
@@ -136,5 +136,7 @@
             </div>
         </div>
     </main>
+    <%- include('../partials/footer') %>
+
 </body>
 </html>

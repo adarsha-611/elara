@@ -4,7 +4,10 @@ import Product from "../../model/productSchema.js";
 import Mongoose from "mongoose";
 import User from '../../model/userSchema.js';
 
-
+const generateOrderId = () => {
+  const random = Math.floor(100000 + Math.random() * 900000);
+  return `ORD-${Date.now()}-${random}`;
+};
 
 
 const getCheckoutPage = async (req, res) => {
@@ -16,48 +19,38 @@ const getCheckoutPage = async (req, res) => {
     }
 
     const user = await User.findById(userId);
-    const cart = await Cart.findOne({ userId: userId });
-
+const cart = await Cart.findOne({ userId })
+  .populate({
+    path: "items.productId",
+    select: "name variants"
+  });
     let cartItems = [];
     let subtotal = 0;
 
-    if (cart && cart.items.length > 0) {
-      const productIds = cart.items.map(item => item.productId);
+  if (cart && cart.items.length > 0) {
 
-      const products = await Product.find({
-        _id: { $in: productIds }
-      });
+  cartItems = cart.items.map(item => {
 
-      cartItems = cart.items.map(item => {
-        const product = products.find(
-          p => p._id.toString() === item.productId.toString()
-        );
+    const product = item.productId;
 
-        if (!product) return null;
+    const price = item.price;
+    const image = product?.variants?.[0]?.images?.[0] || "placeholder.jpg";
 
-        const variant = product.variants?.[0];
+    const itemTotal = price * item.quantity;
+    subtotal += itemTotal;
 
-if (!variant) return null;
-
-  const price = Number(variant.price || 0);
-  const image = variant.images?.[0] || "placeholder.jpg";
-
-  const itemTotal = price * item.quantity;
-  subtotal += itemTotal;
-
-  return {
+    return {
       product: {
-      name: product.name,
-       image,
-     price
-   },
-    quantity: item.quantity,
-  itemTotal
-};
+        name: product.name,
+        image,
+        price
+      },
+      quantity: item.quantity,
+      itemTotal
+    };
+  });
 
-      }).filter(Boolean);
-    }
-
+}
    
     return res.render("user/checkOut", {
       addresses: user.addresses || [],
@@ -99,12 +92,12 @@ const checkaddAddress = async (req, res) => {
         await user.save();
 
         req.flash("success", "Address added successfully");
-        res.redirect("/checkout");
+       return res.redirect("/checkout");
 
     } catch (error) {
         console.error("Error adding address:", error);
         req.flash("error", "Failed to add address");
-        res.redirect("/checkout");
+       return res.redirect("/checkout");
     }
 };
 
@@ -164,12 +157,12 @@ const checkeditAddress = async (req, res) => {
         await user.save();
 
         req.flash("success", "Address updated successfully");
-        res.redirect("/checkout");
+       return res.redirect("/checkout");
 
     } catch (error) {
         console.error("Edit address error:", error);
         req.flash("error", "Failed to update address");
-        res.redirect("/checkout");
+       return res.redirect("/checkout");
     }
 };
 
@@ -184,11 +177,11 @@ const checkdeleteAddress = async (req, res) => {
         );
 
         req.flash("success", "Address deleted successfully");
-        res.redirect("/checkout");
+        return res.redirect("/checkout");
     } catch (error) {
         console.error("Error deleting address:", error);
         req.flash("error", "Failed to delete address");
-        res.redirect("/checkout");
+        return res.redirect("/checkout");
     }
 };
 
@@ -206,22 +199,35 @@ const checksetDefaultAddress = async (req, res) => {
         await user.save();
 
         req.flash("success", "Default address updated");
-        res.redirect("/checkout");
+       return  res.redirect("/checkout");
     } catch (error) {
         console.error("Error setting default address:", error);
         req.flash("error", "Failed to set default address");
-        res.redirect("/checkout");
+        return res.redirect("/checkout");
     }
 };
 
-const orderSuccess = async(req,res)=>{
-    const {orderId} = req.params;
-    res.render("user/orderSuccess",{orderId});
-}
-function generateOrderId() {
-  return "ORD" + Date.now();
-}
+const orderSuccess = async (req, res) => {
+  try {
+    const { orderId } = req.params;
 
+    const order = await Order.findById(orderId);
+
+    if (!order) {
+      return res.redirect("/shop");
+    }
+
+    res.render("user/orderSuccess", { 
+      order,
+      success: req.flash("success"),
+      error: req.flash("error")
+    });
+
+  } catch (error) {
+    console.error("Order Success Error:", error);
+    return res.redirect("/shop");
+  }
+};
 
 
 const placeOrder = async (req, res) => {
@@ -289,13 +295,15 @@ const cart = await Cart.findOne({ userId: userId }).populate({
 
       const itemTotal = selectedVariant.price * cartItem.quantity;
 
-      orderItems.push({
-        product: product._id,
-        variantColor: selectedVariant.color,
-        quantity: cartItem.quantity,
-        price: selectedVariant.price,
-        total: itemTotal
-      });
+     orderItems.push({
+      product: product._id,
+      productName: product.name,           
+      productImage: selectedVariant.images?.[0] || "",  
+      variantColor: selectedVariant.color,
+      quantity: cartItem.quantity,
+      price: selectedVariant.price,
+      total: itemTotal
+});
 
       totalAmount += itemTotal;
     }

@@ -1,6 +1,6 @@
 import { findUserByemail } from "../../../services/user/userService.js";
 import { compareString } from "../../../utils/bcrypt.js";
-
+import passport from "passport";
 const getLogin = async(req,res)=>{
     try {
        const error = req.flash('error');
@@ -70,7 +70,23 @@ const postLogin = async(req,res)=>{
     }
 }
 
+const googleAuth = passport.authenticate("google", {
+  scope: ["profile", "email"],
+});
+
+const googleCallback = [
+  passport.authenticate("google", { failureRedirect: "/login" }),
+  (req, res) => {
+    req.session.userId = req.user._id;
+    req.session.userEmail = req.user.email;
+    req.session.userName = req.user.fullName;
+
+    res.redirect("/home");
+  },
+];
 export default {
     getLogin,
-    postLogin
+    postLogin,
+    googleAuth,
+    googleCallback,
 }

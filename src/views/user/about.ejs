@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About Us - ELARA</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="/css/about.css">
+
+    <!-- ADD THIS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body>
+       <%- include('../partials/header') %>
+
+
+    <!-- Hero Section -->
+    <section class="about-hero">
+        <div class="hero-content">
+            <h1>Our Story</h1>
+            <p>Crafting timeless elegance, one piece at a time</p>
+        </div>
+    </section>
+
+    <!-- About Content Section -->
+    <section class="about-content">
+        <div class="container">
+            <div class="content-grid">
+                <div class="content-image">
+                    <img src="/Images/🤎✨️.jfif" alt="Jewelry craftsmanship">
+                </div>
+                <div class="content-text">
+                    <h2>Welcome to ELARA</h2>
+                    <p>Founded in 2020, ELARA was born from a passion for creating jewelry that tells a story. Each piece in our collection is meticulously handcrafted by skilled artisans, blending traditional techniques with contemporary design.</p>
+                    <p>We believe in slow luxury—pieces that are thoughtfully created, sustainably sourced, and designed to be treasured for generations. Our commitment to quality and craftsmanship ensures that every ELARA piece is not just jewelry, but a work of art.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Values Section -->
+    <section class="values-section">
+        <div class="container">
+            <h2 class="section-title">Our Values</h2>
+            <div class="values-grid">
+                <div class="value-card">
+                    <div class="value-icon">
+                        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path>
+                        </svg>
+                    </div>
+                    <h3>Quality Craftsmanship</h3>
+                    <p>Every piece is handcrafted with precision and care by our master artisans.</p>
+                </div>
+                <div class="value-card">
+                    <div class="value-icon">
+                        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                            <path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"></path>
+                            <path d="M12 6v6l4 2"></path>
+                        </svg>
+                    </div>
+                    <h3>Timeless Design</h3>
+                    <p>Classic elegance meets modern aesthetics in every collection.</p>
+                </div>
+                <div class="value-card">
+                    <div class="value-icon">
+                        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                            <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+                        </svg>
+                    </div>
+                    <h3>Sustainable Luxury</h3>
+                    <p>Ethically sourced materials and responsible production practices.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Story Section -->
+    <section class="story-section">
+        <div class="container">
+            <div class="story-grid">
+                <div class="story-text">
+                    <h2>The Art of Creation</h2>
+                    <p>Each ELARA piece begins as a sketch, brought to life through hours of meticulous work. Our artisans use time-honored techniques passed down through generations, combined with innovative modern methods to create jewelry that stands the test of time.</p>
+                    <p>From selecting the finest materials to the final polish, every step is guided by our commitment to excellence. We don't just make jewelry—we create heirlooms.</p>
+                </div>
+                <div class="story-image">
+                    <img src="/Images/Tainted Love Hoops.jfif" alt="Jewelry design process">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="cta-section">
+        <div class="cta-content">
+            <h2>Discover Our Collection</h2>
+            <p>Explore timeless pieces crafted with passion and precision</p>
+            <a href="/shop" class="cta-button">Shop Now</a>
+        </div>
+    </section>
+
+      <%- include('../partials/footer') %>
+
+</body>
+</html>

@@ -5,19 +5,30 @@
 <title>Elara - Luxury Jewelry</title>
 <script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&amp;family=Lato:wght@300;400;700&amp;display=swap" rel="stylesheet"/>
-<link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet"/>
-<script>
+<script src="https://cdn.tailwindcss.com"></script>
+
+    <script>
+tailwind.config = {
+  theme: {
+    extend: {
+      colors: {
+        'elara-brown': '#7A5C4D'
+      }
+    }
+  }
+}
+</script><script>
         tailwind.config = {
             darkMode: "class",
             theme: {
                 extend: {
                     colors: {
-                        primary: "#a3866a", // Taupe/Gold accent color
+                        primary: "#a3866a", 
                         "primary-dark": "#8a7055",
-                        "background-light": "#f6f3f0", // Creamy white
-                        "background-dark": "#1a1a1a", // Dark gray for dark mode
+                        "background-light": "#f6f3f0", 
+                        "background-dark": "#1a1a1a", 
                         "charcoal": "#333333",
-                        "charcoal-dark": "#1f1f1f", // Footer dark
+                        "charcoal-dark": "#1f1f1f", 
                         "card-light": "#ffffff",
                         "card-dark": "#2a2a2a",
                     },
@@ -42,7 +53,7 @@
 
 <header class="w-full max-w-[1400px] mx-auto grid grid-cols-1 md:grid-cols-12 gap-4 px-4 md:px-8 mb-16">
 <div class="md:col-span-8 relative h-[600px] bg-gray-200 overflow-hidden group">
-<img alt="Woman wearing elegant black blazer and gold statement earrings" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBmZyvrfq-mibr5ng-crWAH8jjuEjwcW1gCyCP30bz2uLs-PtrXGJC_qSPUuSzPz1HHc2kCEcC0LJX9gV_59qowShp2iSxXCd4M-lbnlsjbexTzJD0VjOWd8uAB38larVnzzBoDvcuGZMDlZCzBxFi9V97ibWW6flSdWiPIeFsGfJzIQ2FqoyPvx7Q5_k5X3bVpS0acoOSk41eQVszrsvodLi4SizDKbdJ4ok7adkO_4cLdniF2NmYVn71OLHPZ6fjVICeIj0XvuGQd"/>
+<img alt="Woman wearing elegant black blazer and gold statement earrings" class="w-full h-full object-cover" src="/Images/Gemini_Generated_Image_i22pa3i22pa3i22p.png"/>
 <div class="absolute inset-0 bg-gradient-to-r from-black/40 to-transparent flex flex-col justify-center px-12 md:px-20 text-white">
 <h2 class="font-display text-4xl mb-4 tracking-wider">ELARA</h2>
 <h1 class="font-display text-5xl md:text-6xl mb-4 leading-tight">Statement Gold Earrings</h1>
@@ -52,10 +63,10 @@
 </div>
 <div class="md:col-span-4 flex flex-col gap-4 h-[600px]">
 <div class="h-1/2 overflow-hidden bg-gray-200 relative">
-<img alt="Close up of gold drop earrings" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBtw8XGqbDcZRgmcgtrLMK2OGGkUIEqLCjQqU-1RKrxHlTbOQaTucKgpfhg2NSaVi-nTPjYfs1bgIR9A9tvIh1qFXuoZn7BrSCxru9C9smizIFfrF0khagkU0S6PWd7FlOxzihuM-2e7muxrr7ZIb3MeUGFyrx9mGThmI2LpfPVOzSe3ctifl4tkpOwBYrpxxcysM_8Mq6e-tcwd7dm-9YnbtUB7_AbvQ14ANCB9__ewXNo_UHtpR4jjidrTZ-1qfrVChC1EBA85Qpj"/>
+<img alt="Close up of gold drop earrings" class="w-full h-full object-cover" src="/Images/Earrings fo Daily Use _ Earrings.jfif"/>
 </div>
 <div class="h-1/2 overflow-hidden bg-gray-200 relative">
-<img alt="Woman touching her gold necklace and earrings" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB7hDyZAwHFNUaKW6Zz0TxMRvnNY6oWTucoc3Ax9QVl-3IRU3onKZN-_E9bliFS-q3A_pkSvqYWLwH3iq_YYp-ffcVn1p8EEn7lHuvJpFyRMh37LPzdBW_FtZJfRBA90jNy2pbPa1_y1Ei3419jh77CjtNymUYPoPYaKT_exXfsRxEkZQdVNVCt8YP6LVnGKoaB4AbV5_epVtl1scMOPblAFXmw3EEQfQJuP7zyGY0KLG1Y41n70GVKtZz5seEcqd3eULhUsKfjtzzk"/>
+<img alt="Woman touching her gold necklace and earrings" class="w-full h-full object-cover" src="/Images/night women.jfif"/>
 </div>
 </div>
 </header>
@@ -66,42 +77,52 @@
 <section class="max-w-6xl mx-auto py-20 px-4 md:px-8">
 <h3 class="font-display text-3xl md:text-4xl text-center mb-16 tracking-widest text-charcoal dark:text-white uppercase">New Arrivals</h3>
 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-<div class="group cursor-pointer">
-<div class="bg-gray-100 dark:bg-card-dark aspect-square overflow-hidden mb-4 relative">
-<img alt="Venus Hoops gold earrings" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD8q5ojBt03YjfacY-_3V6ES37M2fpHFGDfjNVG2OEyjtHJ3PLtGAhsJ93W39mcqSxbw1X6N_zBQ2h485PM9QuOo8SyRlGl-YUVgxCgM8dZuv3AdTD8JWjaDZ6vM8jPfpAzq5OmPUu8TZgEfWtfItYZtHZK89c1l1uJDgsen8ew1fiwKa1BD6ndM7xtSh3flxu2IMZakwy3Y4Tdq6j0fxqVkYneTJoqXj9dNzvn-hDRS5UkA24pM6HIlnq338R9so0eouEh439TT895"/>
-</div>
-<div class="bg-white dark:bg-card-dark p-4 border border-gray-100 dark:border-gray-700 shadow-sm">
-<h4 class="font-display text-lg mb-1 text-charcoal dark:text-white">Venus Hoops</h4>
-<p class="text-gray-500 dark:text-gray-400 text-sm font-light">₹ 18,500</p>
-</div>
-</div>
-<div class="group cursor-pointer">
-<div class="bg-gray-100 dark:bg-card-dark aspect-square overflow-hidden mb-4 relative">
-<img alt="Cleo Drops gold earrings" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBxzecwdNwy-MTdJfcRV_64iOFI0fUfUErCvECgZ3x_kPBdh9lw23RpnkjXymW1zrzfZPdUu9Wf5hmDQ7ww7LhBPmRLlFXgSMCRivtLnFjVTsAhjvoARKb-jqZpiU8YnFE3PxvtYvOhFg-JDj5Kb6uePKXXIxiCu3ORTvAsyW2Xum0KPREojniBxrEpVZ02jG0_6O3gb9K9Tn-H6cNemY6EaKwiViSFNEB0_HpujKWkBe86OuyWKE07Qvjt7jzeTwM9oAwmj16PP4pT"/>
-</div>
-<div class="bg-white dark:bg-card-dark p-4 border border-gray-100 dark:border-gray-700 shadow-sm">
-<h4 class="font-display text-lg mb-1 text-charcoal dark:text-white">Cleo Drops</h4>
-<p class="text-gray-500 dark:text-gray-400 text-sm font-light">₹ 25,200</p>
-</div>
-</div>
-<div class="group cursor-pointer">
-<div class="bg-gray-100 dark:bg-card-dark aspect-square overflow-hidden mb-4 relative">
-<img alt="Eaning Waslite pearl earrings" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD6loSxuL1FZ5frpVMXBULn38qKsMpyCDCwseyzzHXCkupmwvqNffykPEH7TrlrA54XUybAr76AAPiJHQtFOLYzaUhtFW0qDvJ7YWDsiI3uluLGv54EkXSgsTJrTxhFHDTZpnaO9M0kh-EfEoI7KRZXFoRivEhP3JaZWkZ6p5VXsLKjPmNg9w3EJ_li-t1CfdIRlb11VGoC9K5w0LKBgZbq2ofHBFGuum8aVyETYqooSrjTZeb8SwThBn5ojKkoI9hsFCwPgy_XSq6o"/>
-</div>
-<div class="bg-white dark:bg-card-dark p-4 border border-gray-100 dark:border-gray-700 shadow-sm">
-<h4 class="font-display text-lg mb-1 text-charcoal dark:text-white">Eaning Waslite</h4>
-<p class="text-gray-500 dark:text-gray-400 text-sm font-light">₹ 15,900</p>
-</div>
-</div>
-<div class="group cursor-pointer">
-<div class="bg-gray-100 dark:bg-card-dark aspect-square overflow-hidden mb-4 relative">
-<img alt="Aurora Studs flower earrings" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCzbCGzc5XyRzAbXqZLIRUrYlgw4ZjqLly5SBQOS0Cmr2LulbsDHfPne2J6dlOZO-buLAfRkboQO7ob1M_sq_usPH5ag4qLy48Ztx1U8W1C9u72L_edFfHlS5KtVlXoJNP-DFr1mSTEGLzA-6rUg08EjoAfvbDkr5ELclk6JCYT7asqOPpzOpHOIAYGHxkYTC0r_dMe20qNWwgNxzX65F4L8sTsNi_DIDbrnnW5r6wK_F1rUafFKCRScM7xKnhKuIOE6eaLOtzNHfDg"/>
-</div>
-<div class="bg-white dark:bg-card-dark p-4 border border-gray-100 dark:border-gray-700 shadow-sm">
-<h4 class="font-display text-lg mb-1 text-charcoal dark:text-white">Aurora Studs</h4>
-<p class="text-gray-500 dark:text-gray-400 text-sm font-light">₹ 12,400</p>
-</div>
-</div>
+
+<% if(products && products.length > 0){ %>
+
+  <% products.forEach(product => { %>
+
+    <% 
+       const firstVariant = product.variants[0];
+       const image = firstVariant && firstVariant.images.length > 0 
+                     ? firstVariant.images[0] 
+                     : '/Images/default.png';
+
+       const price = firstVariant ? firstVariant.price : 0;
+    %>
+
+    <div class="group cursor-pointer">
+        <a href="/productDetail/<%= product._id %>">
+
+            <div class="bg-gray-100 dark:bg-card-dark aspect-square overflow-hidden mb-4 relative">
+                <img 
+                    src="<%= image %>" 
+                    alt="<%= product.name %>"
+                    class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                />
+            </div>
+
+            <div class="bg-white dark:bg-card-dark p-4 border border-gray-100 dark:border-gray-700 shadow-sm">
+                <h4 class="font-display text-lg mb-1 text-charcoal dark:text-white">
+                    <%= product.name %>
+                </h4>
+
+                <p class="text-gray-500 dark:text-gray-400 text-sm font-light">
+                    ₹ <%= price %>
+                </p>
+            </div>
+
+        </a>
+    </div>
+
+  <% }) %>
+
+<% } else { %>
+
+    <p>No products available</p>
+
+<% } %>
+
 </div>
 </section>
 <section class="max-w-6xl mx-auto pb-24 px-4 md:px-8">

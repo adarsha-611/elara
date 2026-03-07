@@ -9,12 +9,12 @@ export const getProductPage = async (req, res) => {
     const { products, totalPages, currentPage } =
       await productsPage(page, 5);
 
-    res.render("admin/product", {
-      products,
-      totalPages,
-      currentPage
-    });
-
+   return res.render("admin/product", {
+  products,
+  totalPages,
+  currentPage,
+  sidebarPage: "product"
+});
   } catch (error) {
     console.log(error);
     res.status(500).send("Server Error");
@@ -24,8 +24,9 @@ export const getProductPage = async (req, res) => {
 
 const getAddProductPage = async(req,res)=>{
     try {
-        return res.render("admin/addProduct");
-    } catch (error) {
+return res.render("admin/addProduct", {
+  sidebarPage: "product"
+});    } catch (error) {
         console.log("Add product page error",error);
         return res.status(500).send("Server Error")
     }
@@ -68,10 +69,10 @@ const postEditProduct = async (req, res) => {
       return res.status(404).json({ success: false, message: "Product not found" });
     }
 
-    // 🔽 SAFETY FIX
-    if (!req.body.variants || req.body.variants === "") {
-      req.body.variants = {};
-    }
+   
+   if (!req.body.variants || req.body.variants === "") {
+  req.body.variants = [];
+}
 
     const existingImages = product.variants.flatMap(v => v.images || []);
 
@@ -80,6 +81,7 @@ const postEditProduct = async (req, res) => {
       req.files || [],
       existingImages
     );
+    console.log("FILES RECEIVED:", req.files);
 
     if (error) {
       return res.status(400).json({

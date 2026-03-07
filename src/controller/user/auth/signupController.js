@@ -21,8 +21,10 @@ const postSignup = async(req,res)=>{
         const{error,value} = validateSignup(req.body);
         
         if (error) {
-            req.flash('error', error.details.map(err => err.message).join('. '));
-            return res.redirect('/signup');
+           return res.render("user/auth/signup", {
+            error: error.details.map(err => err.message).join('. '),
+            oldData: req.body
+});
         }
         
         const existingUser = await findUserByemail(value.email);

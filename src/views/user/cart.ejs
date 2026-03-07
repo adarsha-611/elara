@@ -4,7 +4,18 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Shopping Cart | ELARA</title>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600&family=Poppins:wght@300;400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+    <script>
+tailwind.config = {
+  theme: {
+    extend: {
+      colors: {
+        'elara-brown': '#7A5C4D'
+      }
+    }
+  }
+}
+</script>
     <style>
         :root {
     --bg-color: #FAF7F5;
@@ -296,7 +307,27 @@ nav a {
   background: transparent;
 }
 
+.toast-success {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background-color: #16a34a; /* green */
+    color: white;
+    padding: 16px 28px;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 500;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    opacity: 0;
+    transform: translateY(-20px);
+    transition: all 0.4s ease;
+    z-index: 9999;
+}
 
+.toast-success.show {
+    opacity: 1;
+    transform: translateY(0);
+}
 
 
  </style>
@@ -304,7 +335,12 @@ nav a {
 <body>
       <%- include('../partials/header') %>
 
-
+  <% if (successMessage) { %>
+    <div id="toast" class="toast-success">
+        <%= successMessage %>
+    </div>
+<% } %>
+<div id="cartToast" class="toast-success"></div>
     <main class="container">
         <h2 class="page-title">Shopping Cart</h2>
 
@@ -318,8 +354,11 @@ nav a {
 
   <% if(cartItems.length > 0){ %>
     <% cartItems.forEach(item => { %>
-      <div class="cart-row" data-id="<%= item.productId %>" data-price="<%= item.price %>">
-        <!-- Product Info -->
+<div class="cart-row"
+     data-id="<%= item.productId %>"
+     data-price="<%= item.price %>"
+     data-stock="<%= item.stock %>">
+             <!-- Product Info -->
         <div class="product-info">
           <img src="<%= item.image %>" alt="<%= item.name %>">
           <div>
@@ -378,45 +417,138 @@ nav a {
      <%- include('../partials/footer') %>
 
  <script>
+  function showToast(message, type="error") {
+
+  const toast = document.getElementById("cartToast");
+
+  toast.innerText = message;
+
+  if(type === "error"){
+      toast.style.backgroundColor = "#dc2626"; // red
+  } else {
+      toast.style.backgroundColor = "#16a34a"; // green
+  }
+
+  toast.classList.add("show");
+
+  setTimeout(() => {
+      toast.classList.remove("show");
+  }, 3000);
+
+}
 document.querySelectorAll(".cart-row").forEach(row => {
+
   const minus = row.querySelector(".minus");
   const plus = row.querySelector(".plus");
   const input = row.querySelector(".qty-input");
   const total = row.querySelector(".item-total");
   const price = parseInt(row.dataset.price);
+  const productId = row.dataset.id;
+  const stock = parseInt(row.dataset.stock);
 
   minus.addEventListener("click", () => {
-    let val = parseInt(input.value);
-    if (val > 1) {
-      input.value = val - 1;
-      total.innerText = `₹ ${price * (val - 1)}`;
-      updateSubtotal();
-    }
-  });
 
-  plus.addEventListener("click", () => {
     let val = parseInt(input.value);
-    input.value = val + 1;
-    total.innerText = `₹ ${price * (val + 1)}`;
-    updateSubtotal();
-  });
-});
 
-function updateSubtotal() {
-  let subtotal = 0;
-  document.querySelectorAll(".cart-row").forEach(row => {
-    const qty = parseInt(row.querySelector(".qty-input").value);
-    const price = parseInt(row.dataset.price);
-    subtotal += qty * price;
-  });
-  document.querySelector(".subtotal-value").innerText = `₹ ${subtotal}`;
+    if (val <= 1) {
+  showToast("Minimum quantity is 1");
+  return;
 }
 
-// Initial calculation
+    val--;
+    input.value = val;
+
+    total.innerText = `₹ ${price * val}`;
+
+    updateSubtotal();
+    updateDatabase(productId, val);
+
+  });
+
+
+  plus.addEventListener("click", () => {
+
+    let val = parseInt(input.value);
+
+   if (val >= 5) {
+  showToast("Maximum 5 items allowed");
+  return;
+}
+
+    if (val >= stock) {
+      showToast("No more stock available");
+      return;
+    }
+
+    val++;
+    input.value = val;
+
+    total.innerText = `₹ ${price * val}`;
+
+    updateSubtotal();
+    updateDatabase(productId, val);
+
+  });
+
+});
+
+
+
+function updateSubtotal() {
+
+  let subtotal = 0;
+
+  document.querySelectorAll(".cart-row").forEach(row => {
+
+    const qty = parseInt(row.querySelector(".qty-input").value);
+    const price = parseInt(row.dataset.price);
+
+    subtotal += qty * price;
+
+  });
+
+  document.querySelector(".subtotal-value").innerText = `₹ ${subtotal}`;
+
+}
+
+
+
+function updateDatabase(productId, quantity) {
+
+  fetch("/cart/update", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      productId: productId,
+      quantity: quantity
+    })
+  })
+  .then(res => res.json())
+  .then(data => {
+    if (!data.success) {
+      alert("Failed to update cart");
+    }
+  })
+  .catch(err => console.log(err));
+
+}
+
+
 updateSubtotal();
 </script>
+<script>
+    const toast = document.getElementById("toast");
 
+    if (toast) {
+        toast.classList.add("show");
 
+        setTimeout(() => {
+            toast.classList.remove("show");
+        }, 3000);
+    }
+</script>
 
 </body>
 </html>

@@ -7,53 +7,55 @@ const getCategoryPage = async (req, res) => {
     const { search, page } = req.query;
 
     const limit = 2;
-    const currentPage = parseInt(page) || 1;
-    const skip = (currentPage - 1) * limit;
+    const paginationPage = parseInt(page) || 1;
+    const skip = (paginationPage - 1) * limit;
 
     let query = {};
+    if (search) {
+      query.name = { $regex: search, $options: "i" };
+    }
 
     const totalCategories = await Category.countDocuments(query);
 
     const categories = await Category.find(query)
-      .sort({ createdAt: -1 })  
+      .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit);
 
     const totalPages = Math.ceil(totalCategories / limit);
 
-    
-
     res.render("admin/category", {
       categories,
-      currentPage,
+      sidebarPage: "category",   
+      currentPage: paginationPage, 
       totalPages,
       search,
       success: req.flash("success"),
       error: req.flash("error")
     });
 
-     if (search) {
-      query.name = { $regex: search, $options: "i" };
-    }
-
   } catch (error) {
     console.error(error);
     return res.status(500).send("Server Error");
   }
-};
+}; 
 
-const getAddCategory =(req,res)=>{
+const getAddCategory = (req, res) => {
     try {
-        return res.render("admin/add-Category",{
-            error:req.flash("error"),
-            success:req.flash("success")
+        return res.render("admin/category", {  
+            sidebarPage: "category",   // ✅ ADD THIS
+            currentPage: 1,            // ✅ number for pagination
+            categories: [],
+            totalPages: 0,
+            search: "",
+            error: req.flash("error"),
+            success: req.flash("success")
         });
     } catch (error) {
-        console.log("get addCategory error :",error);
+        console.log("get addCategory error:", error);
         return res.status(500).send("Server Error");
     }
 };
-
 
 const  postAddCategory = async (req,res)=>{
     try {
@@ -63,13 +65,13 @@ const  postAddCategory = async (req,res)=>{
        await createCategory({name,description});
 
       req.flash("success","Category added successfully");
+      console.log(req.body);
 
       return res.redirect("/admin/category");
     } catch (error) {
         console.log("Post add category error:",error.message);
         req.flash("error",error.message)
-        return res.redirect("/admin/add-Category");
-    }
+      return res.redirect("/admin/add-category");    }
 };
 
 const postEditCategory = async(req,res)=>{

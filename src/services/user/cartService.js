@@ -9,6 +9,23 @@ export const addToCart = async (userId, productId, qty = 1) => {
   if (!product) {
     throw new Error("Product not found");
   }
+  const variant = product.variants[0];
+  if(!variant){
+    throw new Error("Variant not available");
+  }
+
+  const availableStock = variant.stock;
+  if(availableStock <=0){
+    throw new Error ("Out of Stock");
+  }
+
+  if(qty>5){
+    throw new Error("Maximum 5 quantity allowed");
+  }
+
+  if(qty>availableStock){
+    throw new Error(`Only ${availableStock}items available`);
+  }
 
   let cart = await Cart.findOne({ userId });
 
@@ -24,12 +41,22 @@ export const addToCart = async (userId, productId, qty = 1) => {
   );
 
   if (itemIndex > -1) {
-    cart.items[itemIndex].quantity += qty;
+
+    const newQuantity = cart.items[itemIndex].quantity + qty;
+
+    if(newQuantity >5){
+      throw new Error("Maximum 5 Quantity allowed");
+    }
+
+    if(newQuantity > availableStock){
+      throw new Error(`Only ${availableStock} items available`);
+    }
+    cart.items[itemIndex].quantity = newQuantity;
   } else {
     cart.items.push({
       productId,
       quantity: qty,
-      price: product.variants[0]?.price || 0
+      price: variant.price
     });
   }
 

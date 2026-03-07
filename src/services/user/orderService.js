@@ -86,27 +86,47 @@ export const requestReturn = async (orderId, itemId, reason) => {
   );
 };
 
-export const cancelOrderService = async (orderId) => {
-  try {
-    const order = await Order.findById(orderId);
-    if (!order) throw new Error('Order not found');
+export const cancelOrderService = async (orderId, itemId) => {
 
-    if (order.orderStatus === 'delivered') {
-      throw new Error('Cannot cancel a delivered order');
-    }
-    if (order.orderStatus === 'cancelled') {
-      throw new Error('Order is already cancelled');
-    }
+  const order = await Order.findById(orderId);
 
-    
-    order.orderStatus = 'cancelled';
-    await order.save();
-
-    return true;
-  } catch (err) {
-    console.error('Cancel Order Service Error:', err);
-    throw err; 
+  if (!order) {
+    throw new Error("Order not found");
   }
+
+  const item = order.items.id(itemId);
+
+  if (!item) {
+    throw new Error("Item not found");
+  }
+
+  if (item.itemStatus === "cancelled") {
+    throw new Error("Item already cancelled");
+  }
+
+  if (item.itemStatus === "delivered") {
+    throw new Error("Delivered item cannot be cancelled");
+  }
+
+  const product = await Product.findById(item.product);
+
+  if (product) {
+    const variant = product.variants.find(
+      v => v.color === item.variantColor
+    );
+
+    if (variant) {
+      variant.stock += item.quantity;
+    }
+
+    await product.save();
+  }
+
+  item.itemStatus = "cancelled";
+
+  await order.save();
+
+  return true;
 };
 
 export const getInvoiceData = async (orderId) => {

@@ -8,10 +8,9 @@ import flash from "connect-flash";
 import mongoose from "mongoose";
 import morgan from "morgan";
 import db from "./src/config/db.js";
-import signupRouter from "./src/routes/auth/signupRouter.js";
-import loginRouter from "./src/routes/auth/loginRouter.js";
+import authRouter from "./src/routes/auth/authRouter.js"
 import passport from "./src/config/passport.js";
-import homeRouter from "./src/routes/homeRouter.js";
+import userRouter from "./src/routes/userRouter.js";
 import profileRouter from "./src/routes/profileRouter.js";
 import adminRouter from "./src/routes/adminRoutes/adminRouter.js"
 import {setUser} from './src/middlewares/setUser.js';
@@ -61,10 +60,15 @@ app.set("views", path.join(__dirname, "src/views"));
 app.use(express.static(path.join(__dirname,"src/public")));
 app.use("/uploads", express.static(path.join(__dirname, "src/public/uploads")));
 
+app.use((req, res, next) => {
+  res.locals.success = req.flash('success');
+  res.locals.error = req.flash('error');
+  next();
+});
 
-app.use("/", signupRouter);
-app.use('/', loginRouter);
-app.use('/',homeRouter);
+
+app.use("/", authRouter);
+app.use('/',userRouter);
 app.use('/',profileRouter);
 app.use('/admin',adminRouter);
 

@@ -5,7 +5,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Checkout | ELARA Luxury Jewelry</title>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<script src="https://cdn.tailwindcss.com"></script>
+    <script>
+tailwind.config = {
+  theme: {
+    extend: {
+      colors: {
+        'elara-brown': '#7A5C4D'
+      }
+    }
+  }
+}
+</script>
     <style>
         :root {
             --primary-gold: #a3866a;
@@ -391,12 +402,7 @@
 <body>
 
     <!-- Header (you can keep your partial) -->
-    <header class="checkout-header">
-        <a href="/" class="logo">ELARA</a>
-        <div class="secure-badge">
-            <i class="fas fa-lock"></i> Secure Checkout
-        </div>
-    </header>
+        <%- include('../partials/header') %>
 
     <div class="container">
 
@@ -490,7 +496,9 @@
                     <% cartItems.forEach(item => { %>
                         <div class="summary-item">
                            <div class="item-thumb">
- <img src="/<%= item.product.image %>" 
+<img src="<%= item.product.image.startsWith('/') 
+    ? item.product.image 
+    : '/' + item.product.image %>" 
      alt="<%= item.product.name %>">
 
 </div>
@@ -498,7 +506,11 @@
                             <div class="item-info">
                                 <h4><%= item.product.name %></h4>
 <div class="item-qty">
-  Qty: <%= item.quantity %> × ₹<%= (item.product?.price || 0).toLocaleString('en-IN') %>
+  Qty: <%= item.quantity %> × ₹<%= item.product.price.toLocaleString('en-IN') %>
+</div>
+
+<div style="font-weight:600; margin-top:4px;">
+  ₹ <%= item.itemTotal.toLocaleString('en-IN') %>
 </div>
                             </div>
                         </div>
@@ -522,7 +534,6 @@
                     <input type="hidden" name="paymentMethod" id="selectedPayment" required>
                     <button type="submit" class="place-order-btn">Place Order →</button>
                 </form>
-
                 <a href="/cart" class="return-link">← Return to Cart</a>
             </div>
         </aside>
@@ -701,6 +712,7 @@
             });
         });
     </script>
+    <%- include('../partials/footer') %>
 
 </body>
 </html>

@@ -3,7 +3,7 @@ import { getAllProducts, getProductById, getRelatedProducts } from "../../servic
 const getShopPage = async (req, res) => {
   try {
     const page = parseInt(req.query.page)||1;
-    const limit =3;
+    const limit =9;
     const skip = (page-1)*limit;
     
     const filters = {

@@ -4,15 +4,27 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ELARA - My Profile</title>
+
     <script src="https://cdn.tailwindcss.com"></script>
 
-    <link rel="stylesheet" href="/css/profile.css">
-    <style>
+    <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            'elara-brown': '#7A5C4D'
+          }
+        }
+      }
+    }
+    </script>
+    <link rel="stylesheet" href="/css/style.css">
 
-    </style>
+ 
+    <link rel="stylesheet" href="/css/profile.css">
 </head>
 <body>
-    <!-- Navigation Bar -->
+ 
     <%- include('../partials/header') %>
 
 
@@ -58,7 +70,9 @@
 
                 <div class="action-buttons">
                     <a href="/profile/edit" class="btn btn-primary">Edit Profile</a>
-                    <a href="/profile/change-password" class="btn btn-secondary">Change Password</a>
+                  <% if (user.authType === "local") { %>
+<a href="/profile/change-password" class="btn btn-secondary">Change Password</a>
+<% } %>
                 </div>
             </section>
         </div>

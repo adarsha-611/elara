@@ -13,7 +13,10 @@ export const validateProduct = (data, files = [], existingImages = []) => {
   stock: Joi.number().integer().min(0).required().messages({
     "number.base": "Stock must be a number",
     "number.min": "Stock cannot be negative"
-  })
+  }),
+  // metalType:Joi.string().required().messages({
+  //   "string.empty":"Variant metal type is required"
+  // })
 }).unknown(true);
 
 
@@ -34,12 +37,12 @@ export const validateProduct = (data, files = [], existingImages = []) => {
       "string.empty": "Category is required"
     }),
 
-    // 🔽 FIXED PART
+
     variants: Joi.alternatives().try(
 
       Joi.object().pattern(Joi.string(), variantItemSchema),
 
-      // CASE 2 → Array format
+ 
       Joi.array().items(variantItemSchema)
 
     ).required().messages({
