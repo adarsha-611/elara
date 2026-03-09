@@ -14,6 +14,7 @@ import userRouter from "./src/routes/userRouter.js";
 import profileRouter from "./src/routes/profileRouter.js";
 import adminRouter from "./src/routes/adminRoutes/adminRouter.js"
 import {setUser} from './src/middlewares/setUser.js';
+import { cartCount} from "./src/middlewares/cartMiddleware.js";
 
 
 
@@ -66,7 +67,7 @@ app.use((req, res, next) => {
   next();
 });
 
-
+app.use(cartCount);
 app.use("/", authRouter);
 app.use('/',userRouter);
 app.use('/',profileRouter);

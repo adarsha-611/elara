@@ -7,7 +7,7 @@ import logoutController from "../controller/user/logoutController.js";
 import orderController from "../controller/user/orderController.js";
 import upload from "../middlewares/multer.js";
 
-
+//Profile
 router.get('/profile', isLoggedIn, profileController.getProfile);
 router.get('/profile/edit', isLoggedIn, profileController.getEditProfile);
 router.post('/profile/edit', isLoggedIn, upload.single('profileImage'), profileController.updateProfile);
@@ -18,13 +18,14 @@ router.post('/profile/change-password', isLoggedIn, profileController.postChange
 router.post('/profile/email/update', isLoggedIn, profileController.requestEmailUpdate);
 router.post('/profile/email/verify', isLoggedIn, profileController.verifyEmailUpdate);
 
-
+//Profile Address
 router.get('/profile/address', isLoggedIn, addressController.getAddresses);
 router.post('/profile/address/add', isLoggedIn, addressController.addAddress);
 router.post('/profile/address/edit', isLoggedIn, addressController.editAddress); 
 router.get('/profile/address/delete/:addressId', isLoggedIn, addressController.deleteAddress); 
 router.get('/profile/address/setdefault/:addressId', isLoggedIn, addressController.setDefaultAddress);
 
+//profile orders
 router.get('/profile/orders',isLoggedIn,orderController.getOrderlistPage)
 router.get('/profile/orders/:id',orderController.getOrderdetailPage);
 router.post('/profile/orders/:id/return',orderController.returnOrder);

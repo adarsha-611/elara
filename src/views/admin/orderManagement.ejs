@@ -200,26 +200,64 @@ body {
                 <h1>Order Management</h1>
             </header>
 
-           <div class="filter-bar">
-    <select id="statusFilter" class="admin-input">
-        <option value="">All Statuses</option>
-        <option value="pending">Pending</option>
-        <option value="delivered">Delivered</option>
-        <option value="cancelled">Cancelled</option>
-    </select>
+           <form method="GET" action="/admin/orders" class="filter-bar">
 
-    <input type="text" id="searchOrderId" placeholder="Search with order id" class="admin-input search-id">
-    <button id="searchBtn" class="btn-admin-action">Search</button> <!-- Added Search button -->
+<select name="status" class="admin-input">
+<option value="">All Status</option>
 
-    <!-- <div class="date-group">
-        <input type="date" id="startDate" class="admin-input date-input">
-        <input type="date" id="endDate" class="admin-input date-input">
-    </div> -->
+<option value="pending" <%= status === "pending" ? "selected" : "" %>>
+Pending
+</option>
 
-    <button id="sortBtn" class="btn-admin-action">Date (Newest First)</button>
-    <button class="btn-admin-action primary-action">Download order List</button>
-    <button id="clearFilters" class="btn-admin-action">Clear Filters</button>
-</div>
+<option value="shipped" <%= status === "shipped" ? "selected" : "" %>>
+Shipped
+</option>
+
+<option value="out for delivery" <%= status === "out for delivery" ? "selected" : "" %>>
+Out for Delivery
+</option>
+
+<option value="delivered" <%= status === "delivered" ? "selected" : "" %>>
+Delivered
+</option>
+
+<option value="cancelled" <%= status === "cancelled" ? "selected" : "" %>>
+Cancelled
+</option>
+
+</select>
+
+<input
+type="text"
+name="search"
+value="<%= search %>"
+placeholder="Search Order ID or Customer"
+class="admin-input search-id"
+/>
+
+<select name="sort" class="admin-input">
+
+<option value="newest" <%= sort === "newest" ? "selected" : "" %>>
+Date (Newest First)
+</option>
+
+<option value="oldest" <%= sort === "oldest" ? "selected" : "" %>>
+Date (Oldest First)
+</option>
+
+</select>
+
+<button type="submit" class="btn-admin-action">
+Search
+</button>
+
+<a href="/admin/orders">
+<button type="button" class="btn-admin-action">
+Clear
+</button>
+</a>
+
+</form>
 
             <div class="table-container">
                 <table class="admin-table">
@@ -276,14 +314,35 @@ body {
                 </table>
             </div>
 
-            <div class="admin-pagination">
-                <button class="page-arrow">‹</button>
-                <button class="page-num">1</button>
-                <button class="page-num active">2</button>
-                <button class="page-num">3</button>
-                <button class="page-num">4</button>
-                <button class="page-arrow">›</button>
-            </div>
+           <div class="admin-pagination">
+
+<% if(currentPage > 1){ %>
+<a href="?page=<%= currentPage-1 %>&search=<%= search %>&status=<%= status %>&sort=<%= sort %>">
+<button class="page-arrow">‹</button>
+</a>
+<% } %>
+
+<% for(let i = 1; i <= totalPages; i++){ %>
+
+<a href="?page=<%= i %>&search=<%= search %>&status=<%= status %>&sort=<%= sort %>">
+
+<button class="page-num <%= currentPage === i ? 'active' : '' %>">
+
+<%= i %>
+
+</button>
+
+</a>
+
+<% } %>
+
+<% if(currentPage < totalPages){ %>
+<a href="?page=<%= currentPage+1 %>&search=<%= search %>&status=<%= status %>&sort=<%= sort %>">
+<button class="page-arrow">›</button>
+</a>
+<% } %>
+
+</div>
         </main>
     </div>
     <script>
@@ -306,108 +365,7 @@ async function updateStatus(orderId, status) {
     }
 }
 
-document.addEventListener("DOMContentLoaded", () => {
-    const statusFilter = document.getElementById("statusFilter");
-    const searchOrderId = document.getElementById("searchOrderId");
-    const searchBtn = document.getElementById("searchBtn");
-    const startDate = document.getElementById("startDate");
-    const endDate = document.getElementById("endDate");
-    const sortBtn = document.getElementById("sortBtn");
-    const clearBtn = document.getElementById("clearFilters");
-    const tableBody = document.querySelector(".admin-table tbody");
 
-    let ordersData = <%- JSON.stringify(orders) %>; // all orders
-    let sortAsc = false;
-
-    function capitalize(str) {
-        return str.charAt(0).toUpperCase() + str.slice(1);
-    }
-
-    function statusOptions(currentStatus) {
-        const flow = {
-            pending: ["pending","shipped","cancelled"],
-            shipped: ["shipped","out for delivery"],
-            "out for delivery": ["out for delivery","delivered"],
-            delivered: ["delivered"],
-            cancelled: ["cancelled"]
-        };
-        return flow[currentStatus] || [currentStatus];
-    }
-
-    function renderTable(data) {
-        tableBody.innerHTML = "";
-        data.forEach(order => {
-            const dateStr = new Date(order.createdAt).toLocaleDateString();
-            const status = order.orderStatus;
-            tableBody.innerHTML += `
-            <tr>
-                <td>${order.user?.fullName || "N/A"}</td>
-                <td>${order.user?.email || "N/A"}</td>
-                <td>${dateStr}</td>
-                <td>₹${order.totalAmount}</td>
-                <td>
-                    <select class="status-dropdown status-${status}" 
-                        onchange="updateStatus('${order._id}', this.value)"
-                        ${['delivered','cancelled'].includes(status) ? 'disabled' : ''}>
-                        ${statusOptions(status).map(s => `<option value="${s}" ${s===status?'selected':''}>${capitalize(s)}</option>`).join("")}
-                    </select>
-                </td>
-                <td><a href="/admin/orders/${order._id}" class="view-outline">View</a></td>
-            </tr>
-            `;
-        });
-    }
-
-    function filterAndSort() {
-        let filtered = [...ordersData];
-
-        // Filter by status
-        if(statusFilter.value) {
-            filtered = filtered.filter(o => o.orderStatus === statusFilter.value);
-        }
-
-        // Filter by Order ID (only triggered by Search button)
-        if(searchOrderId.value.trim()) {
-            filtered = filtered.filter(o => o._id.includes(searchOrderId.value.trim()));
-        }
-
-        // Filter by date range
-        if(startDate.value) {
-            filtered = filtered.filter(o => new Date(o.createdAt) >= new Date(startDate.value));
-        }
-        if(endDate.value) {
-            filtered = filtered.filter(o => new Date(o.createdAt) <= new Date(endDate.value));
-        }
-
-        // Sort by date
-        filtered.sort((a,b) => sortAsc ? new Date(a.createdAt) - new Date(b.createdAt) : new Date(b.createdAt) - new Date(a.createdAt));
-
-        renderTable(filtered);
-    }
-
-    // Event Listeners
-    statusFilter.addEventListener("change", filterAndSort);
-    sortBtn.addEventListener("click", () => {
-        sortAsc = !sortAsc;
-        sortBtn.innerText = sortAsc ? "Date (Oldest First)" : "Date (Newest First)";
-        filterAndSort();
-    });
-    clearBtn.addEventListener("click", () => {
-        statusFilter.value = "";
-        searchOrderId.value = "";
-        startDate.value = "";
-        endDate.value = "";
-        sortAsc = false;
-        sortBtn.innerText = "Date (Newest First)";
-        renderTable(ordersData);
-    });
-
-    // Search button triggers filtering
-    searchBtn.addEventListener("click", filterAndSort);
-
-    // Initial render
-    renderTable(ordersData);
-});
 </script>
 
 </body>

@@ -7,6 +7,7 @@ export const productsPage = async (page = 1, limit = 5) => {
     const totalProducts = await Product.countDocuments({ isDeleted: false });
 
     const products = await Product.find({ isDeleted: false })
+      .populate('category', 'name') 
       .sort({ createdAt: -1 }) 
       .skip(skip)
       .limit(limit);
@@ -39,7 +40,6 @@ export const createProduct = async (data, files) => {
 
       return {
         color: variant.color,
-        // metal: variant.metalType,
         price: Number(variant.price),
         stock: Number(variant.stock),
         images
@@ -124,7 +124,7 @@ export const updateProduct = async (id, data, files) => {
       });
     }
 
-    // Replace full variant array safely
+    
     product.variants = updatedVariants;
 
     await product.save();

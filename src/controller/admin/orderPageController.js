@@ -63,9 +63,9 @@ const getOrderdetailPage = async (req, res) => {
         path: "user",
         select: "name email"
       })
-      .populate({
+     .populate({
         path: "items.product",
-        select: "name"
+        select: "name images"
       });
 
     if (!order) return res.status(404).send("Order not found");

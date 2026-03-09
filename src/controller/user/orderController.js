@@ -80,7 +80,7 @@ const cancelOrder = async (req, res) => {
 
     const { orderId, itemId } = req.params;
 
-    await cancelOrderItemService(orderId, itemId);
+    await cancelOrderService(orderId, itemId);
 
     return res.status(200).json({
       success: true,

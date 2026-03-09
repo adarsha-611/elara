@@ -78,7 +78,7 @@
                                         <span class="variant-count">(<%= product.variants.length %> variants)</span>
                                     <% } %>
                                 </td>
-                                <td><%= product.category || "—" %></td>
+                                <td><%= product.category ? product.category.name : "—" %></td>
                                 <td>
                                     <% if (product.variants && product.variants.length > 0) { %>
                                         <%= product.variants.map(v => v.color || "—").join(" / ") %>

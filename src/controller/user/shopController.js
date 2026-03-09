@@ -15,6 +15,8 @@ const getShopPage = async (req, res) => {
     
  
     const products = await getAllProducts(filters);
+    console.log('products;',products)
+ 
 
     const totalProducts = products.length;
     const totalPages = Math.ceil(totalProducts/limit);

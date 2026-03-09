@@ -1,4 +1,4 @@
-// Check user is logged in
+
 export function isLoggedIn(req, res, next) {
 
     res.set("Cache-Control", "no-store");
@@ -12,7 +12,7 @@ export function isLoggedIn(req, res, next) {
 }
 
 
-// Prevent logged-in users from visiting login/signup page
+
 export function redirectIfAuthenticated(req, res, next) {
 
     res.set("Cache-Control", "no-store");

@@ -43,8 +43,8 @@ const getCategoryPage = async (req, res) => {
 const getAddCategory = (req, res) => {
     try {
         return res.render("admin/category", {  
-            sidebarPage: "category",   // ✅ ADD THIS
-            currentPage: 1,            // ✅ number for pagination
+            sidebarPage: "category",  
+            currentPage: 1,           
             categories: [],
             totalPages: 0,
             search: "",

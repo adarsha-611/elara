@@ -411,16 +411,25 @@ tailwind.config = {
             <h1 class="page-title">Checkout</h1>
 
             <!-- Messages -->
-            <% if (success && success.length) { %>
-                <div style="background:#e8f5e9; color:#2e7d32; padding:14px; border-radius:6px; margin-bottom:24px;">
-                    <%= success %>
-                </div>
-            <% } %>
             <% if (error && error.length) { %>
-                <div style="background:#ffebee; color:#c62828; padding:14px; border-radius:6px; margin-bottom:24px;">
-                    <%= error %>
-                </div>
-            <% } %>
+  <div style="background:#ffebee; color:#c62828; padding:14px; border-radius:6px; margin-bottom:24px;">
+    <ul style="margin:0; padding-left:18px;">
+      <% error.forEach(msg => { %>
+        <li><%= msg %></li>
+      <% }) %>
+    </ul>
+  </div>
+<% } %>
+
+<% if (success && success.length) { %>
+  <div style="background:#e8f5e9; color:#2e7d32; padding:14px; border-radius:6px; margin-bottom:24px;">
+    <ul style="margin:0; padding-left:18px;">
+      <% success.forEach(msg => { %>
+        <li><%= msg %></li>
+      <% }) %>
+    </ul>
+  </div>
+<% } %>
 
             <!-- 1. Delivery Address -->
             <section class="section">
@@ -555,27 +564,27 @@ tailwind.config = {
                 <div class="form-row">
                     <div class="form-group">
                         <label>Full Name *</label>
-                        <input type="text" name="fullName" id="fullName" required>
+                        <input type="text" name="fullName" id="fullName"maxlength="10">
                     </div>
                     <div class="form-group">
                         <label>Phone Number *</label>
-                        <input type="tel" name="phoneNumber" id="phoneNumber" required>
+                        <input type="tel" name="phoneNumber" id="phoneNumber" maxlength="10">
                     </div>
                 </div>
 
                 <div class="form-group">
                     <label>Street Address *</label>
-                    <textarea name="street" id="street" rows="3" required></textarea>
+                    <textarea name="street" id="street" rows="3" maxlength="50"></textarea>
                 </div>
 
                 <div class="form-row">
                     <div class="form-group">
                         <label>City *</label>
-                        <input type="text" name="city" id="city" required>
+                        <input type="text" name="city" id="city" maxlength="10">
                     </div>
                     <div class="form-group">
                         <label>State *</label>
-                        <input type="text" name="state" id="state" required>
+                        <input type="text" name="state" id="state" maxlength="10">
                     </div>
                 </div>
 
@@ -584,7 +593,7 @@ tailwind.config = {
     <!-- Pincode -->
     <div class="form-group">
         <label>Pincode *</label>
-        <input type="text" name="pincode" id="pincode" required>
+        <input type="text" name="pincode" id="pincode" maxlength="6">
     </div>
 
     <!-- Address Type -->

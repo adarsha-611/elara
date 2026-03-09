@@ -22,9 +22,19 @@ export async function getAllProducts(filters = {}) {
       query.name = { $regex: filters.search, $options: "i" };
     }
 
-    if (filters.category && activeCategoryIds.includes(filters.category)) {
-      query.category = filters.category;
-    }
+   if (filters.category) {
+
+  const categoryNames = filters.category.split(",");
+
+  const categoryDocs = await Category.find({
+    name: { $in: categoryNames },
+    isActive: true
+  });
+
+  const categoryIds = categoryDocs.map(c => c._id);
+
+  query.category = { $in: categoryIds };
+}
 
    
     let sortOption = {};
@@ -34,6 +44,7 @@ export async function getAllProducts(filters = {}) {
     if (filters.sort === "new") sortOption.createdAt = -1;
 
     let products = await Product.find(query).sort(sortOption);
+    console.log('query:',query)
 
     if (filters.price) {
       const ranges = filters.price.split(",");
@@ -47,8 +58,8 @@ export async function getAllProducts(filters = {}) {
     }
 
     return products;
-
-  } catch (error) {
+  }
+   catch (error) {
     console.log("Product error", error);
     throw error;
   }

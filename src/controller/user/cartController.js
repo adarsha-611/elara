@@ -24,19 +24,25 @@ const getCartPage = async (req, res) => {
       products.forEach(p => {
         productMap[p._id.toString()] = p;
       });
+    cartItems = cart.items.map(item => {
+    const product = productMap[item.productId.toString()];
+    if (!product) return null; 
 
-     cartItems = cart.items.map(item => {
-  const product = productMap[item.productId.toString()];
+    
+    const variant = product.variants.find(v => 
+        item.variantId ? v._id.toString() === item.variantId.toString() : false
+    ) || product.variants[0]; 
 
-  return {
-    productId: item.productId,
-    quantity: item.quantity,
-    price: item.price,
-    stock: product?.variants?.[0]?.stock || 0,
-    name: product?.name || "No Name",
-    image: product?.variants?.[0]?.images?.[0] || "/images/default.png"
-  };
-});
+    return {
+        productId: item.productId,
+        variantId: item.variantId,
+        quantity: item.quantity,
+        price: variant.price,
+        stock: variant.stock,
+        name: product.name,
+        image: variant.images?.[0] || "/images/default.png"
+    };
+}).filter(item => item !== null); 
 
     }
 

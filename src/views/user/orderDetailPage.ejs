@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Order Details | ELARA Luxury Jewelry</title>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
 <script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="/css/profile.css">
     <script>
 tailwind.config = {
   theme: {
@@ -218,49 +218,7 @@ body {
 .account-container {
     display: flex;
 }
-.sidebar {
-    width: 280px;
-    background-color: var(--sidebar-brown);
-    border-radius: 4px;
-    padding: 30px 0;
-    color: white;
-    height: fit-content;
-}
 
-.sidebar .user-info {
-    display: flex;
-    align-items: center;
-    padding: 0 25px 25px;
-    border-bottom: 1px solid rgba(255,255,255,0.1);
-    margin-bottom: 20px;
-}
-
-.sidebar .user-avatar {
-    width: 45px;
-    height: 45px;
-    background: rgba(255,255,255,0.2);
-    border-radius: 50%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    margin-right: 15px;
-    font-size: 1.2rem;
-    overflow: hidden;
-}
-
-.sidebar-menu a {
-    display: block;
-    padding: 15px 25px;
-    color: rgba(255,255,255,0.8);
-    text-decoration: none;
-    font-size: 0.9rem;
-}
-
-.sidebar-menu a:hover,
-.sidebar-menu a.active {
-    background: rgba(0,0,0,0.15);
-    color: white;
-}
 @media (min-width: 768px) {
     .detail-actions {
         flex-direction: row;
@@ -388,6 +346,20 @@ body {
     object-fit: cover;
     border-radius: 6px;
 }
+.cancel-btn{
+    background-color:#e74c3c;
+    color:white;
+    border:none;
+    padding:6px 12px;
+    font-size:13px;
+    border-radius:6px;
+    cursor:pointer;
+    transition:0.3s;
+}
+
+.cancel-btn:hover{
+    background-color:#c0392b;
+}
    </style>
 </head>
 <body>
@@ -412,6 +384,9 @@ body {
             i => i.returnRequest && i.returnRequest.status === "accepted"
         );
     %>
+    <%
+const someItemCancelled = order.items.some(i => i.itemStatus === "cancelled");
+%>
 
     <div class="stepper">
 
@@ -427,24 +402,21 @@ body {
         </div>
 
         <!-- Processing -->
-        <div class="step <%= ["confirmed","shipped","out for delivery","delivered"].includes(order.orderStatus) ? "completed" : "" %>">
-            <div class="step-icon"><i class="fa-solid fa-gears"></i></div>
+<div class="step <%= ["confirmed","shipped","out for delivery","delivered","cancelled"].includes(order.orderStatus) ? "completed" : "" %>">            <div class="step-icon"><i class="fa-solid fa-gears"></i></div>
             <div class="step-text">
                 <strong>Processing</strong>
             </div>
         </div>
 
         <!-- Shipped -->
-        <div class="step <%= ["shipped","out for delivery","delivered"].includes(order.orderStatus) ? "completed" : "" %>">
-            <div class="step-icon"><i class="fa-solid fa-truck"></i></div>
+<div class="step <%= ["shipped","out for delivery","delivered","cancelled"].includes(order.orderStatus) ? "completed" : "" %>">            <div class="step-icon"><i class="fa-solid fa-truck"></i></div>
             <div class="step-text">
                 <strong>Shipped</strong>
             </div>
         </div>
 
         <!-- Out for Delivery -->
-        <div class="step <%= ["out for delivery","delivered"].includes(order.orderStatus) ? "completed" : "" %>">
-            <div class="step-icon"><i class="fa-solid fa-motorcycle"></i></div>
+<div class="step <%= ["out for delivery","delivered","cancelled"].includes(order.orderStatus) ? "completed" : "" %>">            <div class="step-icon"><i class="fa-solid fa-motorcycle"></i></div>
             <div class="step-text">
                 <strong>Out for Delivery</strong>
             </div>
@@ -479,14 +451,17 @@ body {
         <% } %>
 
         <!-- Cancelled -->
-        <% if(order.orderStatus === "cancelled") { %>
-            <div class="step completed">
-                <div class="step-icon">❌</div>
-                <div class="step-text">
-                    <strong>Order Cancelled</strong>
-                </div>
-            </div>
-        <% } %>
+<% if(order.orderStatus === "cancelled" || someItemCancelled) { %>
+    <div class="step completed">
+<div class="step-icon">❌</div>
+<div class="step-text">
+<strong>Order Cancelled</strong>
+<span>
+<%= new Date().toLocaleDateString("en-IN") %>
+</span>
+</div>
+</div>
+<% } %>
 
     </div>
 </div>
@@ -498,7 +473,7 @@ body {
 
     <div class="order-item">
 
-   <%
+<%
 let variant = item.product.variants.find(
   v => v.color === item.variantColor
 );
@@ -506,24 +481,35 @@ let variant = item.product.variants.find(
 
 <% if (variant && variant.images && variant.images.length > 0) { %>
     <img src="<%= variant.images[0] %>" width="80">
-<% } else { %>
-    <p>No image</p>
 <% } %>
-<!-- <pre><%= JSON.stringify(item.product, null, 2) %></pre> -->
 
-      <div class="item-info">
-        <strong>
-<%= item.product?.name || "Product unavailable" %>
-        </strong>
-        <span>Qty: <%= item.quantity %></span>
-        <span>Color: <%= item.variantColor %></span>
-      </div>
+<div class="item-info">
+    <strong><%= item.product?.name || "Product unavailable" %></strong>
+    <span>Qty: <%= item.quantity %></span>
+    <span>Color: <%= item.variantColor %></span>
+</div>
 
-      <div class="item-price">
-        ₹ <%= item.total.toLocaleString() %>
-      </div>
+<div class="item-price">
+    ₹ <%= item.total.toLocaleString() %>
+</div>
 
-    </div>
+<% if(order.orderStatus !== "delivered" && item.itemStatus !== "cancelled") { %>
+
+<button
+type="button"
+onclick="cancelItem('<%= order._id %>','<%= item._id %>',event)"
+class="cancel-btn">
+Cancel
+</button>
+
+
+<% } else if(item.itemStatus === "cancelled") { %>
+
+<span style="color:red;font-size:13px;">Cancelled</span>
+
+<% } %>
+
+</div>
 
   <% }) %>
 </div>
@@ -542,7 +528,7 @@ let variant = item.product.variants.find(
                 <div class="card">
                     <h3>Payment Method</h3>
             <p class="payment-text">
-      <strong>Payment Method :</strong> <%= order.paymentMethod.toUpperCase() %><br>
+      <strong>Payment Method :</strong> <%= order.paymentMethod === 'cod'?'Cash On Delivary' : 'Online Payment' %><br>
   <strong>Status :</strong> <%= order.paymentStatus %>
 </p>
                 </div>
@@ -583,16 +569,7 @@ let variant = item.product.variants.find(
 </button>
   <% } else if (order.orderStatus !== 'cancelled') { %>
 
-      <!-- Cancel Button -->
-      <% order.items.forEach(item => { %>
-
-<form action="/profile/orders/<%= order._id %>/cancel/<%= item._id %>" method="POST">
-    <button type="submit" class="btn-secondary">
-        Cancel Item
-    </button>
-</form>
-
-<% }) %>
+    
 
   <% } %>
 <a href="/profile/orders/<%= order._id %>/invoice"
@@ -605,7 +582,7 @@ let variant = item.product.variants.find(
     </main>
 
    
->
+
 
       <!-- Return Modal -->
 <div id="returnModal" class="custom-modal">
@@ -747,42 +724,60 @@ document.addEventListener("DOMContentLoaded", function () {
 </script>
 </script>
 <script>
-function cancelOrder(orderId) {
-  Swal.fire({
-    title: 'Are you sure?',
-    text: 'Do you want to cancel this order?',
-    icon: 'warning',
-    showCancelButton: true,
-    confirmButtonText: 'Yes, Cancel',
-    cancelButtonText: 'No',
-  }).then((result) => {
-    if (result.isConfirmed) {
-      Swal.fire({
-        title: 'Processing...',
-        allowOutsideClick: false,
-        didOpen: () => Swal.showLoading()
-      });
+function cancelItem(orderId,itemId){
 
-      fetch(`/profile/orders/${orderId}/cancel`, { method: 'POST' })
-        .then(res => res.json())
-        .then(data => {
-          Swal.close();
-          if (!data.success) throw new Error(data.message);
-          Swal.fire({
-            icon: 'success',
-            title: 'Cancelled!',
-            text: data.message,
-            timer: 1500,
-            showConfirmButton: false
-          });
-          setTimeout(() => location.reload(), 1600);
-        })
-        .catch(err => {
-          Swal.close();
-          Swal.fire('Error', err.message || 'Something went wrong', 'error');
-        });
-    }
-  });
+Swal.fire({
+title: "Cancel this item?",
+text: "This action cannot be undone!",
+icon: "warning",
+showCancelButton: true,
+confirmButtonText: "Yes, Cancel",
+cancelButtonText: "No"
+}).then((result)=>{
+
+if(result.isConfirmed){
+
+Swal.fire({
+title: "Cancelling...",
+allowOutsideClick:false,
+didOpen:()=>Swal.showLoading()
+})
+
+fetch(`/profile/orders/${orderId}/cancel/${itemId}`,{
+method:"POST"
+})
+.then(res=>res.json())
+.then(data=>{
+
+Swal.close()
+
+if(data.success){
+
+Swal.fire({
+icon:"success",
+title:"Cancelled",
+text:data.message,
+timer:1500,
+showConfirmButton:false
+})
+
+setTimeout(()=>location.reload(),1500)
+
+}else{
+
+Swal.fire("Error",data.message,"error")
+
+}
+
+})
+.catch(()=>{
+Swal.fire("Error","Something went wrong","error")
+})
+
+}
+
+})
+
 }
 </script>
 

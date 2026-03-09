@@ -7,6 +7,23 @@
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/css/adminOrderdetail.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+      .product-cell{
+display:flex;
+align-items:center;
+gap:10px;
+}
+
+.product-img{
+width:45px;
+height:45px;
+object-fit:cover;
+border-radius:6px;
+}
+.details-container {
+  margin: 0 auto; 
+}
+    </style>
 </head>
 <body>
 
@@ -43,7 +60,7 @@
                         <div class="info-item">
                             <label>Customer :</label>
                             <div class="customer-data">
-                                <strong><%= order.user.fullName %></strong><br>
+                                <strong><%= order.user.name %></strong>
                                 <%= order.user.email %>
                             </div>
                         </div>
@@ -80,7 +97,12 @@
                         <tbody>
                             <% order.items.forEach(item => { %>
                             <tr>
-                              <td><%= item.product?.name || "N/A" %></td>                              
+                             <td class="product-cell">
+  <% if(item.product && item.product.images && item.product.images.length > 0){ %>
+    <img src="/uploads/<%= item.product.images[0] %>" class="product-img">
+  <% } %>
+  <span><%= item.product?.name || "N/A" %></span>
+</td>                            
                                 <td><%= item.variantColor %></td>
                                 <td><%= item.quantity %></td>
                                 <td>₹ <%= item.price %></td>
@@ -114,35 +136,7 @@
                 </div>
             </div>
 
-            
-            <aside class="timeline-column">
-                <div class="timeline-card">
-                    <h3>Order Status</h3>
-                    <div class="timeline">
-                        <% 
-                        const timelineStages = [
-                            { key: "pending", icon: "⏳", title: "Pending", desc: "Seller received the order, waiting confirmation." },
-                            { key: "confirmed", icon: "✅", title: "Confirmed", desc: "Order confirmed by seller." },
-                            { key: "shipped", icon: "🚚", title: "Shipped", desc: "Order has been shipped." },
-                            { key: "out for delivery", icon: "📦", title: "Out for Delivery", desc: "Order is on the way." },
-                            { key: "delivered", icon: "🏠", title: "Delivered", desc: "Order delivered to customer." },
-                            { key: "cancelled", icon: "❌", title: "Cancelled", desc: "Order cancelled." }
-                        ];
-                        %>
-
-                        <% timelineStages.forEach(stage => { %>
-                            <div class="timeline-item <%= order.orderStatus === stage.key ? 'active' : (timelineStages.findIndex(s => s.key === stage.key) < timelineStages.findIndex(s => s.key === order.orderStatus) ? 'completed' : '') %>">
-                                <div class="icon"><%= stage.icon %></div>
-                                <div class="content">
-                                    <strong><%= stage.title %></strong>
-                                    <% if(stage.desc) { %><p><%= stage.desc %></p><% } %>
-                                    <small><%= order.updatedAt ? new Date(order.updatedAt).toLocaleString() : '' %></small>
-                                </div>
-                            </div>
-                        <% }) %>
-                    </div>
-                </div>
-            </aside>
+           
         </div>
     </main>
 </div>

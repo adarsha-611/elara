@@ -2,7 +2,7 @@ import Order from "../../model/orderSchema.js";
 import Product from "../../model/productSchema.js";
 
 
-export const getUserOrders = async (userId, page = 1, limit = 5) => {
+export const getUserOrders = async (userId, page = 1, limit = 3) => {
   const skip = (page - 1) * limit;
 
 
@@ -85,7 +85,6 @@ export const requestReturn = async (orderId, itemId, reason) => {
     }
   );
 };
-
 export const cancelOrderService = async (orderId, itemId) => {
 
   const order = await Order.findById(orderId);
@@ -121,8 +120,29 @@ export const cancelOrderService = async (orderId, itemId) => {
 
     await product.save();
   }
+ item.itemStatus = "cancelled";
 
-  item.itemStatus = "cancelled";
+
+const cancelledCount = order.items.filter(
+  i => i.itemStatus === "cancelled"
+).length;
+
+
+if (cancelledCount === order.items.length) {
+  order.orderStatus = "cancelled";
+} else if (cancelledCount > 0) {
+  order.orderStatus = "cancelled"; 
+}
+
+await order.save();
+
+  const allCancelled = order.items.every(
+    i => i.itemStatus === "cancelled"
+  );
+
+  if (allCancelled) {
+    order.orderStatus = "cancelled";
+  }
 
   await order.save();
 

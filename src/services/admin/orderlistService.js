@@ -1,5 +1,6 @@
     import Order from '../../model/orderSchema.js';
     import User from '../../model/userSchema.js';
+    import Product from "../../model/productSchema.js";
 
     export const getOrderlist = async({
         page = 1,
@@ -127,8 +128,9 @@ export const requestReturn = async(orderId, itemId, reason) => {
     }
   );
 }
-export const acceptReturnReq = async (orderId, itemId) => {
 
+
+export const acceptReturnReq = async (orderId, itemId) => {
   const order = await Order.findById(orderId);
   if (!order) throw new Error("Order not found");
 
@@ -139,25 +141,31 @@ export const acceptReturnReq = async (orderId, itemId) => {
     throw new Error("Return already processed");
   }
 
-  // ✅ Update return request
+
   item.returnRequest.status = "accepted";
   item.returnRequest.processedAt = new Date();
-
-  // ✅ FIXED FIELD NAME
   item.itemStatus = "returned";
 
-  // ✅ Check if all items returned
-  const allReturned = order.items.every(
-    i => i.itemStatus === "returned"
-  );
 
+  const product = await Product.findById(item.product);
+  if (product) {
+    const variant = product.variants.find(
+      v => v.color === item.variantColor
+    );
+    if (variant) {
+      variant.stock += item.quantity;
+    }
+    await product.save();
+  }
+
+  
+  const allReturned = order.items.every(i => i.itemStatus === "returned");
   if (allReturned) {
-    order.orderStatus = "cancelled"; // or create new "returned" status
+    order.orderStatus = "cancelled";
   }
 
   await order.save();
 };
-
 
 export const rejectReturnReq = async(orderId, itemId) => {
   await Order.updateOne(

@@ -123,7 +123,14 @@
         <div class="icons">
             <a href="/wishlist"><i class="fa-regular fa-heart"></i></a>
             <a href="/profile"><i class="fa-regular fa-user"></i></a>
-            <a href="/cart"><i class="fa-solid fa-bag-shopping"></i></a>
+            <a href="/cart" class="relative inline-block">
+    <i class="fa fa-shopping-cart text-xl"></i>
+    <% if(cartCount > 0){ %>
+        <span class="absolute -top-2 -right-2 bg-red-500 text-white text-xs px-2 rounded-full">
+            <%= cartCount %>
+        </span>
+    <% } %>
+</a>
         </div>
     <% } else { %>
         <div class="auth-buttons">

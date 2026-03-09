@@ -8,7 +8,7 @@ const getHome = async (req, res) => {
             return res.redirect('/login');
         }
 
-        // 🔥 Fetch latest active products
+      
         const products = await Product.find({
             isActive: true,
             isDeleted: false

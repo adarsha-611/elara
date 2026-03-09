@@ -1,5 +1,5 @@
 import User from "../../model/userSchema.js";
-import { validateAddress } from "../../utils/validators/joi_address.js";
+import validateAddress from '../../utils/validators/joi_address.js';
 
 const getAddresses = async (req, res) => {
   try {
@@ -39,7 +39,29 @@ const getAddresses = async (req, res) => {
 
 const addAddress = async (req, res) => {
     try {
-        console.log("Add Address - req.body:", req.body);  
+        console.log("Add Address - req.body:", req.body);
+const { error } = validateAddress(req.body);
+
+if (error) {
+
+    const errors = error.details.map(err => ({
+        field: err.path[0],
+        message: err.message
+    }));
+
+    const user = await User.findById(req.session.userId);
+
+    return res.render("user/profile/address", {
+        user,
+        addresses: user.addresses,
+        validationErrors: JSON.stringify(errors),
+        oldInput: JSON.stringify(req.body),
+        showModalAfterError: "add",
+        formMode: "add",
+        success: null,
+        error: null
+    });
+}
 
         const userId = req.session.userId;
         req.body.isDefault = req.body.isDefault === "on" || req.body.isDefault === true;

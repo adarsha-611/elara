@@ -14,9 +14,7 @@ export const validateProduct = (data, files = [], existingImages = []) => {
     "number.base": "Stock must be a number",
     "number.min": "Stock cannot be negative"
   }),
-  // metalType:Joi.string().required().messages({
-  //   "string.empty":"Variant metal type is required"
-  // })
+  
 }).unknown(true);
 
 

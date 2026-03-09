@@ -24,23 +24,27 @@ export const signupSchema = Joi.object({
       "any.required": "Email is required"
     }),
 
-  password: Joi.string()
-    .min(6)
-    .required()
-    .messages({
-      "string.empty": "Password is required",
-      "string.min": "Password must be at least 6 characters",
-      "any.required": "Password is required"
-    }),
+password: Joi.string()
+  .trim()
+  .min(6)
+  .pattern(/^\S+$/)
+  .required()
+  .messages({
+    "string.empty": "Password is required",
+    "string.min": "Password must be at least 6 characters",
+    "string.pattern.base": "Password cannot contain spaces",
+    "any.required": "Password is required"
+  }),
 
-  confirmPassword: Joi.string()
-    .valid(Joi.ref("password"))
-    .required()
-    .messages({
-      "any.only": "Passwords do not match",
-      "string.empty": "Please confirm your password",
-      "any.required": "Please confirm your password"
-    }),
+ confirmPassword: Joi.string()
+  .trim()
+  .valid(Joi.ref("password"))
+  .required()
+  .messages({
+    "any.only": "Passwords do not match",
+    "string.empty": "Please confirm your password",
+    "any.required": "Please confirm your password"
+  }),
 
   referralCode: Joi.string()
     .optional()

@@ -3,6 +3,7 @@ import Cart from "../../model/cartSchema.js";
 import Product from "../../model/productSchema.js";
 import Mongoose from "mongoose";
 import User from '../../model/userSchema.js';
+import { validateAddress } from "../../utils/validators/joi_address.js";
 
 const generateOrderId = () => {
   const random = Math.floor(100000 + Math.random() * 900000);
@@ -15,14 +16,15 @@ const getCheckoutPage = async (req, res) => {
     const userId = req.session.userId;
 
     if (!userId) {
+       console.log("No userId in session");
       return res.redirect("/login");
     }
 
     const user = await User.findById(userId);
-const cart = await Cart.findOne({ userId })
-  .populate({
-    path: "items.productId",
-    select: "name variants"
+    const cart = await Cart.findOne({ userId })
+       .populate({
+       path: "items.productId",
+      select: "name variants"
   });
     let cartItems = [];
     let subtotal = 0;
@@ -38,6 +40,7 @@ const cart = await Cart.findOne({ userId })
 
     const itemTotal = price * item.quantity;
     subtotal += itemTotal;
+    // console.log("User addresses:", user.addresses);
 
     return {
       product: {
@@ -68,37 +71,67 @@ const cart = await Cart.findOne({ userId })
 
 
 const checkaddAddress = async (req, res) => {
-    try {
-        console.log("Add Address - req.body:", req.body);  
+  try {
+    const userId = req.session.userId;
 
-        const userId = req.session.userId;
-        req.body.isDefault = req.body.isDefault === "on" || req.body.isDefault === true;
-
-        
-        const value = req.body;  
-
-        const user = await User.findById(userId);
-
-        let makeDefault = user.addresses.length === 0 || value.isDefault;
-        if (makeDefault) {
-            user.addresses.forEach(a => a.isDefault = false);
-        }
-
-        user.addresses.push({
-            ...value,
-            isDefault: makeDefault
-        });
-
-        await user.save();
-
-        req.flash("success", "Address added successfully");
-       return res.redirect("/checkout");
-
-    } catch (error) {
-        console.error("Error adding address:", error);
-        req.flash("error", "Failed to add address");
-       return res.redirect("/checkout");
+    if (!userId) {
+      req.flash("error", "Please login first");
+      return res.redirect("/login");
     }
+
+    
+    const isDefault = req.body.isDefault === "on" || req.body.isDefault === true;
+
+    
+    const addressData = {
+      fullName: req.body.fullName,
+      phoneNumber: req.body.phoneNumber,
+      street: req.body.street,
+      city: req.body.city,
+      state: req.body.state,
+      pincode: req.body.pincode,
+      addressType: req.body.addressType,
+      isDefault: isDefault,
+      addressId: req.body.addressId || ""
+    };
+
+   
+    const { error, value } = validateAddress(addressData);
+
+    if (error) {
+      const message = error.details.map(err => err.message).join(", ");
+      req.flash("error", message);
+      return res.redirect("/checkout");
+    }
+
+  
+    const user = await User.findById(userId);
+
+    let makeDefault = user.addresses.length === 0 || value.isDefault;
+    if (makeDefault) {
+      user.addresses.forEach(a => (a.isDefault = false));
+    }
+
+    user.addresses.push({
+      fullName: value.fullName,
+      phoneNumber: value.phoneNumber,
+      street: value.street,
+      city: value.city,
+      state: value.state,
+      pincode: value.pincode,
+      addressType: value.addressType,
+      isDefault: makeDefault
+    });
+
+    await user.save();
+
+    req.flash("success", "Address added successfully");
+    return res.redirect("/checkout");
+  } catch (err) {
+    console.error("Error adding address:", err);
+    req.flash("error", "Failed to add address");
+    return res.redirect("/checkout");
+  }
 };
 
 
@@ -117,7 +150,13 @@ const checkeditAddress = async (req, res) => {
         req.body.isDefault = req.body.isDefault === "on" || req.body.isDefault === true;
 
        
-        const value = req.body;  
+        const { error, value } = validateAddress(req.body);
+
+      if (error) {
+      const message = error.details.map(err => err.message).join(", ");
+      req.flash("error", message);
+      return res.redirect("/checkout");
+    }  
 
         const user = await User.findById(userId);
         if (!user) {
@@ -143,16 +182,16 @@ const checkeditAddress = async (req, res) => {
         });
 
         
-        if (value.isDefault) {
-            user.addresses.forEach(a => { a.isDefault = false; });
-            address.isDefault = true;
-        } else if (address.isDefault && user.addresses.length > 1) {
-            address.isDefault = false;
-        
-            if (user.addresses.length > 0) {
-                user.addresses[0].isDefault = true;
-            }
-        }
+       if (value.isDefault) {
+          user.addresses.forEach(a => a.isDefault = false);
+          address.isDefault = true;
+      } else {
+    
+       const hasDefault = user.addresses.some(a => a.isDefault);
+       if (!hasDefault && user.addresses.length > 0) {
+          user.addresses[0].isDefault = true;
+       }
+    }
 
         await user.save();
 
@@ -171,10 +210,16 @@ const checkdeleteAddress = async (req, res) => {
         const userId = req.session.userId;
         const { addressId } = req.params;
 
-        await User.updateOne(
-            { _id: userId },
-            { $pull: { addresses: { _id: addressId } } }
-        );
+       await User.updateOne(
+    { _id: userId },
+    { $pull: { addresses: { _id: addressId } } }
+    );
+
+      const user = await User.findById(userId);
+        if (user.addresses.length > 0 && !user.addresses.some(a => a.isDefault)) {
+        user.addresses[0].isDefault = true;
+        await user.save();
+      }
 
         req.flash("success", "Address deleted successfully");
         return res.redirect("/checkout");
