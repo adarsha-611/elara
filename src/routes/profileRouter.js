@@ -28,7 +28,7 @@ router.get('/profile/address/setdefault/:addressId', isLoggedIn, addressControll
 //profile orders
 router.get('/profile/orders',isLoggedIn,orderController.getOrderlistPage)
 router.get('/profile/orders/:id',orderController.getOrderdetailPage);
-router.post('/profile/orders/:id/return',orderController.returnOrder);
+router.post('/profile/orders/:orderId/return/:itemId', orderController.returnOrder);
 router.post("/profile/orders/:orderId/cancel/:itemId",orderController.cancelOrder);
 router.get('/profile/orders/:id/invoice', orderController.downloadInvoice);
 

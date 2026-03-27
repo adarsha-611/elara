@@ -68,28 +68,36 @@
         }
     }
 
-    export const changeOrderStatus = async(orderId,newStatus)=>{
-        const validStatuses = [
-            "pending",
-            "shipped",
-            "out for delivery",
-            "delivered",
-            "cancelled"
-        ];
+   export const changeItemStatus = async (orderId, itemId, newStatus) => {
+  const order = await Order.findById(orderId);
+  if (!order) throw new Error("Order not found");
 
-        if(!validStatuses.includes(newStatus)){
-            throw new Error("Invalid status");
-        }
-        const order = await Order.findById(orderId);
-        if(order.orderStatus==="delivered"){
-            throw new Error("Delivered order cannot be modified");
+  const item = order.items.id(itemId);
+  if (!item) throw new Error("Item not found");
 
-        }
-        order.orderStatus = newStatus;
-        await order.save();
+  item.itemStatus = newStatus;
 
-        
-    }
+  const statuses = order.items.map(i => i.itemStatus);
+
+  if (statuses.every(s => s === "cancelled")) {
+    order.orderStatus = "cancelled";
+  } 
+  else if (statuses.every(s => s === "delivered")) {
+    order.orderStatus = "delivered";
+  } 
+  else if (statuses.some(s => s === "out for delivery")) {
+    order.orderStatus = "out for delivery";
+  } 
+  else if (statuses.some(s => s === "shipped")) {
+    order.orderStatus = "shipped";
+  } 
+  else {
+    order.orderStatus = "pending";
+  }
+
+  await order.save();
+};
+
 
  export const getOrderDetail = async (id) => {
 
@@ -160,9 +168,10 @@ export const acceptReturnReq = async (orderId, itemId) => {
 
   
   const allReturned = order.items.every(i => i.itemStatus === "returned");
-  if (allReturned) {
-    order.orderStatus = "cancelled";
-  }
+
+if (allReturned) {
+  order.orderStatus = "returned";
+}
 
   await order.save();
 };

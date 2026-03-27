@@ -1,7 +1,11 @@
-const Joi = require("joi");
+import Joi from "joi";
 
-function validateAddress(data) {
+export function validateAddress(data) {
+
   const schema = Joi.object({
+
+    addressId: Joi.string().allow("").optional(),
+
     fullName: Joi.string().trim().min(3).required().messages({
       "string.empty": "Full name is required",
       "string.min": "Full name must be at least 3 characters"
@@ -26,7 +30,8 @@ function validateAddress(data) {
     addressType: Joi.string().valid("Home", "Work").required(),
 
     isDefault: Joi.boolean().optional()
-  });
+
+  }).unknown(true);   // ⭐ VERY IMPORTANT
 
   return schema.validate(data, { abortEarly: false });
 }

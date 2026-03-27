@@ -338,16 +338,15 @@
             <div class="product-config">
                 <div class="config-group">
                     <label>Select Metal Color</label>
-                    <select class="custom-select" id="colorSelect" onchange="changeVariant()">
-    <% product.variants.forEach((variant, i) => { %>
-       <option 
-  value="<%= i %>"
-  data-price="<%= variant.price %>"
-  data-stock="<%= variant.stock %>"
-  data-images='<%- JSON.stringify(variant.images) %>'>
-  <%= variant.color %>
-</option>
-
+                  <select class="custom-select" id="colorSelect" onchange="changeVariant()">
+    <% product.variants.forEach(function(variant){ %>
+        <option 
+            value="<%= variant._id %>"
+            data-price="<%= variant.price %>"
+            data-stock="<%= variant.stock %>"
+            data-images='<%- JSON.stringify(variant.images) %>'>
+            <%= variant.color %>
+        </option>
     <% }) %>
 </select>
 
@@ -364,11 +363,11 @@
           
             
             <div class="action-buttons">
-             <button 
-                class="btn-primary" 
-                 onclick="addToCart('<%= product._id %>')">
-                         Add to Cart
-            </button>
+            <button 
+    class="btn-primary" 
+    onclick="addToCart('<%= product._id %>', getSelectedVariant())">
+    Add to Cart
+</button>
 
                 <button class="btn-wishlist">♡</button>
             </div>
@@ -486,7 +485,10 @@ document.querySelectorAll(".qty-box").forEach(box => {
     input.value = val + 1;
   });
 });
-
+function getSelectedVariant() {
+  const select = document.getElementById("colorSelect");
+  return select.value;
+}
 
 // ---------- ADD TO CART FUNCTION ----------
 async function addToCart(productId, variantId = null) {
@@ -579,7 +581,43 @@ function changeVariant() {
 }
 </script>
 
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
+<script>
+const productId = "<%= product._id %>";
+
+async function checkProductAvailability() {
+    try {
+        const res = await fetch(`/product-status/${productId}`);
+        const data = await res.json();
+
+        if (!data.available) {
+            Swal.fire({
+    toast: true,
+    position: 'top-end',
+    icon: 'warning',
+    title: 'This product is no longer available',
+    showConfirmButton: false,
+    timer: 3000,
+    background: '#4A302C',   
+    color: '#fff',           
+    iconColor: '#facc15',    
+    customClass: {
+        popup: 'rounded-lg shadow-lg'
+    }
+});
+
+            setTimeout(() => {
+                window.location.href = "/shop";
+            }, 3000);
+        }
+    } catch (err) {
+        console.error(err);
+    }
+}
+
+setInterval(checkProductAvailability, 5000);
+</script>
 
 </body>
 </html>

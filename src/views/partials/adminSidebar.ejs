@@ -1,79 +1,113 @@
 <aside class="admin-sidebar">
     <div class="sidebar-header">
         <h1 class="sidebar-logo">ELARA</h1>
+        <p class="sidebar-tagline">Administration</p>
     </div>
+    
     <nav class="sidebar-nav">
         <ul>
             <li class="<%= currentPage === 'dashboard' ? 'active' : '' %>">
                 <a href="/admin/dashboard">
-                    <span class="icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M13 9V3h8v6h-8zM3 13V3h8v10H3zm10 8V11h8v10h-8zM3 21v-6h8v6H3z"/></svg></span> 
-                    Dashboard
+                    <span class="icon">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+                    </span> 
+                    <span class="label">Dashboard</span>
                 </a>
             </li>
             <li class="<%= currentPage === 'products' ? 'active' : '' %>">
                 <a href="/admin/products">
-                    <span class="icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12l4 6-10 12L2 9z"/><path d="M11 3 8 9l4 12 4-12-3-6"/><path d="M2 9h20"/></svg></span> 
-                    Products
+                    <span class="icon">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg>
+                    </span> 
+                    <span class="label">Products</span>
                 </a>
             </li>
             <li class="<%= currentPage === 'orders' ? 'active' : '' %>">
                 <a href="/admin/orders">
-                    <span class="icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg></span> 
-                    Orders list
+                    <span class="icon">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+                    </span> 
+                    <span class="label">Orders List</span>
                 </a>
             </li>
             <li class="<%= currentPage === 'users' ? 'active' : '' %>">
                 <a href="/admin/users">
-                    <span class="icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span> 
-                    Customers
+                    <span class="icon">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                    </span> 
+                    <span class="label">Customers</span>
                 </a>
             </li>
-            <li class="<%= sidebarPage === 'category' ? 'active' : '' %>">
+            <li class="<%= (typeof currentPage !== 'undefined' && currentPage === 'category') || (typeof sidebarPage !== 'undefined' && sidebarPage === 'category') ? 'active' : '' %>">
                 <a href="/admin/category">
-                    <span class="icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg></span> 
-                    Category
+                    <span class="icon">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
+                    </span> 
+                    <span class="label">Category</span>
                 </a>
             </li>
             <li class="<%= currentPage === 'coupons' ? 'active' : '' %>">
                 <a href="/admin/coupons">
-                    <span class="icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="8" width="18" height="12" rx="2"/><path d="M12 12V3"/><path d="m15 6-3-3-3 3"/></svg></span> 
-                    Coupons
+                    <span class="icon">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 5l-1.761 1.761a2 2 0 0 0 0 2.828L15 11.35"/><path d="M9 11.35l1.761-1.761a2 2 0 0 0 0-2.828L9 5"/><rect x="2" y="5" width="20" height="14" rx="2"/></svg>
+                    </span> 
+                    <span class="label">Coupons</span>
                 </a>
             </li>
         </ul>
     </nav>
+
     <div class="sidebar-footer">
-        <a href="/admin/logout" class="logout-btn">Logout</a>
+        <a href="/admin/logout" class="logout-link">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+            <span>Sign Out</span>
+        </a>
     </div>
 </aside>
 
 <style>
+    /* Premium Sidebar Styling */
     .admin-sidebar {
-        width: 260px;
-        background-color: #F9F6F2; /* Luxury Cream Background */
+        width: 280px;
+        background-color: #F9F8F3; /* Ivory Pearl */
         height: 100vh;
         position: fixed;
         left: 0;
         top: 0;
         display: flex;
         flex-direction: column;
-        padding: 40px 0;
-        border-right: 1px solid #E5DED4;
+        padding: 0;
+        border-right: 1px solid #EAE6E1;
         z-index: 1000;
-        font-family: 'Inter', sans-serif;
+        font-family: 'Lato', sans-serif;
     }
 
     .sidebar-header {
-        text-align: center;
-        margin-bottom: 50px;
+        padding: 60px 40px 40px;
     }
 
     .sidebar-logo {
-        font-size: 28px;
-        letter-spacing: 4px;
-        font-weight: 300;
+        font-family: 'Playfair Display', serif;
+        font-size: 32px;
+        letter-spacing: 6px;
+        font-weight: 400;
         margin: 0;
-        color: #1A1A1A; /* Deep Black/Charcoal */
+        color: #1A1A1A;
+        text-align: center;
+    }
+
+    .sidebar-tagline {
+        font-size: 9px;
+        text-transform: uppercase;
+        letter-spacing: 0.4em;
+        color: #C5A371; /* Muted Gold */
+        text-align: center;
+        margin-top: 8px;
+        font-weight: 700;
+    }
+
+    .sidebar-nav {
+        padding: 0 20px;
     }
 
     .sidebar-nav ul {
@@ -83,77 +117,95 @@
     }
 
     .sidebar-nav li {
-        margin-bottom: 8px;
-        padding: 0 20px;
+        margin-bottom: 4px;
+        position: relative;
     }
 
     .sidebar-nav a {
         display: flex;
         align-items: center;
-        padding: 12px 18px;
+        padding: 14px 20px;
         text-decoration: none;
-        color: #4A4A4A;
-        font-weight: 500;
-        font-size: 14px;
-        border-radius: 8px;
-        transition: all 0.2s ease;
+        color: #666;
+        font-size: 13px;
+        font-weight: 400;
+        letter-spacing: 0.05em;
+        border-radius: 12px;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
     .sidebar-nav a .icon {
-        margin-right: 15px;
+        margin-right: 16px;
         display: flex;
         align-items: center;
-        color: #8C7355; /* Muted Gold color */
+        opacity: 0.6;
+        transition: all 0.3s ease;
     }
 
-    /* Active State matching your reference styling */
+    /* Active State - Minimalist Luxury */
     .sidebar-nav li.active a {
         background-color: #FFFFFF;
         color: #1A1A1A;
-        box-shadow: 0 4px 12px rgba(140, 115, 85, 0.1);
-        border: 1px solid #E5DED4;
+        font-weight: 700;
+        box-shadow: 0 10px 30px rgba(61, 43, 36, 0.04);
+    }
+
+    /* Left accent line for active item */
+    .sidebar-nav li.active::before {
+        content: "";
+        position: absolute;
+        left: -20px;
+        top: 20%;
+        height: 60%;
+        width: 4px;
+        background-color: #C5A371; /* Gold Accent */
+        border-radius: 0 4px 4px 0;
     }
 
     .sidebar-nav li.active a .icon {
-        color: #B59461; /* Brighter Gold for Active */
+        color: #C5A371;
+        opacity: 1;
+        transform: scale(1.1);
     }
 
     .sidebar-nav a:hover:not(.active) {
-        background-color: #F1EBE4;
+        background-color: #F1EFE9;
+        color: #1A1A1A;
     }
 
     .sidebar-footer {
         margin-top: auto;
-        padding: 0 30px 40px;
+        padding: 30px 40px;
+        border-top: 1px solid #EAE6E1;
     }
 
-    .logout-btn {
-        background: #1A1A1A; /* Black button for contrast */
-        display: block;
-        text-align: center;
-        padding: 12px;
-        border-radius: 6px;
-        color: #FFFFFF;
+    .logout-link {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        color: #999;
         text-decoration: none;
-        font-weight: 600;
-        font-size: 14px;
-        transition: opacity 0.2s;
+        font-size: 12px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.15em;
+        transition: color 0.3s;
     }
 
-    .logout-btn:hover {
-        opacity: 0.9;
+    .logout-link:hover {
+        color: #CC3333;
     }
+
+    /* Global Layout Adjustments */
     .admin-layout {
-    display: flex;
-    min-height: 100vh;
-}
+        display: flex;
+        min-height: 100vh;
+        background-color: #FCFAFA;
+    }
 
-.admin-sidebar {
-    width: 260px;
-}
-
-.content-area {
-    flex: 1;
-    padding: 40px;
-}
+    .content-area {
+        flex: 1;
+        margin-left: 280px; /* Match sidebar width */
+        padding: 60px;
+    }
 </style>

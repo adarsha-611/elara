@@ -18,11 +18,12 @@ router.get('/about',homeController.getAboutPage);
 //shop page
 router.get('/shop',shopController.getShopPage)
 router.get('/productDetail/:id', shopController.getProductDetailPage)
+router.get("/product-status/:id",shopController.checkProductStatus);
 
 //Cart
 router.get('/cart', isLoggedIn, cartController.getCartPage);
 router.post('/cart/add', isLoggedIn, cartController.addCartItem);
-router.post('/cart/remove/:productId', isLoggedIn, cartController.removeCartItem);
+router.post('/cart/remove/:productId/:variantId', isLoggedIn, cartController.removeCartItem);
 router.post('/cart/qtyupdate', isLoggedIn, cartController.updateQuantity);
 
 //checkOut

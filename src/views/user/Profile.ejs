@@ -4,82 +4,87 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ELARA - My Profile</title>
-
     <script src="https://cdn.tailwindcss.com"></script>
-
     <script>
     tailwind.config = {
       theme: {
         extend: {
           colors: {
-            'elara-brown': '#7A5C4D'
+            'elara-brown': '#7A5C4D',
+            'elara-dark': '#3D2B24',
+            'elara-ivory': '#FDFBF9',
+            'elara-beige': '#F4F1EE'
           }
         }
       }
     }
     </script>
     <link rel="stylesheet" href="/css/style.css">
-
- 
     <link rel="stylesheet" href="/css/profile.css">
 </head>
-<body>
- 
-    <%- include('../partials/header') %>
+<body class="bg-elara-beige"> <%- include('../partials/header') %>
 
+    <main class="max-w-6xl mx-auto px-6 py-12">
+        <div class="flex flex-col md:flex-row gap-8 items-start">
+            
+            <div class="w-full md:w-72 shrink-0">
+                <%- include('../partials/profileSidebar', { user, path: '/profile' }) %>
+            </div>
 
-    <div class="page-header">
-        <h2>Welcome, <%= user.fullName %></h2>
-    </div>
+            <section class="flex-1 bg-elara-ivory rounded-2xl shadow-sm border border-white overflow-hidden">
+                
+                <div class="p-8 pb-0">
+                    <h1 class="text-2xl font-light tracking-wide text-elara-dark">My <span class="font-bold">Profile</span></h1>
+                    <p class="text-elara-brown text-[10px] uppercase tracking-[0.3em] mt-1 font-bold">Personal Information</p>
+                </div>
 
-    <main class="main-content">
-        <div class="content-wrapper">
-            <!-- Left Sidebar -->
-       <%- include('../partials/profileSidebar', { user, path: '/profile' }) %>
-
-            <!-- Right Content Card -->
-            <section class="profile-card">
                 <% if (success && success.length > 0) { %>
-                    <div style="background: #d4edda; color: #155724; padding: 10px; margin-bottom: 10px;">
+                    <div class="bg-green-50 text-green-700 px-8 py-4 mt-6 text-sm border-b border-green-100 font-medium">
                         <%= success %>
                     </div>
                 <% } %>
                 <% if (error && error.length > 0) { %>
-                    <div style="background: #f8d7da; color: #721c24; padding: 10px; margin-bottom: 10px;">
+                    <div class="bg-red-50 text-red-700 px-8 py-4 mt-6 text-sm border-b border-red-100 font-medium">
                         <%= error %>
                     </div>
                 <% } %>
 
-                <div class="card-header">
-                    <h1>My Profile</h1>
-                    <p>Manage your personal information</p>
-                </div>
+                <div class="p-8 md:p-10">
+                    <div class="grid grid-cols-1 gap-6 mb-10">
+                        
+                        <div class="bg-white border border-elara-beige rounded-xl p-5 group transition-all hover:border-elara-brown">
+                            <label class="block text-[10px] uppercase tracking-widest text-elara-brown font-extrabold mb-2">Full Name</label>
+                            <div class="text-lg font-semibold text-elara-dark"><%= user.fullName %></div>
+                        </div>
 
-                <div class="profile-content">
-                    <div class="profile-form">
-                         <div class="form-group">
-                             <label>Full Name</label>
-                             <div class="display-field"><%= user.fullName %></div>
-                         </div>
-                         <div class="form-group">
-                             <label>Email</label>
-                             <div class="display-field"><%= user.email %></div>
-                         </div>
+                        <div class="bg-white border border-elara-beige rounded-xl p-5 group transition-all hover:border-elara-brown">
+                            <label class="block text-[10px] uppercase tracking-widest text-elara-brown font-extrabold mb-2">Email Address</label>
+                            <div class="text-lg font-semibold text-elara-dark opacity-80"><%= user.email %></div>
+                        </div>
+
+                    </div>
+
+                    <div class="flex flex-wrap gap-4">
+                        <a href="/profile/edit" 
+                           class="px-10 py-3.5 bg-elara-dark text-white rounded-xl text-xs font-bold uppercase tracking-[0.2em] hover:bg-elara-brown transition-all shadow-md active:scale-95">
+                            Edit Profile
+                        </a>
+
+                        <% if (user.authType === "local") { %>
+                            <a href="/profile/change-password" 
+                               class="px-10 py-3.5 border-2 border-elara-dark text-elara-dark rounded-xl text-xs font-bold uppercase tracking-[0.2em] hover:bg-elara-brown hover:text-white hover:border-elara-brown transition-all">
+                                Security
+                            </a>
+                        <% } %>
                     </div>
                 </div>
 
-                <div class="action-buttons">
-                    <a href="/profile/edit" class="btn btn-primary">Edit Profile</a>
-                  <% if (user.authType === "local") { %>
-<a href="/profile/change-password" class="btn btn-secondary">Change Password</a>
-<% } %>
-                </div>
+                <div class="h-1 bg-gradient-to-r from-elara-dark via-elara-brown to-elara-dark opacity-20"></div>
             </section>
         </div>
     </main>
-<%- include('../partials/footer') %>
-    <script>
-      
-    </script>
+
+    <%- include('../partials/footer') %>
+
 </body>
 </html>

@@ -44,7 +44,7 @@ router.patch("/toggle-product-status/:id",adminAuth, productController.productSt
 
 //OrderManagement
 router.get('/orders',adminAuth,orderPageController.getOrderPage);
-router.patch('/orders/:id/status',adminAuth,orderPageController.updateOrderStatus)
+router.patch('/orders/update-item-status/:orderId/:itemId', adminAuth, orderPageController.updateItemStatus);
 router.get('/orders/:id',adminAuth,orderPageController.getOrderdetailPage);
 router.post('/return/accept/:orderId/:itemId',adminAuth,orderPageController.acceptReturn);
 router.post('/return/reject/:orderId/:itemId',adminAuth,orderPageController.rejectReturn);

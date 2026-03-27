@@ -328,6 +328,15 @@ nav a {
     opacity: 1;
     transform: translateY(0);
 }
+.blocked-warning {
+  color: #b91c1c;
+  background: #fee2e2;
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 12px;
+  margin-top: 5px;
+  display: inline-block;
+}
 
 
  </style>
@@ -355,16 +364,22 @@ nav a {
   <% if(cartItems.length > 0){ %>
     <% cartItems.forEach(item => { %>
 <div class="cart-row"
-     data-id="<%= item.productId %>"
-     data-price="<%= item.price %>"
-     data-stock="<%= item.stock %>">
+    data-product="<%= item.productId %>"
+    data-variant="<%= item.variantId %>"
+    data-price="<%= item.price %>"
+    data-stock="<%= item.stock %>"
+    data-blocked="<%= item.isBlocked %>">
              <!-- Product Info -->
         <div class="product-info">
           <img src="<%= item.image %>" alt="<%= item.name %>">
-          <div>
-            <h4><%= item.name %></h4>
-            <p class="price">₹ <%= item.price %></p>
-          </div>
+          <<div>
+  <h4><%= item.name %></h4>
+  <p class="price">₹ <%= item.price %></p>
+
+  <% if(item.isBlocked){ %>
+    <p class="blocked-warning">This product is no longer available</p>
+  <% } %>
+</div>
         </div>
 
         <!-- Quantity Controls -->
@@ -379,8 +394,8 @@ nav a {
         <!-- Total & Remove -->
         <div class="total-price">
           <span class="item-total">₹ <%= item.price * item.quantity %></span>
-          <form action="/cart/remove/<%= item.productId %>" method="POST">
-            <button type="submit" class="remove-btn">
+<form action="/cart/remove/<%= item.productId %>/<%= item.variantId %>" method="POST">
+                  <button type="submit" class="remove-btn">
               🗑
             </button>
           </form>
@@ -400,7 +415,7 @@ nav a {
                     </div>
                     <p class="shipping-note">Tax and Shipping calculated at checkout</p>
                     
-<button class="btn-checkout" onclick="window.location.href='/checkout'">
+<button class="btn-checkout" onclick="checkBlockedBeforeCheckout()">
     Proceed to Checkout
 </button>
 <button class="btn-back" onclick="window.location.href='/shop'">
@@ -415,139 +430,164 @@ nav a {
    
 
      <%- include('../partials/footer') %>
-
- <script>
-  function showToast(message, type="error") {
-
+<<script>
+function showToast(message, type = "error") {
   const toast = document.getElementById("cartToast");
 
   toast.innerText = message;
 
-  if(type === "error"){
-      toast.style.backgroundColor = "#dc2626"; // red
+  if (type === "error") {
+    toast.style.backgroundColor = "#dc2626";
   } else {
-      toast.style.backgroundColor = "#16a34a"; // green
+    toast.style.backgroundColor = "#16a34a";
   }
 
   toast.classList.add("show");
 
   setTimeout(() => {
-      toast.classList.remove("show");
-  }, 3000);
-
+    toast.classList.remove("show");
+  }, 2500);
 }
-document.querySelectorAll(".cart-row").forEach(row => {
 
+/* ---------------- SUBTOTAL + BLOCK LOGIC ---------------- */
+
+function updateSubtotal() {
+  let subtotal = 0;
+
+  document.querySelectorAll(".cart-row").forEach(row => {
+    const isBlocked = row.dataset.blocked === "true";
+
+    // Disable only quantity buttons if blocked
+    if (isBlocked) {
+      row.querySelectorAll(".qty-btn").forEach(btn => {
+        btn.disabled = true;
+        btn.style.opacity = "0.5";
+        btn.style.cursor = "not-allowed";
+      });
+      return;
+    }
+
+    const qty = parseInt(row.querySelector(".qty-input").value);
+    const price = parseInt(row.dataset.price);
+    subtotal += qty * price;
+  });
+
+  document.querySelector(".subtotal-value").innerText = `₹ ${subtotal}`;
+}
+
+/* ---------------- QUANTITY BUTTONS ---------------- */
+
+document.querySelectorAll(".cart-row").forEach(row => {
   const minus = row.querySelector(".minus");
   const plus = row.querySelector(".plus");
   const input = row.querySelector(".qty-input");
   const total = row.querySelector(".item-total");
+
   const price = parseInt(row.dataset.price);
-  const productId = row.dataset.id;
+  const productId = row.dataset.product;
+  const variantId = row.dataset.variant;
   const stock = parseInt(row.dataset.stock);
+  const isBlocked = row.dataset.blocked === "true";
+
+  if (isBlocked) return;
 
   minus.addEventListener("click", () => {
-
     let val = parseInt(input.value);
 
-    if (val <= 1) {
-  showToast("Minimum quantity is 1");
-  return;
-}
+    if (val - 1 < 1) {
+      showToast("Minimum quantity is 1");
+      return;
+    }
 
     val--;
     input.value = val;
-
     total.innerText = `₹ ${price * val}`;
 
     updateSubtotal();
-    updateDatabase(productId, val);
-
+    updateDatabase(productId, variantId, val);
   });
 
-
   plus.addEventListener("click", () => {
-
     let val = parseInt(input.value);
 
-   if (val >= 5) {
-  showToast("Maximum 5 items allowed");
-  return;
-}
+    if (val + 1 > 5) {
+      showToast("Maximum 5 items allowed");
+      return;
+    }
 
-    if (val >= stock) {
-      showToast("No more stock available");
+    if (val + 1 > stock) {
+      showToast("Only " + stock + " items available");
       return;
     }
 
     val++;
     input.value = val;
-
     total.innerText = `₹ ${price * val}`;
 
     updateSubtotal();
-    updateDatabase(productId, val);
-
+    updateDatabase(productId, variantId, val);
   });
-
 });
 
+/* ---------------- UPDATE DATABASE ---------------- */
 
-
-function updateSubtotal() {
-
-  let subtotal = 0;
-
-  document.querySelectorAll(".cart-row").forEach(row => {
-
-    const qty = parseInt(row.querySelector(".qty-input").value);
-    const price = parseInt(row.dataset.price);
-
-    subtotal += qty * price;
-
-  });
-
-  document.querySelector(".subtotal-value").innerText = `₹ ${subtotal}`;
-
-}
-
-
-
-function updateDatabase(productId, quantity) {
-
-  fetch("/cart/update", {
+function updateDatabase(productId, variantId, quantity) {
+  fetch("/cart/qtyupdate", {
     method: "POST",
     headers: {
       "Content-Type": "application/json"
     },
     body: JSON.stringify({
-      productId: productId,
-      quantity: quantity
+      productId,
+      variantId,
+      quantity
     })
   })
-  .then(res => res.json())
-  .then(data => {
-    if (!data.success) {
-      alert("Failed to update cart");
-    }
+  .then(res => {
+    return res.json().then(data => {
+      if (!res.ok) {
+        throw new Error(data.message || "Failed to update cart");
+      }
+      return data;
+    });
   })
-  .catch(err => console.log(err));
-
+  .then(data => {
+    console.log("Success:", data);
+  })
+  .catch(err => {
+    console.log("Error:", err.message);
+    showToast(err.message);
+  });
 }
 
+/* ---------------- CHECKOUT BLOCK CHECK ---------------- */
+
+function checkBlockedBeforeCheckout() {
+  const blockedItem = document.querySelector('[data-blocked="true"]');
+
+  if (blockedItem) {
+    showToast("Remove unavailable products before checkout");
+    return;
+  }
+
+  window.location.href = "/checkout";
+}
+
+/* ---------------- SUCCESS TOAST ---------------- */
+
+const toast = document.getElementById("toast");
+
+if (toast) {
+  toast.classList.add("show");
+
+  setTimeout(() => {
+    toast.classList.remove("show");
+  }, 3000);
+}
+
+/* ---------------- INITIAL LOAD ---------------- */
 
 updateSubtotal();
-</script>
-<script>
-    const toast = document.getElementById("toast");
-
-    if (toast) {
-        toast.classList.add("show");
-
-        setTimeout(() => {
-            toast.classList.remove("show");
-        }, 3000);
-    }
 </script>
 
 </body>

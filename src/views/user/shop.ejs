@@ -1,210 +1,424 @@
 <!DOCTYPE html>
+
 <html lang="en">
+
 <head>
+
     <meta charset="UTF-8">
+
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <title>ELARA - Shop</title>
+
     <link rel="stylesheet" href="/css/shop.css">
+
     <script src="https://cdn.tailwindcss.com"></script>
+
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
     <style>
-        .pagination {
-  display: flex;
-  justify-content: center;
-  margin: 20px 0;
-  gap: 8px;
+
+   /* Container spacing */
+.elara-pagination-wrapper {
+    display: flex;
+    justify-content: center;
+    margin: 4rem 0;
 }
 
+.pagination {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+/* Base style for all links */
 .pagination a {
-  padding: 6px 12px;
-  border: 1px solid #ccc;
-  color: #333;
-  text-decoration: none;
-  border-radius: 4px;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    font-family: 'Lato', sans-serif;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
-.pagination a:hover {
-  background-color: #f0f0f0;
+/* The Square Page Numbers */
+.pagination a.page-num {
+    width: 42px;
+    height: 42px;
+    border: 1px solid #F4F1EE; /* elara-beige */
+    background-color: #FFFFFF;
+    color: #3D2B24; /* elara-dark */
+    font-size: 0.75rem;
+    font-weight: 700;
+    border-radius: 4px; /* Essential for the sharp square look */
 }
 
-.pagination a.active {
-  background-color: #a17c6b;
-  color: white;
-  border-color: #a17c6b;
+/* Hover state for page numbers */
+.pagination a.page-num:hover:not(.active) {
+    border-color: #7A5C4D; /* elara-brown */
+    color: #7A5C4D;
+    transform: translateY(-2px);
 }
 
-.pagination a.prev,
-.pagination a.next {
-  font-weight: bold;
+/* Active Page State */
+.pagination a.page-num.active {
+    background-color: #3D2B24; /* elara-dark */
+    color: #FFFFFF;
+    border-color: #3D2B24;
+    box-shadow: 0 4px 15px rgba(61, 43, 36, 0.1);
 }
+
+/* Navigation (Prev/Next) Styling */
+.pagination a.nav-btn {
+    padding: 0 15px;
+    height: 42px;
+    color: #3D2B24;
+    font-size: 10px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    opacity: 0.8;
+}
+
+.pagination a.nav-btn:hover {
+    color: #7A5C4D;
+    opacity: 1;
+}
+
+
 
     </style>
+
 </head>
+
 <body>
+
     <%- include('../partials/header') %>
 
+
+
     <div class="main-container">
+
         <aside class="sidebar">
+
             <div class="filter-section">
+
                 <h3>Sort By</h3>
+
                 <label><input type="radio" name="sort" value="low" <%= filters.sort === 'low' ? 'checked' : '' %>> Price: Low - High</label>
+
                 <label><input type="radio" name="sort" value="high" <%= filters.sort === 'high' ? 'checked' : '' %>> Price: High - Low</label>
+
                 <label><input type="radio" name="sort" value="az" <%= filters.sort === 'az' ? 'checked' : '' %>> Name: A-Z</label>
+
                 <label><input type="radio" name="sort" value="new" <%= filters.sort === 'new' ? 'checked' : '' %>> Newest</label>
+
             </div>
 
+
+
             <div class="filter-section">
+
                 <h3>Categories</h3>
+
                 <label><input type="checkbox" class="category" value="stud" <%= filters.category && filters.category.includes('stud') ? 'checked' : '' %>> Stud Earrings</label>
+
                 <label><input type="checkbox" class="category" value="hoop" <%= filters.category && filters.category.includes('hoop') ? 'checked' : '' %>> Hoop Earrings</label>
+
                 <label><input type="checkbox" class="category" value="drop" <%= filters.category && filters.category.includes('drop') ? 'checked' : '' %>> Drop Earrings</label>
+
                 <label><input type="checkbox" class="category" value="floral" <%= filters.category && filters.category.includes('floral') ? 'checked' : '' %>> Floral Earrings</label>
+
             </div>
 
+
+
             <div class="filter-section">
+
                 <h3>Price Range</h3>
+
                 <label><input type="checkbox" class="price" value="0-1000" <%= filters.price && filters.price.includes('0-1000') ? 'checked' : '' %>> ₹0 - ₹1000</label>
+
                 <label><input type="checkbox" class="price" value="1000-2000" <%= filters.price && filters.price.includes('1000-2000') ? 'checked' : '' %>> ₹1000 - ₹2000</label>
+
                 <label><input type="checkbox" class="price" value="2000-3000" <%= filters.price && filters.price.includes('2000-3000') ? 'checked' : '' %>> ₹2000 - ₹3000</label>
+
             </div>
+
+
 
             <div class="sidebar-buttons">
+
                 <button class="btn-clear">Clear</button>
+
                 <button class="btn-apply">Apply</button>
+
             </div>
+
         </aside>
 
+
+
         <main class="content">
+
             <div class="content-header">
+
                 <h1>Shop</h1>
+
                 <div class="search-bar">
+
                     <input type="text" id="searchInput" placeholder="Search products..." value="<%= filters.search || '' %>" onkeypress="if(event.key==='Enter') applyFilters()">
+
                     <button onclick="applyFilters()">
+
                         <i class="fa-solid fa-magnifying-glass"></i>
+
                     </button>
+
                 </div>
+
             </div>
 
+
+
             <div class="product-grid">
+
                 <% if (products.length > 0) { %>
+
                    <% products.forEach(product => { %>
 
+
+
 <%
+
   let displayVariant = null;
 
+
+
   if (product.variants && product.variants.length > 0) {
+
     displayVariant =
+
       product.variants.find(v => v.stock > 0) || product.variants[0];
+
   }
+
 %>
+
+
 
 <div class="product-card">
 
+
+
   <div class="img-container">
 
+
+
     <!-- Clickable Image -->
+
     <a href="/productDetail/<%= product._id %>">
+
       <img 
+
         src="<%= displayVariant && displayVariant.images.length > 0
+
               ? displayVariant.images[0]
+
               : '/images/default.png' %>" 
+
         alt="<%= product.name %>">
+
     </a>
 
+
+
     <!-- Heart Button -->
+
     <i 
+
       class="fa-regular fa-heart wishlist-icon"
+
       data-id="<%= product._id %>">
+
     </i>
 
+
+
   </div>
+
+
 
   <div class="product-info">
+
     <h4>
+
       <a href="/productDetail/<%= product._id %>">
+
         <%= product.name %>
+
       </a>
+
     </h4>
 
+
+
     <p class="price">
+
       ₹ <%= displayVariant ? displayVariant.price : 'N/A' %>
+
     </p>
+
   </div>
 
+
+
 </div>
+
 <% }) %>
+
                 <% } else { %>
+
                     <p>No products found</p>
+
                 <% } %>
+
             </div>
+
         </main>
+
     </div>
 
+
+<div class="elara-pagination-wrapper">
     <div class="pagination">
-  <% if (currentPage > 1) { %>
-    <a href="?page=<%= currentPage - 1 %>" class="prev">Previous</a>
-  <% } %>
+        <% if (currentPage > 1) { %>
+            <a href="?page=<%= currentPage - 1 %>" class="nav-btn">Prev</a>
+        <% } %>
 
-  <% for (let i = 1; i <= totalPages; i++) { %>
-    <a href="?page=<%= i %>" class="<%= currentPage === i ? 'active' : '' %>"><%= i %></a>
-  <% } %>
+        <% for (let i = 1; i <= totalPages; i++) { %>
+            <a href="?page=<%= i %>" class="page-num <%= currentPage === i ? 'active' : '' %>">
+                <%= i %>
+            </a>
+        <% } %>
 
-  <% if (currentPage < totalPages) { %>
-    <a href="?page=<%= currentPage + 1 %>" class="next">Next</a>
-  <% } %>
+        <% if (currentPage < totalPages) { %>
+            <a href="?page=<%= currentPage + 1 %>" class="nav-btn">Next</a>
+        <% } %>
+    </div>
 </div>
+
+
 
 
   <%- include('../partials/footer') %>
 
+
+
     <script>
+
         function applyFilters() {
+
             const search = document.getElementById("searchInput").value;
+
             const sort = document.querySelector('input[name="sort"]:checked')?.value || "";
+
             const categories = [...document.querySelectorAll('.category:checked')].map(el => el.value).join(',');
+
             const prices = [...document.querySelectorAll('.price:checked')].map(el => el.value).join(',');
+
             let url = `/shop?search=${encodeURIComponent(search)}&sort=${sort}&category=${categories}&price=${prices}`;
+
             window.location.href = url;
+
         }
 
+
+
         document.querySelector('.btn-clear').onclick = () => {
+
             window.location.href = "/shop";
+
         };
 
+
+
         // Auto-apply if "Apply" button clicked (optional: add click listener)
+
         document.querySelector('.btn-apply').onclick = applyFilters;
+
     </script>
+
     <script>
+
 document.querySelectorAll(".wishlist-icon").forEach(icon => {
+
+
 
     icon.addEventListener("click", async function (e) {
 
+
+
         e.stopPropagation(); // prevent link click
+
         e.preventDefault();
+
+
 
         const productId = this.dataset.id;
 
+
+
         const res = await fetch(`/wishlist/toggle/${productId}`, {
+
             method: "POST"
+
         });
+
+
 
         const data = await res.json();
 
+
+
         if (data.status === "added") {
 
+
+
             this.classList.remove("fa-regular");
+
             this.classList.add("fa-solid");
+
+
 
         } else if (data.status === "removed") {
 
+
+
             this.classList.remove("fa-solid");
+
             this.classList.add("fa-regular");
+
+
 
         }
 
+
+
     });
 
+
+
 });
+
 </script>
+
+
 </body>
+
 </html>
+
+
+
+
+

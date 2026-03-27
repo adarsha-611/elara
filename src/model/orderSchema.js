@@ -113,11 +113,11 @@ const orderSchema = new mongoose.Schema({
     type: String,
     enum: [
       "pending",
-      "confirmed",
       "shipped",
       "out for delivery",
       "delivered",
-      "cancelled"
+      "cancelled",
+      "returned"
     ],
     default: "pending",
   },

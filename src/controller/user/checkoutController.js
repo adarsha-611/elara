@@ -26,6 +26,19 @@ const getCheckoutPage = async (req, res) => {
        path: "items.productId",
       select: "name variants"
   });
+  if (!cart || cart.items.length === 0) {
+  return res.redirect("/cart");
+}
+
+// 🔴 CHECK BLOCKED PRODUCTS
+for (const item of cart.items) {
+  const product = item.productId;
+
+  if (!product || product.isDeleted || product.isBlocked || product.isActive === false) {
+    req.flash("error", `${product?.name || "Some item"} is unavailable`);
+    return res.redirect("/cart");
+  }
+}
     let cartItems = [];
     let subtotal = 0;
 
@@ -296,10 +309,9 @@ const placeOrder = async (req, res) => {
       return res.redirect("/login");
     }
 
-   
-const cart = await Cart.findOne({ userId: userId }).populate({
+    const cart = await Cart.findOne({ userId }).populate({
       path: "items.productId",
-      select: "name variants isDeleted"
+      select: "name variants isDeleted isBlocked isActive"
     });
 
     if (!cart || cart.items.length === 0) {
@@ -310,12 +322,25 @@ const cart = await Cart.findOne({ userId: userId }).populate({
     let totalAmount = 0;
     const orderItems = [];
 
+    // 🔴 VALIDATE PRODUCTS + BUILD ORDER ITEMS
     for (const cartItem of cart.items) {
       const product = cartItem.productId;
 
-      if (!product || product.isDeleted) {
+      console.log("CHECK PRODUCT:", {
+        name: product?.name,
+        isDeleted: product?.isDeleted,
+        isBlocked: product?.isBlocked,
+        isActive: product?.isActive
+      });
+
+      if (
+        !product ||
+        product.isDeleted ||
+        product.isBlocked ||
+        product.isActive === false
+      ) {
         req.flash("error", `${product?.name || "Item"} unavailable`);
-        return res.redirect("/checkout");
+        return res.redirect("/cart");
       }
 
       if (!product.variants || product.variants.length === 0) {
@@ -323,12 +348,11 @@ const cart = await Cart.findOne({ userId: userId }).populate({
         return res.redirect("/checkout");
       }
 
-      const selectedVariant = product.variants[0];
-
-     if (!selectedVariant) {
-    throw new Error(`No variants available for ${product.name}`);
-  }
-
+      const selectedVariant = product.variants.id(cartItem.variantId);
+      if (!selectedVariant) {
+        req.flash("error", `Variant not found for ${product.name}`);
+        return res.redirect("/checkout");
+      }
 
       if (selectedVariant.stock < cartItem.quantity) {
         req.flash(
@@ -340,19 +364,20 @@ const cart = await Cart.findOne({ userId: userId }).populate({
 
       const itemTotal = selectedVariant.price * cartItem.quantity;
 
-     orderItems.push({
-      product: product._id,
-      productName: product.name,           
-      productImage: selectedVariant.images?.[0] || "",  
-      variantColor: selectedVariant.color,
-      quantity: cartItem.quantity,
-      price: selectedVariant.price,
-      total: itemTotal
-});
+      orderItems.push({
+        product: product._id,
+        productName: product.name,
+        productImage: selectedVariant.images?.[0] || "",
+        variantColor: selectedVariant.color,
+        quantity: cartItem.quantity,
+        price: selectedVariant.price,
+        total: itemTotal
+      });
 
       totalAmount += itemTotal;
     }
 
+    // 🔴 ADDRESS
     const shippingAddressDoc = user.addresses.id(addressId);
     if (!shippingAddressDoc) {
       req.flash("error", "Address not found");
@@ -368,6 +393,7 @@ const cart = await Cart.findOne({ userId: userId }).populate({
       pincode: shippingAddressDoc.pincode
     };
 
+    // 🔴 CREATE ORDER
     const order = await Order.create({
       user: userId,
       items: orderItems,
@@ -379,14 +405,13 @@ const cart = await Cart.findOne({ userId: userId }).populate({
       orderId: generateOrderId()
     });
 
-   
-   await Cart.updateOne(
-  { userId: userId },
-  { $set: { items: [] } }
- );
+    // 🔴 CLEAR CART
+    await Cart.updateOne(
+      { userId },
+      { $set: { items: [] } }
+    );
 
-
-
+    // 🔴 UPDATE STOCK
     for (const item of orderItems) {
       await Product.updateOne(
         {
@@ -408,8 +433,6 @@ const cart = await Cart.findOne({ userId: userId }).populate({
     return res.redirect("/checkout");
   }
 };
-
-
 
 
 export default{

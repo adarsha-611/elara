@@ -3,30 +3,48 @@ import User from "../../model/userSchema.js";
 import Order from "../../model/orderSchema.js"
 import PDFDocument from "pdfkit";
 
-const getOrderlistPage = async(req,res)=>{
+const getOrderlistPage = async (req, res) => {
     try {
         const userId = req.session.userId;
-        if(!userId){
+        if (!userId) {
             return res.redirect('/login');
         }
-        const page = parseInt(req.query.page)||1;
 
+        const page = parseInt(req.query.page) || 1;
 
-        const{orders,totalPages,currentPage}= await getUserOrders(userId,page);
-         const user = await User.findById(userId)
+        const { orders, totalPages, currentPage } = await getUserOrders(userId, page);
+        const user = await User.findById(userId);
 
-        return res.render("user/orderlist",{
-            orders,
+        // Add trackerStatus for each order
+        const ordersWithStatus = orders.map(order => {
+            let trackerStatus = "pending";
+
+            if (order.items.some(item => item.itemStatus === "delivered")) {
+                trackerStatus = "delivered";
+            } else if (order.items.some(item => item.itemStatus === "out for delivery")) {
+                trackerStatus = "out for delivery";
+            } else if (order.items.some(item => item.itemStatus === "shipped")) {
+                trackerStatus = "shipped";
+            }
+
+            return {
+                ...order._doc,
+                trackerStatus
+            };
+        });
+
+        return res.render("user/orderlist", {
+            orders: ordersWithStatus,
             user,
             totalPages,
             currentPage
-        })
-      
+        });
+
     } catch (error) {
         console.log(error);
-        return res.status(500).send("Server Error")
+        return res.status(500).send("Server Error");
     }
-}
+};
 
 const getOrderdetailPage = async(req,res)=>{
     try {
@@ -51,29 +69,26 @@ const getOrderdetailPage = async(req,res)=>{
     }
 }
 
-const returnOrder = async(req,res)=>{
+const returnOrder = async (req, res) => {
     try {
-        const orderId = req.params.id;
-        const userId = req.session.userId;
-        const { selectedItems, reason } = req.body;
+        const { orderId, itemId } = req.params;
+        const { reason, comments } = req.body;
 
-        if (!selectedItems) {
-            return res.redirect(`/profile/orders/${orderId}`);
-        }
+        await requestReturn(orderId, itemId, reason, comments);
 
-        const itemsArray = Array.isArray(selectedItems) ? selectedItems : [selectedItems];
-
-        for (const itemId of itemsArray) {
-            await requestReturn(orderId, itemId, reason);
-        }
-
-        return res.redirect(`/profile/orders/${orderId}?returnSuccess=true`);
+        return res.status(200).json({
+            success: true,
+            message: "Return request submitted"
+        });
 
     } catch (error) {
         console.log(error);
-        return res.status(500).send("Server Error");
+        return res.status(500).json({
+            success: false,
+            message: "Server Error"
+        });
     }
-}
+};
 
 const cancelOrder = async (req, res) => {
   try {

@@ -4,202 +4,188 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ELARA - Admin User Management</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
    <style>
-    /* Theme Variables based on ELARA brand references */
     :root {
-        --bg-cream: #F9F6F2;
-        --text-charcoal: #1A1A1A;
-        --text-muted: #4A4A4A;
-        --accent-gold: #B59461;
-        --border-color: #E5DED4;
-        --white: #FFFFFF;
+        --sidebar-tan: #B18E7B;
+        --main-bronze: #5D4037; /* Consistent Roasted Brown */
+        --main-bronze-hover: #795548;
+        --bg-light: #F4F4F4;
+        --white: #ffffff;
     }
 
     body { 
-        font-family: 'Inter', Arial, sans-serif; 
-        background: var(--bg-cream); 
+        font-family: 'Poppins', sans-serif; 
+        background: var(--bg-light); 
         margin: 0; 
         display: flex; 
-        color: var(--text-charcoal);
+        color: #333;
     }
     
-    /* Layout Fix */
+    .admin-layout {
+        display: flex;
+        min-height: 100vh;
+        width: 100%;
+    }
+
     .main-content { 
         flex: 1; 
-        margin-left: 260px; /* Width of the sidebar */
-        min-height: 100vh;
+        margin-left: 260px; 
+        padding: 40px;
     }
 
-    .navbar { 
-        background: var(--white); 
-        color: var(--text-charcoal); 
-        padding: 15px 40px; 
+    .content-header h1 {
+        font-size: 26px;
+        color: var(--main-bronze);
+        font-weight: 600;
+        margin-bottom: 30px;
+    }
+
+    /* Search Bar Styling */
+    .filter-bar { 
         display: flex; 
-        justify-content: space-between; 
-        align-items: center; 
-        border-bottom: 1px solid var(--border-color);
-    }
-    
-    .navbar a { 
-        color: var(--text-muted); 
-        text-decoration: none; 
-        font-weight: 500;
-        font-size: 14px;
-        transition: color 0.2s;
-    }
-
-    .navbar a:hover { color: var(--accent-gold); }
-
-    .container { padding: 40px; max-width: 1200px; margin: 0 auto; }
-    
-    .header-actions { 
-        display: flex; 
-        justify-content: space-between; 
-        align-items: center; 
+        gap: 12px; 
         margin-bottom: 30px; 
+        align-items: center;
     }
-
-    .header-actions h1 {
-        font-size: 24px;
-        font-weight: 400;
-        letter-spacing: 1px;
-    }
-
-    .search-form { display: flex; gap: 10px; }
 
     input[type="text"] { 
         padding: 10px 15px; 
-        border: 1px solid var(--border-color); 
+        border: 1px solid #ddd; 
         border-radius: 8px; 
         width: 300px; 
         background: var(--white);
+        font-size: 13px;
         outline: none;
+        transition: border-color 0.3s;
     }
 
-    input[type="text"]:focus { border-color: var(--accent-gold); }
+    input[type="text"]:focus { border-color: var(--main-bronze); }
 
-    /* Button Styling */
     .btn { 
-        padding: 10px 20px; 
+        padding: 10px 22px; 
         border: none; 
         border-radius: 8px; 
         cursor: pointer; 
-        text-decoration: none; 
-        display: inline-block; 
-        font-size: 14px; 
-        font-weight: 600;
-        transition: all 0.2s;
+        font-size: 13px; 
+        font-weight: 500;
+        transition: all 0.3s;
     }
 
-    .btn-primary { background: var(--text-charcoal); color: var(--white); }
-    .btn-primary:hover { background: #333; }
+    .btn-primary { background: var(--main-bronze); color: var(--white); }
+    .btn-primary:hover { background: var(--main-bronze-hover); }
 
-    .btn-danger { background: #fdf2f2; color: #dc3545; border: 1px solid #f8d7da; }
-    .btn-danger:hover { background: #dc3545; color: white; }
-
-    .btn-success { background: #f2fdf5; color: #28a745; border: 1px solid #d4edda; }
-    .btn-success:hover { background: #28a745; color: white; }
-
-    .btn-secondary { background: var(--border-color); color: var(--text-muted); }
+    .btn-secondary { 
+        background-color: transparent; 
+        color: #666; 
+        border: 1px solid #ccc;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+    }
 
     /* Table Styling */
-    table { 
-        width: 100%; 
-        border-collapse: separate; 
-        border-spacing: 0;
+    .table-container { 
         background: var(--white); 
         border-radius: 12px;
         overflow: hidden;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.03); 
-        border: 1px solid var(--border-color);
+        box-shadow: 0 4px 20px rgba(0,0,0,0.05); 
     }
 
-    th, td { padding: 16px 20px; text-align: left; border-bottom: 1px solid var(--border-color); }
+    table { 
+        width: 100%; 
+        border-collapse: collapse; 
+        text-align: left;
+    }
+
+    th, td { padding: 18px 20px; border-bottom: 1px solid #eee; }
 
     th { 
-        background: #FAF9F6; 
+        background: #fcfcfc; 
         font-weight: 600; 
         text-transform: uppercase; 
-        font-size: 12px; 
-        letter-spacing: 1px;
-        color: var(--text-muted);
+        font-size: 13px; 
+        letter-spacing: 0.5px;
+        color: #888;
     }
 
-    td { font-size: 14px; color: var(--text-muted); }
+    td { font-size: 14px; }
+    tr:hover { background-color: #fafafa; }
 
-    .status-active { 
-        background: #e6f4ea; 
-        color: #1e7e34; 
-        padding: 4px 12px; 
+    /* Status Pills */
+    .status-badge { 
+        padding: 5px 12px; 
         border-radius: 20px; 
-        font-size: 12px; 
+        font-size: 11px; 
+        font-weight: 600; 
+        text-transform: uppercase;
     }
 
-    .status-blocked { 
-        background: #fdf2f2; 
-        color: #dc3545; 
-        padding: 4px 12px; 
-        border-radius: 20px; 
-        font-size: 12px; 
+    .status-active { background: #E8F5E9; color: #2E7D32; }
+    .status-blocked { background: #FFEBEE; color: #C62828; }
+
+    /* Action Buttons */
+    .btn-table-action {
+        padding: 7px 16px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: 0.3s;
+        border: 1px solid;
+        background: transparent;
     }
+
+    .btn-danger-outline { border-color: #dc3545; color: #dc3545; }
+    .btn-danger-outline:hover { background: #dc3545; color: white; }
+
+    .btn-success-outline { border-color: #28a745; color: #28a745; }
+    .btn-success-outline:hover { background: #28a745; color: white; }
 
     /* Pagination */
-    .pagination { margin-top: 30px; display: flex; justify-content: center; gap: 8px; }
+    .admin-pagination { 
+        margin-top: 30px; 
+        display: flex; 
+        justify-content: center; 
+        gap: 8px; 
+    }
 
     .page-link { 
-        padding: 8px 16px; 
-        border: 1px solid var(--border-color); 
+        min-width: 38px;
+        height: 38px;
+        border: 1px solid #ddd; 
         background: var(--white); 
         text-decoration: none; 
-        color: var(--text-muted); 
-        border-radius: 6px; 
+        color: #333; 
+        border-radius: 8px; 
+        display: flex;
+        align-items: center;
+        justify-content: center;
         font-size: 14px;
+        transition: 0.3s;
     }
 
     .page-link.active { 
-        background: var(--accent-gold); 
+        background: var(--main-bronze); 
         color: var(--white); 
-        border-color: var(--accent-gold); 
+        border-color: var(--main-bronze); 
     }
-
-    .alert { 
-        padding: 15px; 
-        margin-bottom: 25px; 
-        border-radius: 8px; 
-        font-size: 14px; 
-        border: 1px solid transparent;
-    }
-
-    .alert-success { background: #f2fdf5; color: #155724; border-color: #d4edda; }
-    .alert-error { background: #fdf2f2; color: #721c24; border-color: #f8d7da; }
 </style>
 </head>
 <body>
 
-    <%- include('../partials/adminSidebar') %>
+    <div class="admin-layout">
+        <%- include('../partials/adminSidebar') %>
 
-    <div class="main-content">
-        <nav class="navbar">
-            <div class="logo" style="font-weight: bold; font-size: 1.2em;">ELARA ADMIN</div>
-            <div>
-                <span style="margin-right: 20px;">User Management</span>
-               
-            </div>
-        </nav>
-        
-        <div class="container">
-            <% if (success && success.length > 0) { %>
-                <div class="alert alert-success"><%= success %></div>
-            <% } %>
-            <% if (error && error.length > 0) { %>
-                <div class="alert alert-error"><%= error %></div>
-            <% } %>
-
-            <div class="header-actions">
+        <div class="main-content">
+            <header class="content-header">
                 <h1>User Management</h1>
-                <form action="/admin/users" method="GET" class="search-form">
+            </header>
+
+            <div class="filter-bar">
+                <form action="/admin/users" method="GET" style="display: flex; gap: 10px;">
                     <input type="text" name="search" placeholder="Search by name or email" value="<%= search || '' %>">
                     <button type="submit" class="btn btn-primary">Search</button>
                     <% if (search) { %>
@@ -208,68 +194,72 @@
                 </form>
             </div>
 
-            <table>
-                <thead>
-                    <tr>
-                        <th>Name</th>
-                        <th>Email</th>
-                        <th>Created</th>
-                        <th>Status</th>
-                        <th>Action</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <% if (users.length > 0) { %>
-                        <% users.forEach(user => { %>
-                            <tr>
-                                <td><%= user.fullName %></td>
-                                <td><%= user.email %></td>
-                                <td><%= new Date(user.createdAt).toLocaleDateString() %></td>
-                                <td>
-                                    <% if (user.isBlocked) { %>
-                                        <span class="status-blocked">Blocked</span>
-                                    <% } else { %>
-                                        <span class="status-active">Active</span>
-                                    <% } %>
-                                </td>
-                                <td>
-                                    <% if (user.isBlocked) { %>
-                                        <a href="/admin/users/block/<%= user._id %>" class="btn btn-success unblock-btn">Unblock</a>
-                                    <% } else { %>
-                                        <a href="/admin/users/block/<%= user._id %>" class="btn btn-danger block-btn">Block</a>
-                                    <% } %>
-                                </td>
-                            </tr>
-                        <% }) %>
-                    <% } else { %>
+            <div class="table-container">
+                <table>
+                    <thead>
                         <tr>
-                            <td colspan="5" style="text-align: center; padding: 20px;">No users found</td>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Created Date</th>
+                            <th>Status</th>
+                            <th>Action</th>
                         </tr>
-                    <% } %>
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody>
+                        <% if (users.length > 0) { %>
+                            <% users.forEach(user => { %>
+                                <tr>
+                                    <td style="font-weight: 500;"><%= user.fullName %></td>
+                                    <td style="color: #666;"><%= user.email %></td>
+                                    <td><%= new Date(user.createdAt).toLocaleDateString() %></td>
+                                    <td>
+                                        <% if (user.isBlocked) { %>
+                                            <span class="status-badge status-blocked">Blocked</span>
+                                        <% } else { %>
+                                            <span class="status-badge status-active">Active</span>
+                                        <% } %>
+                                    </td>
+                                    <td>
+                                        <form action="/admin/users/block/<%= user._id %>?page=<%= currentPage %>&search=<%= search || '' %>" method="POST">
+                                            <% if (user.isBlocked) { %>
+                                                <button type="button" class="btn-table-action btn-success-outline unblock-btn">Unblock</button>
+                                            <% } else { %>
+                                                <button type="button" class="btn-table-action btn-danger-outline block-btn">Block</button>
+                                            <% } %>
+                                        </form>
+                                    </td>
+                                </tr>
+                            <% }) %>
+                        <% } else { %>
+                            <tr>
+                                <td colspan="5" style="text-align: center; padding: 40px; color: #999;">No users found.</td>
+                            </tr>
+                        <% } %>
+                    </tbody>
+                </table>
+            </div>
 
             <% if (totalPages > 1) { %>
-                <div class="pagination">
+                <div class="admin-pagination">
                     <% if (currentPage > 1) { %>
-                        <a href="/admin/users?page=<%= currentPage - 1 %>&search=<%= search || '' %>" class="page-link">&laquo; Prev</a>
+                        <a href="/admin/users?page=<%= currentPage - 1 %>&search=<%= search || '' %>" class="page-link">‹</a>
                     <% } %>
                     <% for(let i = 1; i <= totalPages; i++) { %>
                         <a href="/admin/users?page=<%= i %>&search=<%= search || '' %>" class="page-link <%= currentPage === i ? 'active' : '' %>"><%= i %></a>
                     <% } %>
                     <% if (currentPage < totalPages) { %>
-                        <a href="/admin/users?page=<%= currentPage + 1 %>&search=<%= search || '' %>" class="page-link">Next &raquo;</a>
+                        <a href="/admin/users?page=<%= currentPage + 1 %>&search=<%= search || '' %>" class="page-link">›</a>
                     <% } %>
                 </div>
             <% } %>
         </div>
     </div>
-    <script>
+
+<script>
 document.querySelectorAll('.block-btn').forEach(btn => {
   btn.addEventListener('click', function (e) {
     e.preventDefault();
-    const link = this.href;
-
+    const form = this.closest("form");
     Swal.fire({
       title: 'Block User?',
       text: "Are you sure you want to block this user?",
@@ -279,9 +269,7 @@ document.querySelectorAll('.block-btn').forEach(btn => {
       cancelButtonColor: '#6c757d',
       confirmButtonText: 'Yes, Block'
     }).then((result) => {
-      if (result.isConfirmed) {
-        window.location.href = link;
-      }
+      if (result.isConfirmed) form.submit();
     });
   });
 });
@@ -289,24 +277,20 @@ document.querySelectorAll('.block-btn').forEach(btn => {
 document.querySelectorAll('.unblock-btn').forEach(btn => {
   btn.addEventListener('click', function (e) {
     e.preventDefault();
-    const link = this.href;
-
+    const form = this.closest("form");
     Swal.fire({
       title: 'Unblock User?',
-      text: "Are you sure you want to unblock this user?",
+      text: "Restore access for this user?",
       icon: 'question',
       showCancelButton: true,
       confirmButtonColor: '#28a745',
       cancelButtonColor: '#6c757d',
       confirmButtonText: 'Yes, Unblock'
     }).then((result) => {
-      if (result.isConfirmed) {
-        window.location.href = link;
-      }
+      if (result.isConfirmed) form.submit();
     });
   });
 });
 </script>
-
 </body>
 </html>

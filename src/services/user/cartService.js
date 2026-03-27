@@ -28,11 +28,12 @@ export const addToCart = async (userId, productId, qty = 1, variantId) => {
   let cart = await Cart.findOne({ userId });
   if (!cart) cart = new Cart({ userId, items: [] });
 
-  const itemIndex = cart.items.findIndex(
-    item =>
-      item.productId.toString() === productId.toString() &&
-      item.variantId?.toString() === variant._id.toString()
+    const itemIndex = cart.items.findIndex(item => {
+      return (
+    item.productId.toString() === productId.toString() &&
+    String(item.variantId) === String(variant._id)
   );
+});
 
   if (itemIndex > -1) {
     const newQuantity = cart.items[itemIndex].quantity + qty;
@@ -52,15 +53,16 @@ export const addToCart = async (userId, productId, qty = 1, variantId) => {
   return cart;
 };
 
-export const removeFromCart = async(userId,productId)=>{
-  const cart = await cartSchema.findOne({userId});
+export const removeFromCart = async (userId, productId, variantId) => {
+  const cart = await cartSchema.findOne({ userId });
 
-  if(!cart) throw Error("Cart not found");
+  if (!cart) throw Error("Cart not found");
 
-  cart.items = cart.items.filter(
-    item=> item.productId.toString() !== productId
-  );
+  cart.items = cart.items.filter(item =>
+  !(item.productId.toString() === productId &&
+    String(item.variantId) === String(variantId))
+);
 
   await cart.save();
   return cart;
-}
+};

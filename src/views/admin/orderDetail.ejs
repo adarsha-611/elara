@@ -4,255 +4,426 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Order Details - <%= order.orderId %> | Elara Admin</title>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/css/adminOrderdetail.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
-      .product-cell{
-display:flex;
-align-items:center;
-gap:10px;
-}
+        :root {
+            --sidebar-tan: #B18E7B;
+            --main-bronze: #5D4037; 
+            --main-bronze-hover: #795548;
+            --bg-light: #F4F4F4;
+            --white: #ffffff;
+            --success-green: #2E7D32;
+            --danger-red: #C62828;
+            --warning-gold: #D4A017;
+        }
 
-.product-img{
-width:45px;
-height:45px;
-object-fit:cover;
-border-radius:6px;
-}
-.details-container {
-  margin: 0 auto; 
-}
+        body {
+            background-color: var(--bg-light);
+            font-family: 'Poppins', sans-serif;
+            color: #333;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .details-container {
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+
+        .page-title {
+            font-size: 24px;
+            color: var(--main-bronze);
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .btn-back {
+            background: none;
+            border: 1px solid var(--main-bronze);
+            color: var(--main-bronze);
+            padding: 8px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-bottom: 30px;
+            font-weight: 500;
+            transition: 0.3s;
+        }
+
+        .btn-back:hover {
+            background: var(--main-bronze);
+            color: white;
+        }
+
+        /* Summary Card */
+        .summary-card {
+            background: var(--white);
+            border-radius: 15px;
+            border-left: 6px solid var(--main-bronze);
+            padding: 30px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.04);
+            margin-bottom: 40px;
+        }
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 25px;
+            margin-bottom: 25px;
+        }
+
+        .info-group label {
+            display: block;
+            font-size: 11px;
+            text-transform: uppercase;
+            color: #888;
+            letter-spacing: 1px;
+            margin-bottom: 5px;
+        }
+
+        .info-group span, .info-group strong {
+            font-size: 15px;
+            color: #222;
+        }
+
+        .shipping-box {
+            background: #fdfdfd;
+            border: 1px solid #eee;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 10px;
+        }
+
+        /* Order Items Section */
+        .section-header {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #000;
+        }
+
+        .section-header::before {
+            content: '';
+            width: 3px;
+            height: 20px;
+            background: var(--main-bronze);
+            display: inline-block;
+        }
+
+        /* Item Card */
+        .item-card {
+            background: var(--white);
+            border-radius: 12px;
+            border-left: 5px solid #ddd;
+            padding: 20px 25px;
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.02);
+        }
+
+        .item-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+            border-left-color: var(--main-bronze);
+        }
+
+        .item-main { display: flex; flex-direction: column; gap: 8px; }
+        .item-name { font-weight: 600; font-size: 17px; margin: 0; }
+        .item-specs { font-size: 13px; color: #666; display: flex; gap: 15px; }
+
+        /* Status Pills */
+        .badge-row { display: flex; gap: 10px; margin-top: 10px; }
+        .pill {
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            text-transform: uppercase;
+        }
+        .dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+
+        /* Status-Specific Styling */
+        .pending { background: #FFF9C4; color: #8D6E00; }
+        .shipped { background: #E3F2FD; color: #1565C0; }
+        .out-for-delivery { background: #EEEEEE; color: #424242; }
+        .delivered { background: #E8F5E9; color: #2E7D32; }
+        .cancelled { background: #FFEBEE; color: #C62828; }
+        .returned { background: #FFF3E0; color: #EF6C00; }
+
+        .pill-return { 
+            background: #FFF9E6; 
+            color: var(--warning-gold); 
+            border: 1px solid var(--warning-gold);
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .pill-return:hover { background: var(--warning-gold); color: white; }
+
+        .item-actions { display: flex; flex-direction: column; gap: 10px; width: 200px; }
+        .status-select { padding: 10px; border-radius: 8px; border: 1px solid #ddd; font-size: 13px; }
+        .btn-update-status {
+            background: var(--main-bronze);
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 8px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        .btn-update-status:hover { background: var(--main-bronze-hover); }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0; top: 0;
+            width: 100%; height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            backdrop-filter: blur(2px);
+        }
+        .modal-content {
+            background-color: #fff;
+            margin: 10% auto;
+            padding: 30px;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.2);
+            position: relative;
+        }
     </style>
 </head>
 <body>
 
-<div class="admin-wrapper">
-    <main class="details-container">
-        <h1 class="page-title">Order Details - <%= order.orderId %></h1>
-        <button class="btn-back" onclick="window.history.back()">Back to orders</button>
+<div class="details-container">
+    <h1 class="page-title">Order Details - <%= order.orderId %></h1>
+    <button class="btn-back" onclick="window.history.back()">Back to orders</button>
 
-        <div class="details-layout">
-            <div class="main-info-column">
-                <!-- Summary Card -->
-                <div class="info-card summary-card">
-                    <div class="grid-row">
-                        <div class="info-item">
-                            <label>Order id :</label>
-                            <span><%= order.orderId %></span>
-                        </div>
-                        <div class="info-item">
-                            <label>Order date:</label>
-                            <span><%= new Date(order.createdAt).toLocaleDateString() %></span>
-                        </div>
+    <div class="summary-card">
+        <div class="summary-grid">
+            <div class="info-group">
+                <label>Order Information</label>
+                <span>ID: <strong><%= order.orderId %></strong></span><br>
+                <span>Date: <%= new Date(order.createdAt).toLocaleDateString() %></span>
+            </div>
+            <div class="info-group">
+                <label>Customer Details</label>
+                <strong><%= order.user.name %></strong><br>
+                <span><%= order.user.email %></span>
+            </div>
+            <div class="info-group">
+                <label>Payment & Status</label>
+                <span>Total: <strong>₹ <%= order.totalAmount %></strong></span><br>
+                <span class="pill <%= order.orderStatus.replace(/\s+/g, '-') %>" style="display:inline-flex; margin-top:5px;">
+                    <%= order.orderStatus %>
+                </span>
+            </div>
+        </div>
+        
+        <div class="shipping-box">
+            <label style="font-size: 11px; color: #999; text-transform: uppercase; letter-spacing: 1px;">Shipping To:</label>
+            <p style="margin: 5px 0 0 0; line-height: 1.6; font-size: 14px;">
+                <strong><%= order.shippingAddress.fullName %></strong>, <%= order.shippingAddress.phoneNumber %><br>
+                <%= order.shippingAddress.street %>, <%= order.shippingAddress.city %>, <%= order.shippingAddress.state %> - <%= order.shippingAddress.pincode %>
+            </p>
+        </div>
+    </div>
+
+    <div class="section-header">ORDER ITEMS</div>
+    
+    <div class="items-list">
+        <% order.items.forEach(item => { %>
+            <div class="item-card">
+                <div class="item-main">
+                    <h3 class="item-name"><%= item.product ? item.product.name : item.productName || 'N/A' %></h3>
+                    <div class="item-specs">
+                        <span>Color: <strong><%= item.variantColor || 'N/A' %></strong></span>
+                        <span>Qty: <strong><%= item.quantity %></strong></span>
+                        <span>Price: <strong>₹<%= item.price %></strong></span>
                     </div>
-                    <div class="grid-row">
-                        <div class="info-item">
-                            <label>Status :</label>
-                            <span class="status-badge <%= order.orderStatus %>"><%= order.orderStatus %></span>
+
+                    <div class="badge-row">
+                        <div class="pill <%= item.itemStatus.replace(/\s+/g, '-') %>">
+                            <span class="dot"></span>
+                            <%= item.itemStatus %>
                         </div>
-                        <div class="info-item">
-                            <label>Phone:</label>
-                            <span><%= order.shippingAddress.phoneNumber %></span>
-                        </div>
-                    </div>
-                    <div class="grid-row">
-                        <div class="info-item">
-                            <label>Customer :</label>
-                            <div class="customer-data">
-                                <strong><%= order.user.name %></strong>
-                                <%= order.user.email %>
-                            </div>
-                        </div>
-                        <div class="info-item">
-                            <label>Total:</label>
-                            <span>₹ <%= order.totalAmount %></span>
-                        </div>
-                    </div>
-                    
-                    <div class="shipping-section">
-                        <label>Shipping Address</label>
-                        <p>
-                            <%= order.shippingAddress.fullName %><br>
-                            <%= order.shippingAddress.street %>, <%= order.shippingAddress.city %><br>
-                            <%= order.shippingAddress.state %>, <%= order.shippingAddress.pincode %>
-                        </p>
+
+                        <% if (item.returnRequest?.requested && item.returnRequest.status === "pending") { %>
+                            <button class="pill pill-return btn-view" 
+                                    data-order="<%= order._id %>" 
+                                    data-item="<%= item._id %>">
+                                <span class="dot"></span>
+                                RETURN: REQUESTED
+                            </button>
+                        <% } %>
                     </div>
                 </div>
 
-                <!-- Order Items -->
-                <div class="items-section">
-                    <h2>Order Items</h2>
-                    <table class="order-table">
-                        <thead>
-                            <tr>
-                                <th>Product</th>
-                                <th>Colour</th>
-                                <th>Qty</th>
-                                <th>Price</th>
-                                <th>Status</th>
-                                <th>Return Request</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <% order.items.forEach(item => { %>
-                            <tr>
-                             <td class="product-cell">
-  <% if(item.product && item.product.images && item.product.images.length > 0){ %>
-    <img src="/uploads/<%= item.product.images[0] %>" class="product-img">
-  <% } %>
-  <span><%= item.product?.name || "N/A" %></span>
-</td>                            
-                                <td><%= item.variantColor %></td>
-                                <td><%= item.quantity %></td>
-                                <td>₹ <%= item.price %></td>
-                                <td>
-                                    <span class="status-badge <%= item.itemStatus || 'pending' %>">
-                                        <%= item.itemStatus || 'pending' %>
-                                    </span>
-                                </td>
-                                <td>
-  <% if (item.returnRequest?.requested) { %>
-    <% if (item.returnRequest.status === "pending") { %>
-      <button 
-        class="btn-view" 
-        data-order="<%= order._id.toString() %>" 
-        data-item="<%= item._id.toString() %>">
-        View
-      </button>
-    <% } else if (item.returnRequest.status === "accepted") { %>
-      <span class="badge-accepted">Accepted</span>
-    <% } else if (item.returnRequest.status === "rejected") { %>
-      <span class="badge-rejected">Rejected</span>
-    <% } %>
-  <% } else { %>
-    <span class="badge-none">No Request</span>
-  <% } %>
-</td>
-                            </tr>
-                            <% }) %>
-                        </tbody>
-                    </table>
+                <div class="item-actions">
+                   <%
+const statusFlow = ["pending","shipped","out for delivery","delivered"];
+const currentIndex = statusFlow.indexOf(item.itemStatus);
+const nextStatuses = statusFlow.slice(currentIndex + 1);
+%>
+
+<select class="status-select" id="status-<%= item._id %>"
+<%= ['delivered','cancelled','returned'].includes(item.itemStatus) ? 'disabled' : '' %>>
+
+    <!-- Current status -->
+    <option value="<%= item.itemStatus %>" selected>
+        <%= item.itemStatus.charAt(0).toUpperCase() + item.itemStatus.slice(1) %>
+    </option>
+
+    <!-- Next statuses -->
+    <% nextStatuses.forEach(s => { %>
+        <option value="<%= s %>">
+            <%= s.charAt(0).toUpperCase() + s.slice(1) %>
+        </option>
+    <% }) %>
+
+</select>
+                    
+                    <% if(!['delivered','cancelled','returned'].includes(item.itemStatus)) { %>
+                        <button class="btn-update-status" onclick="updateItemStatus('<%= order._id %>', '<%= item._id %>')">
+                            ✓ Update Status
+                        </button>
+                    <% } %>
                 </div>
             </div>
-
-           
-        </div>
-    </main>
+        <% }) %>
+    </div>
 </div>
 
-<!-- Return Modal -->
-<!-- Return Modal -->
 <div id="returnModal" class="modal">
-  <div class="modal-content modal-large">
-    <!-- Close Icon -->
-    <span class="close-btn" onclick="closeModal()">×</span>
+    <div class="modal-content">
+        <span onclick="document.getElementById('returnModal').style.display='none'" 
+              style="position: absolute; right: 20px; top: 15px; font-size: 24px; cursor: pointer; color: #888;">&times;</span>
+        
+        <h2 style="color: var(--main-bronze); margin-bottom: 20px; border-bottom: 1px solid #eee; padding-bottom: 10px; font-weight: 600;">Return Request</h2>
+        
+        <div style="margin-bottom: 15px;">
+            <label style="font-size: 11px; text-transform: uppercase; color: #999;">Product</label>
+            <p id="modalProduct" style="font-weight: 600; margin: 5px 0; font-size: 15px;"></p>
+        </div>
+        
+        <div style="margin-bottom: 20px;">
+            <label style="font-size: 11px; text-transform: uppercase; color: #999;">Price</label>
+            <p style="font-weight: 600; margin: 5px 0; font-size: 15px;">₹ <span id="modalPrice"></span></p>
+        </div>
+        
+        <div style="margin-bottom: 25px; padding: 15px; background: #FFF9F4; border-radius: 8px; border-left: 4px solid var(--warning-gold);">
+            <label style="font-size: 11px; text-transform: uppercase; color: var(--main-bronze);">Reason for Return</label>
+            <p id="modalReason" style="margin: 5px 0; font-style: italic; color: #333; font-size: 14px;"></p>
+        </div>
 
-    <h2>Return Details</h2>
-
-    <div class="return-info">
-      <p><strong>Product:</strong> <span id="modalProduct"></span></p>
-      <p><strong>Price:</strong> ₹ <span id="modalPrice"></span></p>
-      <p><strong>Reason:</strong></p>
-      <div id="modalReason" class="reason-box"></div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+            <button onclick="handleReturnAction('approve')" style="background: var(--success-green); color: white; border: none; padding: 12px; border-radius: 6px; cursor: pointer; font-weight: 600;">Approve</button>
+            <button onclick="handleReturnAction('reject')" style="background: var(--danger-red); color: white; border: none; padding: 12px; border-radius: 6px; cursor: pointer; font-weight: 600;">Reject</button>
+        </div>
     </div>
-
-    <!-- Action Buttons -->
-    <div class="modal-actions">
-      <button id="acceptBtn" class="btn-accept">Accept</button>
-      <button id="rejectBtn" class="btn-reject">Reject</button>
-    </div>
-  </div>
 </div>
 
 <script>
- // Open return modal
-document.querySelectorAll('.btn-view').forEach(btn => {
-  btn.addEventListener('click', async () => {
-    const orderId = btn.dataset.order;
-    const itemId = btn.dataset.item;
+let activeOrderId = null;
+let activeItemId = null;
 
-    try {
-      const res = await fetch(`/admin/return/details/${orderId}/${itemId}`);
-      if (!res.ok) throw new Error('Return details not found');
-      const data = await res.json();
+async function updateItemStatus(orderId, itemId) {
+    const newStatus = document.getElementById(`status-${itemId}`).value;
+    const result = await Swal.fire({
+        title: 'Update Status?',
+        text: `Set this item to ${newStatus}?`,
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#5D4037', 
+        confirmButtonText: 'Yes, Update'
+    });
 
-      document.getElementById("modalProduct").textContent = data.productName || "N/A";
-      document.getElementById("modalPrice").textContent = data.price || "0";
-      document.getElementById("modalReason").textContent = data.reason || "No reason provided";
-
-      document.getElementById("acceptBtn").dataset.order = orderId;
-      document.getElementById("acceptBtn").dataset.item = itemId;
-      document.getElementById("rejectBtn").dataset.order = orderId;
-      document.getElementById("rejectBtn").dataset.item = itemId;
-
-      document.getElementById("returnModal").style.display = "block";
-
-    } catch (err) {
-      Swal.fire('Error', err.message, 'error');
+    if(result.isConfirmed){
+        const res = await fetch(`/admin/orders/update-item-status/${orderId}/${itemId}`, {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ status: newStatus })
+        });
+        const data = await res.json();
+        if (data.success) {
+            Swal.fire('Updated!', '', 'success').then(() => location.reload());
+        } else {
+            Swal.fire('Error', data.message, 'error');
+        }
     }
-  });
+}
+
+// Logic for opening return modal
+document.querySelectorAll('.btn-view').forEach(btn => {
+    btn.addEventListener('click', async () => {
+        activeOrderId = btn.dataset.order;
+        activeItemId = btn.dataset.item;
+        try {
+            const res = await fetch(`/admin/return/details/${activeOrderId}/${activeItemId}`);
+            const data = await res.json();
+            document.getElementById("modalProduct").textContent = data.productName;
+            document.getElementById("modalPrice").textContent = data.price;
+            document.getElementById("modalReason").textContent = data.reason;
+            document.getElementById("returnModal").style.display = "block";
+        } catch (err) { 
+            console.error(err); 
+            Swal.fire('Error', 'Could not fetch details', 'error');
+        }
+    });
 });
 
-// Close modal
-function closeModal() {
-  document.getElementById("returnModal").style.display = "none";
+async function handleReturnAction(action) {
+    const color = action === 'approve' ? '#2E7D32' : '#C62828';
+
+    const result = await Swal.fire({
+        title: `Confirm ${action}?`,
+        text: `Do you want to ${action} this return request?`,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: color,
+        confirmButtonText: `Yes, ${action} it!`
+    });
+
+    if (result.isConfirmed) {
+        try {
+            const urlAction = action === "approve" ? "accept" : "reject";
+
+            const res = await fetch(`/admin/return/${urlAction}/${activeOrderId}/${activeItemId}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' }
+            });
+
+            const data = await res.json();
+
+            if (data.success) {
+                Swal.fire('Processed!', `The request has been ${action}ed.`, 'success')
+                .then(() => location.reload());
+            } else {
+                Swal.fire('Error', data.message, 'error');
+            }
+
+        } catch (err) {
+            console.error(err);
+        }
+    }
 }
 
 window.onclick = function(event) {
-  const modal = document.getElementById("returnModal");
-  if (event.target == modal) closeModal();
-};
-
-// Handle accept/reject with confirmation Swal
-function handleReturnAction(action) {
-  const btn = document.getElementById(action === 'accept' ? 'acceptBtn' : 'rejectBtn');
-  const orderId = btn.dataset.order;
-  const itemId = btn.dataset.item;
-
-  Swal.fire({
-    title: 'Are you sure?',
-    text: `Do you want to ${action} this return request?`,
-    icon: 'warning',
-    showCancelButton: true,
-    confirmButtonText: 'Yes, Confirm',
-    cancelButtonText: 'No',
-  }).then(() => {
-    // Show loading
-    Swal.fire({
-      title: 'Processing...',
-      allowOutsideClick: false,
-      didOpen: () => Swal.showLoading()
-    });
-
-    fetch(`/admin/return/${action}/${orderId}/${itemId}`, { method: 'POST' })
-      .then(res => res.json().then(data => ({ status: res.status, body: data })))
-      .then(({ status, body }) => {
-        Swal.close(); // close loading
-        if (!body.success) throw new Error(body.message || `Failed to ${action} return`);
-
-        Swal.fire({
-          icon: 'success',
-          title: `Return ${action}ed!`,
-          text: body.message,
-          timer: 1500,
-          showConfirmButton: false
-        });
-
-        closeModal();
-        setTimeout(() => location.reload(), 1600);
-
-      })
-      .catch(err => {
-        Swal.close();
-        Swal.fire('Error', err.message || 'Something went wrong', 'error');
-      });
-  });
+    let modal = document.getElementById('returnModal');
+    if (event.target == modal) modal.style.display = "none";
 }
-
-// Attach event listeners
-document.getElementById("acceptBtn").addEventListener("click", () => handleReturnAction('accept'));
-document.getElementById("rejectBtn").addEventListener("click", () => handleReturnAction('reject'));
 </script>
 </body>
 </html>

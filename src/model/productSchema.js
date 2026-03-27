@@ -18,7 +18,7 @@ const variantSchema = new mongoose.Schema({
             type: String
         }
     ]
-}, { _id: false }); 
+}); 
 
 const productSchema = new mongoose.Schema({
     name: {

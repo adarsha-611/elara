@@ -46,6 +46,7 @@ const getProductDetailPage = async (req, res) => {
     if (!product) {
       return res.redirect("/shop");
     }
+  
 
     const relatedProducts = await getRelatedProducts(
       product.category,
@@ -63,8 +64,22 @@ const getProductDetailPage = async (req, res) => {
   }
 };
 
+const checkProductStatus = async(req,res)=>{
+  try {
+     const product = await getProductById(req.params.id);
+
+     if(!product||!product.isActive){
+      return res.json({available:false})
+     }
+     return res.json({available:true});
+  } catch (error) {
+    console.log(error);
+    return res.json({available:false});
+  }
+}
 
 export default {
   getShopPage,
-  getProductDetailPage
+  getProductDetailPage,
+  checkProductStatus
 };

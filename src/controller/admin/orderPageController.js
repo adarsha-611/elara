@@ -1,4 +1,4 @@
-import { getOrderlist,changeOrderStatus,getOrderDetail,rejectReturnReq,acceptReturnReq} from "../../services/admin/orderlistService.js";
+import { getOrderlist,changeItemStatus,getOrderDetail,rejectReturnReq,acceptReturnReq} from "../../services/admin/orderlistService.js";
 import Order from '../../model/orderSchema.js';
 
 const getOrderPage = async(req,res)=>{
@@ -33,25 +33,25 @@ const getOrderPage = async(req,res)=>{
 }
 
 
-const updateOrderStatus = async(req,res)=>{
-    try {
-        const{id} = req.params;
-        const{status} = req.body;
+const updateItemStatus = async (req, res) => {
+  try {
+    const { orderId, itemId } = req.params;
+    const { status } = req.body;
 
-        await changeOrderStatus(id,status);
+    await changeItemStatus(orderId, itemId, status);
 
-        return res.json({
-            success:true,
-            message:"Order status updated succesfully"
-        })
-    }catch(error){
-        console.log(error);
-        return res.status(400).json({
-            success:false,
-            message:error.message
-        })
-    }
-}
+    res.json({
+      success: true,
+      message: "Item status updated"
+    });
+
+  } catch (error) {
+    res.json({
+      success: false,
+      message: error.message
+    });
+  }
+};
 
 
 const getOrderdetailPage = async (req, res) => {
@@ -148,7 +148,7 @@ const getReturnDetails = async (req, res) => {
 
 export default{
     getOrderPage,
-    updateOrderStatus,
+    updateItemStatus,
     getOrderdetailPage,
     acceptReturn,
     rejectReturn,
