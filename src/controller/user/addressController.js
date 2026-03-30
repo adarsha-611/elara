@@ -15,11 +15,10 @@ const getAddresses = async (req, res) => {
     }
 
     const totalAddresses = userDoc.addresses.length;
-    const totalPages = Math.max(1, Math.ceil(totalAddresses / limit));
+    const totalPages = Math.ceil(totalAddresses / limit);
 
-    const paginatedAddresses = userDoc.addresses
-      .slice(skip, skip + limit)
-      .map(addr => addr.toObject ? addr.toObject() : addr);
+    const addressesSorted = userDoc.addresses.sort((a, b) => b._id - a._id);
+    const paginatedAddresses = addressesSorted.slice(skip, skip + limit);
 
     res.render("user/address", {
       user: userDoc.toObject(),
@@ -28,34 +27,45 @@ const getAddresses = async (req, res) => {
       totalPages,
       success: req.flash("success"),
       error: req.flash("error"),
-      validationErrors: req.flash("validationErrors"),
-      oldInput: req.flash("oldInput"),
-      showModalAfterError: req.flash("showModalAfterError"),
-      formMode: req.flash("formMode"),
     });
 
   } catch (error) {
     console.error("Error fetching addresses:", error);
     res.status(500).send("Server Error");
   }
-};
-
-
+};;
 
 const addAddress = async (req, res) => {
   try {
-    req.body.isDefault = req.body.isDefault === "on" || req.body.isDefault === true;
-
-    const { error, value } = validateAddress(req.body);
-
+    const isAjax = req.xhr || req.headers['x-requested-with'] === 'XMLHttpRequest';
+    
+    
+    const addressData = {
+      fullName: req.body.fullName,
+      phoneNumber: req.body.phoneNumber,
+      street: req.body.street,
+      city: req.body.city,
+      state: req.body.state,
+      pincode: req.body.pincode,
+      addressType: req.body.addressType,
+      isDefault: req.body.isDefault === "on" || req.body.isDefault === true
+    };
+    
+    
+    const { error, value } = validateAddress(addressData);
+    
     if (error) {
       const errors = error.details.map(err => ({
         field: err.path[0],
         message: err.message
       }));
-
+      
+      if (isAjax) {
+        return res.status(400).json({ success: false, errors });
+      }
+      
+    
       const userDoc = await User.findById(req.session.userId);
-
       return res.render("user/address", {
         user: userDoc.toObject(),
         addresses: userDoc.addresses,
@@ -64,73 +74,72 @@ const addAddress = async (req, res) => {
         validationErrors: JSON.stringify(errors),
         oldInput: JSON.stringify(req.body),
         showModalAfterError: "add",
-        formMode: "add",
-        success: null,
-        error: null
+        formMode: "add"
       });
     }
-
-    req.body = value;
-
+    
+ 
     const user = await User.findById(req.session.userId);
-
-    const makeDefault = user.addresses.length === 0 || req.body.isDefault;
-
+    if (!user) {
+      if (isAjax) return res.status(404).json({ success: false, message: "User not found" });
+      req.flash("error", "User not found");
+      return res.redirect("/profile/address");
+    }
+    
+    const makeDefault = user.addresses.length === 0 || value.isDefault;
+    
     if (makeDefault) {
       user.addresses.forEach(addr => addr.isDefault = false);
     }
-
+    
     user.addresses.push({
-      fullName: req.body.fullName,
-      phoneNumber: req.body.phoneNumber,
-      street: req.body.street,
-      city: req.body.city,
-      state: req.body.state,
-      pincode: req.body.pincode,
-      addressType: req.body.addressType,
+      fullName: value.fullName,
+      phoneNumber: value.phoneNumber,
+      street: value.street,
+      city: value.city,
+      state: value.state,
+      pincode: value.pincode,
+      addressType: value.addressType,
       isDefault: makeDefault
     });
-
+    
     user.markModified("addresses");
     await user.save();
-
+    
+    if (isAjax) {
+      return res.json({ success: true, message: "Address added successfully" });
+    }
+    
     req.flash("success", "Address added successfully");
     res.redirect("/profile/address");
-
+    
   } catch (error) {
     console.error("Error adding address:", error);
+    const isAjax = req.xhr || req.headers['x-requested-with'] === 'XMLHttpRequest';
+    
+    if (isAjax) {
+      return res.status(500).json({ success: false, message: "Failed to add address" });
+    }
+    
     req.flash("error", "Failed to add address");
     res.redirect("/profile/address");
   }
 };
 
 
-
 const editAddress = async (req, res) => {
   try {
-    const userId = req.session.userId;
+    const isAjax = req.xhr || req.headers['x-requested-with'] === 'XMLHttpRequest';
     const addressId = req.body.addressId;
-
+    
     if (!addressId) {
-      req.flash("error", "No address ID provided");
+      if (isAjax) return res.status(400).json({ success: false, message: "No address ID" });
+      req.flash("error", "No address ID");
       return res.redirect("/profile/address");
     }
-
-    req.body.isDefault = req.body.isDefault === "on" || req.body.isDefault === true;
-
-    const user = await User.findById(userId);
-    if (!user) {
-      req.flash("error", "User not found");
-      return res.redirect("/profile/address");
-    }
-
-    const address = user.addresses.id(addressId);
-    if (!address) {
-      req.flash("error", "Address not found");
-      return res.redirect("/profile/address");
-    }
-
-    Object.assign(address, {
+    
+    
+    const addressData = {
       fullName: req.body.fullName,
       phoneNumber: req.body.phoneNumber,
       street: req.body.street,
@@ -138,79 +147,220 @@ const editAddress = async (req, res) => {
       state: req.body.state,
       pincode: req.body.pincode,
       addressType: req.body.addressType,
-    });
-
-    if (req.body.isDefault) {
+      isDefault: req.body.isDefault === "on" || req.body.isDefault === true
+    };
+    
+   
+    const { error, value } = validateAddress(addressData);
+    
+    if (error) {
+      const errors = error.details.map(err => ({
+        field: err.path[0],
+        message: err.message
+      }));
+      
+      if (isAjax) {
+        return res.status(400).json({ success: false, errors });
+      }
+      
+      const userDoc = await User.findById(req.session.userId);
+      return res.render("user/address", {
+        user: userDoc.toObject(),
+        addresses: userDoc.addresses,
+        currentPage: 1,
+        totalPages: 1,
+        validationErrors: JSON.stringify(errors),
+        oldInput: JSON.stringify({ ...req.body, addressId }),
+        showModalAfterError: "edit",
+        formMode: "edit"
+      });
+    }
+    
+   
+    const user = await User.findById(req.session.userId);
+    if (!user) {
+      if (isAjax) return res.status(404).json({ success: false, message: "User not found" });
+      req.flash("error", "User not found");
+      return res.redirect("/profile/address");
+    }
+    
+    const address = user.addresses.id(addressId);
+    if (!address) {
+      if (isAjax) return res.status(404).json({ success: false, message: "Address not found" });
+      req.flash("error", "Address not found");
+      return res.redirect("/profile/address");
+    }
+    
+   
+    address.fullName = value.fullName;
+    address.phoneNumber = value.phoneNumber;
+    address.street = value.street;
+    address.city = value.city;
+    address.state = value.state;
+    address.pincode = value.pincode;
+    address.addressType = value.addressType;
+    
+   
+    if (value.isDefault) {
       user.addresses.forEach(addr => addr.isDefault = false);
       address.isDefault = true;
-    } 
-    else if (address.isDefault && user.addresses.length > 1) {
+    } else if (address.isDefault && user.addresses.length > 1) {
       address.isDefault = false;
       user.addresses[0].isDefault = true;
     }
-
+    
     await user.save();
-
+    
+    if (isAjax) {
+      return res.json({ success: true, message: "Address updated successfully" });
+    }
+    
     req.flash("success", "Address updated successfully");
     res.redirect("/profile/address");
-
+    
   } catch (error) {
     console.error("Edit address error:", error);
+    const isAjax = req.xhr || req.headers['x-requested-with'] === 'XMLHttpRequest';
+    
+    if (isAjax) {
+      return res.status(500).json({ success: false, message: "Failed to update address" });
+    }
+    
     req.flash("error", "Failed to update address");
     res.redirect("/profile/address");
   }
 };
 
 
-
 const deleteAddress = async (req, res) => {
   try {
-    const user = await User.findById(req.session.userId);
+    const isAjax = req.xhr || req.headers['x-requested-with'] === 'XMLHttpRequest';
     const { addressId } = req.params;
-
+    
+    // console.log("Delete address - ID:", addressId); 
+    
+    const user = await User.findById(req.session.userId);
+    if (!user) {
+      if (isAjax) {
+        return res.status(404).json({ success: false, message: "User not found" });
+      }
+      req.flash("error", "User not found");
+      return res.redirect("/profile/address");
+    }
+    
     const address = user.addresses.id(addressId);
+    if (!address) {
+      if (isAjax) {
+        return res.status(404).json({ success: false, message: "Address not found" });
+      }
+      req.flash("error", "Address not found");
+      return res.redirect("/profile/address");
+    }
+    
     const wasDefault = address.isDefault;
-
     address.deleteOne();
-
+    
     if (wasDefault && user.addresses.length > 0) {
       user.addresses[0].isDefault = true;
     }
-
+    
     await user.save();
-
+    
+    if (isAjax) {
+      return res.json({ success: true, message: "Address deleted successfully" });
+    }
+    
     req.flash("success", "Address deleted successfully");
     res.redirect("/profile/address");
-
+    
   } catch (error) {
     console.error("Error deleting address:", error);
+    const isAjax = req.xhr || req.headers['x-requested-with'] === 'XMLHttpRequest';
+    
+    if (isAjax) {
+      return res.status(500).json({ success: false, message: error.message || "Failed to delete address" });
+    }
+    
     req.flash("error", "Failed to delete address");
     res.redirect("/profile/address");
   }
 };
 
-
 const setDefaultAddress = async (req, res) => {
   try {
-    const user = await User.findById(req.session.userId);
+    const isAjax = req.xhr || req.headers['x-requested-with'] === 'XMLHttpRequest';
     const { addressId } = req.params;
-
+    
+    console.log("Setting default address:", addressId); // Debug
+    
+    const user = await User.findById(req.session.userId);
+    if (!user) {
+      if (isAjax) {
+        return res.status(404).json({ success: false, message: "User not found" });
+      }
+      req.flash("error", "User not found");
+      return res.redirect("/profile/address");
+    }
+    
+   
+    const address = user.addresses.id(addressId);
+    if (!address) {
+      if (isAjax) {
+        return res.status(404).json({ success: false, message: "Address not found" });
+      }
+      req.flash("error", "Address not found");
+      return res.redirect("/profile/address");
+    }
+    
+    
     user.addresses.forEach(addr => {
       addr.isDefault = addr._id.toString() === addressId;
     });
-
+    
     await user.save();
-
-    req.flash("success", "Default address updated");
+    
+    if (isAjax) {
+      return res.json({ success: true, message: "Default address updated successfully" });
+    }
+    
+    req.flash("success", "Default address updated successfully");
     res.redirect("/profile/address");
-
+    
   } catch (error) {
     console.error("Error setting default address:", error);
+    const isAjax = req.xhr || req.headers['x-requested-with'] === 'XMLHttpRequest';
+    
+    if (isAjax) {
+      return res.status(500).json({ success: false, message: error.message || "Failed to set default address" });
+    }
+    
     req.flash("error", "Failed to set default address");
     res.redirect("/profile/address");
   }
 };
 
+
+const getAddress = async (req, res) => {
+  try {
+    const { addressId } = req.params;
+    const user = await User.findById(req.session.userId);
+    
+    if (!user) {
+      return res.status(404).json({ success: false, message: "User not found" });
+    }
+    
+    const address = user.addresses.id(addressId);
+    if (!address) {
+      return res.status(404).json({ success: false, message: "Address not found" });
+    }
+    
+    return res.json({ success: true, address });
+    
+  } catch (error) {
+    console.error("Get address error:", error);
+    return res.status(500).json({ success: false, message: "Failed to get address" });
+  }
+};
 
 export default {
   getAddresses,
@@ -218,4 +368,5 @@ export default {
   editAddress,
   deleteAddress,
   setDefaultAddress,
+  getAddress
 };

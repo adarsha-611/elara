@@ -183,16 +183,11 @@ body {
 
       <td>
         <div class="item-thumbnails">
-          <% order.items.slice(0,2).forEach(item => { %>
-<% if(
-    item.productDetails &&
-    item.productDetails.images &&
-    item.productDetails.images.length > 0
-){ %>
-              <img src="/uploads/products/<%= item.productDetails.images[0] %>" alt="Item">
-            <% } %>
-          <% }) %>
-        </div>
+  <% order.items.slice(0,2).forEach(item => { %>
+    <img src="<%= item.productImage %>" alt="Product">
+  <% }) %>
+</div>
+
       </td>
 
       <td>₹ <%= order.totalAmount.toLocaleString() %></td>

@@ -1,10 +1,9 @@
-import mongoose, { Query } from "mongoose";
+import mongoose from "mongoose";
 import Product from "../../model/productSchema.js";
-import Category from "../../model/categorySchema.js"
+import Category from "../../model/categorySchema.js";
 
 export async function getAllProducts(filters = {}) {
   try {
-
   
     const activeCategoryIds = await Category.distinct("_id", {
       isActive: true
@@ -14,87 +13,81 @@ export async function getAllProducts(filters = {}) {
     let query = {
       isActive: true,
       isDeleted: false,
-      category: { $in: activeCategoryIds } 
+      category: { $in: activeCategoryIds }
     };
 
     
-    if (filters.search) {
-      query.name = { $regex: filters.search, $options: "i" };
+    if (filters.search && filters.search.trim()) {
+      query.name = { $regex: filters.search.trim(), $options: "i" };
     }
 
-   if (filters.category) {
-
-  const categoryNames = filters.category.split(",");
-
-  const categoryDocs = await Category.find({
-    name: { $in: categoryNames },
-    isActive: true
-  });
-
-  const categoryIds = categoryDocs.map(c => c._id);
-
+    if (filters.category && filters.category.trim()) {
+  const categoryIds = filters.category.split(",");
   query.category = { $in: categoryIds };
 }
 
-   
+    
     let sortOption = {};
     if (filters.sort === "low") sortOption["variants.price"] = 1;
     if (filters.sort === "high") sortOption["variants.price"] = -1;
     if (filters.sort === "az") sortOption.name = 1;
     if (filters.sort === "new") sortOption.createdAt = -1;
 
+    
     let products = await Product.find(query).sort(sortOption);
-    console.log('query:',query)
 
-    if (filters.price) {
-      const ranges = filters.price.split(",");
-      products = products.filter(p => {
-        const price = p.variants[0]?.price || 0;
-        return ranges.some(r => {
-          const [min, max] = r.split("-").map(Number);
+
+    if (filters.price && filters.price.trim()) {
+      const priceRanges = filters.price.split(",");
+      products = products.filter(product => {
+        if (!product.variants || product.variants.length === 0) return false;
+        
+        const price = product.variants[0]?.price || 0;
+        
+        return priceRanges.some(range => {
+          const [min, max] = range.split("-").map(Number);
+          if (max === 10000) {
+            
+            return price >= min;
+          }
           return price >= min && price <= max;
         });
       });
     }
 
     return products;
-  }
-   catch (error) {
+  } catch (error) {
     console.log("Product error", error);
     throw error;
   }
 }
 
- 
-export async function getProductById(productId){
-    try {
-        const id = new mongoose.Types.ObjectId(productId);
-
-        const product = await Product.findOne({
-            _id:id,
-            isActive:true,
-            isDeleted:false
-        })
-
-        return product
-    } catch (error) {
-        console.log("product detail error",error)
-    }
+export async function getProductById(productId) {
+  try {
+    const id = new mongoose.Types.ObjectId(productId);
+    const product = await Product.findOne({
+      _id: id,
+      isActive: true,
+      isDeleted: false
+    });
+    return product;
+  } catch (error) {
+    console.log("product detail error", error);
+    return null;
+  }
 }
 
 export async function getRelatedProducts(category, currentProductId) {
-    try {
-        const related = await Product.find({
-            category: category,
-            _id: { $ne: currentProductId }, 
-            isActive: true,
-            isDeleted: false
-        })
-        .limit(4); 
-
-        return related;
-    } catch (error) {
-        console.log("Related product error", error);
-        throw error;
-    }
+  try {
+    const related = await Product.find({
+      category: category,
+      _id: { $ne: currentProductId },
+      isActive: true,
+      isDeleted: false
+    }).limit(4);
+    return related;
+  } catch (error) {
+    console.log("Related product error", error);
+    throw error;
+  }
 }

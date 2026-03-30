@@ -1,6 +1,7 @@
-    import Order from '../../model/orderSchema.js';
+import Order from '../../model/orderSchema.js';
     import User from '../../model/userSchema.js';
     import Product from "../../model/productSchema.js";
+    import mongoose from "mongoose";
 
     export const getOrderlist = async({
         page = 1,
@@ -13,18 +14,31 @@
 
         let query = {};
 
-        if(search){
-            const users = await User.find({
-                name:{$regex:search,$options:"i"}
-            }).select("_id");
+if (search) {
+  const users = await User.find({
+    fullName: { $regex: search, $options: "i" }
+  }).select("_id");
 
-            const userIds = users.map(u=>u._id);
+  const userIds = users.map(u => u._id);
 
-            query.$or = [
-                {_id:search.match(/^[0-9a-fA-F]{24}$/)? search:null},
-                {user:{$in:userIds}}
-            ]
-        }
+  let orConditions = [];
+
+  if (mongoose.Types.ObjectId.isValid(search)) {
+    orConditions.push({ _id: new mongoose.Types.ObjectId(search) });
+  }
+
+  
+  orConditions.push({
+    orderId: { $regex: search, $options: "i" }
+  });
+
+ 
+  if (userIds.length > 0) {
+    orConditions.push({ user: { $in: userIds } });
+  }
+
+  query.$or = orConditions;
+}
 
         if(status){
             query.orderStatus = status;

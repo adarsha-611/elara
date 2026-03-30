@@ -1,31 +1,31 @@
 import { getAllProducts, getProductById, getRelatedProducts } from "../../services/user/shopProductService.js";
 
+import Category from "../../model/categorySchema.js";
+
 const getShopPage = async (req, res) => {
   try {
     const page = parseInt(req.query.page)||1;
     const limit =9;
     const skip = (page-1)*limit;
-    
+
     const filters = {
       search: req.query.search || "",
       category: req.query.category || "",
       sort: req.query.sort || "",
       price: req.query.price || ""
     };
-    
- 
+
     const products = await getAllProducts(filters);
-    console.log('products;',products)
- 
+    const categories = await Category.find({ isActive: true });
 
     const totalProducts = products.length;
     const totalPages = Math.ceil(totalProducts/limit);
-
     const paginatedProducts = products.slice(skip,skip+limit);
 
     return res.render("user/shop", {
       products:paginatedProducts,
       filters,
+      categories,
       currentPage:page,
       totalPages
     });
@@ -35,7 +35,6 @@ const getShopPage = async (req, res) => {
     return res.status(500).send("Server Error");
   }
 };
-
 
 const getProductDetailPage = async (req, res) => {
   try {

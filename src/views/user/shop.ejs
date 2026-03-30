@@ -117,19 +117,22 @@
 
 
 
-            <div class="filter-section">
+           <div class="filter-section">
+  <h3>Categories</h3>
 
-                <h3>Categories</h3>
+  <% categories.forEach(cat => { %>
+    <label>
+      <input 
+        type="checkbox" 
+        class="category" 
+        value="<%= cat._id %>"
+        <%= filters.category && filters.category.includes(cat._id.toString()) ? 'checked' : '' %>
+      >
+      <%= cat.name %>
+    </label>
+  <% }) %>
 
-                <label><input type="checkbox" class="category" value="stud" <%= filters.category && filters.category.includes('stud') ? 'checked' : '' %>> Stud Earrings</label>
-
-                <label><input type="checkbox" class="category" value="hoop" <%= filters.category && filters.category.includes('hoop') ? 'checked' : '' %>> Hoop Earrings</label>
-
-                <label><input type="checkbox" class="category" value="drop" <%= filters.category && filters.category.includes('drop') ? 'checked' : '' %>> Drop Earrings</label>
-
-                <label><input type="checkbox" class="category" value="floral" <%= filters.category && filters.category.includes('floral') ? 'checked' : '' %>> Floral Earrings</label>
-
-            </div>
+</div>
 
 
 
