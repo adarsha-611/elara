@@ -1,6 +1,7 @@
 import cartSchema from "../../model/cartSchema.js";
 import Product from "../../model/productSchema.js";
 import { addToCart,removeFromCart } from "../../services/user/cartService.js";
+
 const getCartPage = async (req, res) => {
   try {
     const userId = req.session.userId;
@@ -28,16 +29,80 @@ const getCartPage = async (req, res) => {
         productMap[String(p._id)] = p;
       });
 
+      
+      let cartUpdated = false;
+
+      for (let item of cart.items) {
+        const product = productMap[String(item.productId)];
+        if (!product) continue;
+
+        let variant = product.variants.find(v =>
+          String(v._id) === String(item.variantId)
+        );
+
+        console.log("Product status:", {
+          name: product.name,
+          isBlocked: product.isBlocked,
+          isActive: product.isActive
+        });
+        if (!variant) {
+  console.log("Variant missing for cart item:", item.productId);
+  continue;
+}
+
+        if (!variant) continue;
+
+        let stockWarning = false;
+
+        if (item.quantity > variant.stock) {
+      stockWarning = true;
+      }
+
+        if (item.price !== variant.price) {
+          item.price = variant.price;
+          cartUpdated = true;
+        }
+      }
+
+     
+      if (cartUpdated) {
+        await cart.save();
+      }
+
+     
       cartItems = cart.items.map(item => {
         try {
-          if (!item) return null;
-          if (!item.productId) return null;
-          console.log(JSON.stringify(cart, null, 2));
+          if (!item || !item.productId) return null;
 
           const product = productMap[String(item.productId)];
-          if (!product) return null;
 
-          if (!product.variants || product.variants.length === 0) return null;
+          if (!product) {
+            return {
+              productId: String(item.productId),
+              variantId: String(item.variantId),
+              quantity: item.quantity || 1,
+              price: item.price || 0,
+              stock: 0,
+              name: "Product unavailable",
+              image: "/images/default.png",
+              isBlocked: true,
+              productMissing: true
+            };
+          }
+
+          if (!product.variants || product.variants.length === 0) {
+            return {
+              productId: String(item.productId),
+              variantId: String(item.variantId),
+              quantity: item.quantity || 1,
+              price: item.price || 0,
+              stock: 0,
+              name: product.name,
+              image: "/images/default.png",
+              isBlocked: true,
+              variantMissing: true
+            };
+          }
 
           let variant = null;
 
@@ -46,24 +111,35 @@ const getCartPage = async (req, res) => {
               String(v._id) === String(item.variantId)
             );
           }
+          let variantMissing = false;
+
+          if (item.variantId) {
+            variant = product.variants.find(v =>
+          String(v._id) === String(item.variantId)
+        );
+    }
 
           if (!variant) {
-            variant = product.variants[0];
-          }
+              variantMissing = true;
+      }
 
-          if (!variant) return null;
+          const isBlocked = product.isBlocked || !product.isActive;
 
-          const isBlocked = product.isBlocked||!product.isActive;
-          return {
+         return {
             productId: String(item.productId),
-            variantId: String(variant._id),
+            variantId: String(item.variantId), 
             quantity: item.quantity || 1,
-            price: variant.price || 0,
-            stock: variant.stock || 0,
+            price: variant ? variant.price : item.price || 0,
+            stock: variant ? variant.stock : 0,
             name: product.name || "",
-            image: variant.images?.[0] || "/images/default.png",
-            isBlocked:isBlocked
-          };
+            image:
+             item.image ||
+             variant?.images?.[0] ||
+             product?.images?.[0] ||
+             "/images/default.png",
+            isBlocked: product.isBlocked || !product.isActive,
+             variantMissing: variantMissing
+      };
 
         } catch (err) {
           console.log("Cart item error:", err);
@@ -81,17 +157,17 @@ const getCartPage = async (req, res) => {
   }
 };
 
-const addCartItem = async (req, res) => {
-  try {
-    const userId = req.session.userId;
-    const { productId, qty, variantId } = req.body;
+    const addCartItem = async (req, res) => {
+       try {
+         const userId = req.session.userId;
+         const { productId, qty, variantId } = req.body;
 
-    const product = await Product.findById(productId);
+        const product = await Product.findById(productId);
 
-    if (!product) {
-      return res.status(400).json({
-        success: false,
-        message: "Product not found"
+        if (!product) {
+          return res.status(400).json({
+              success: false,
+              message: "Product not found"
       });
     }
 
@@ -135,6 +211,8 @@ const removeCartItem = async (req, res) => {
     });
   }
 };
+
+
 
 const updateQuantity = async (req, res) => {
   try {
@@ -215,9 +293,85 @@ if (!variant) {
     });
   }
 };
+
+
+const validationCheckout = async (req, res) => {
+  try {
+    const userId = req.session.userId;
+
+    const cart = await cartSchema.findOne({ userId });
+
+    if (!cart || cart.items.length === 0) {
+      return res.json({
+        success: false,
+        message: "Cart is empty"
+      });
+    }
+
+    for (let item of cart.items) {
+      const product = await Product.findById(item.productId);
+
+      
+      if (!product) {
+        return res.json({
+          success: false,
+          message: "A product in your cart is no longer available"
+        });
+      }
+
+    
+      if (product.isBlocked || !product.isActive || product.isDeleted) {
+        return res.json({
+          success: false,
+          message: `${product.name} is no longer available`
+        });
+      }
+
+     
+      const variant = product.variants.find(v =>
+        String(v._id) === String(item.variantId)
+      );
+
+      if (!variant) {
+        return res.json({
+          success: false,
+          message: `${product.name} option is no longer available`
+        });
+      }
+
+      
+      if (variant.stock === 0) {
+        return res.json({
+          success: false,
+          message: `${product.name} is out of stock`
+        });
+      }
+
+      if (item.quantity > variant.stock) {
+        return res.json({
+          success: false,
+          message: `Only ${variant.stock} items available for ${product.name}`
+        });
+      }
+    }
+
+    return res.json({
+      success: true
+    });
+
+  } catch (error) {
+    console.log("VALIDATION ERROR:", error);
+    return res.json({
+      success: false,
+      message: "Validation failed"
+    });
+  }
+};
+
 export default {
     getCartPage,
     addCartItem,
     removeCartItem,
     updateQuantity,
+    validationCheckout,
 };

@@ -25,6 +25,7 @@ router.get('/cart', isLoggedIn, cartController.getCartPage);
 router.post('/cart/add', isLoggedIn, cartController.addCartItem);
 router.post('/cart/remove/:productId/:variantId', isLoggedIn, cartController.removeCartItem);
 router.post('/cart/qtyupdate', isLoggedIn, cartController.updateQuantity);
+router.post('/cart/validate-checkout',cartController.validationCheckout);
 
 //checkOut
 router.get('/checkout', isLoggedIn, checkoutController.getCheckoutPage);

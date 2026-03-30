@@ -117,8 +117,6 @@
     throw new Error("Order not found");
   }
 
-  console.log("POPULATED ORDER:", JSON.stringify(order.items, null, 2));
-
   return order;
 };
 

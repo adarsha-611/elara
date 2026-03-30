@@ -10,11 +10,11 @@ export const getProductPage = async (req, res) => {
       await productsPage(page, 5);
 
    return res.render("admin/product", {
-  products,
-  totalPages,
-  currentPage,
-  sidebarPage: "product"
-});
+      products,
+      totalPages,
+      currentPage,
+      sidebarPage: "product"
+  });
   } catch (error) {
     console.log(error);
     res.status(500).send("Server Error");
@@ -22,10 +22,10 @@ export const getProductPage = async (req, res) => {
 };
 
 
-const getAddProductPage = async(req,res)=>{
+  const getAddProductPage = async(req,res)=>{
     try {
-return res.render("admin/addProduct", {
-  sidebarPage: "product"
+  return res.render("admin/addProduct", {
+    sidebarPage: "product"
 });    } catch (error) {
         console.log("Add product page error",error);
         return res.status(500).send("Server Error")

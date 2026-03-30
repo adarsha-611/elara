@@ -21,22 +21,69 @@ const getCheckoutPage = async (req, res) => {
     }
 
     const user = await User.findById(userId);
-    const cart = await Cart.findOne({ userId })
-       .populate({
-       path: "items.productId",
-      select: "name variants"
-  });
+   const cart = await Cart.findOne({ userId })
+   .populate({
+     path: "items.productId",
+     select: "name variants isDeleted isBlocked isActive"
+   });
   if (!cart || cart.items.length === 0) {
   return res.redirect("/cart");
 }
 
-// 🔴 CHECK BLOCKED PRODUCTS
+let stockIssue = false;
+let stockMessage = "";
+
 for (const item of cart.items) {
   const product = item.productId;
+  // console.log("---- CHECK ITEM ----");
+  // console.log("Product:", product.name);
+  // console.log("Cart VariantId:", item.variantId.toString());
+  // console.log(
+  //   "Product VariantIds:",
+  //   product.variants.map(v => v._id.toString())
+  // );
+
 
   if (!product || product.isDeleted || product.isBlocked || product.isActive === false) {
-    req.flash("error", `${product?.name || "Some item"} is unavailable`);
-    return res.redirect("/cart");
+    stockIssue = true;
+    stockMessage = `${product?.name || "Some item"} is unavailable`;
+    break;
+  }
+
+  
+  let variant = product.variants.find(
+  v => v._id.toString() === item.variantId.toString()
+);
+
+
+if (!variant && item.variantColor) {
+  variant = product.variants.find(
+    v => v.color === item.variantColor
+  );
+}
+
+
+  if (!variant) {
+    await Cart.updateOne(
+      { userId },
+      { $pull: { items: { _id: item._id } } }
+    );
+
+    stockIssue = true;
+    stockMessage = `${product.name} variant was removed or changed`;
+    break;
+  }
+
+  if (variant.stock === 0) {
+    stockIssue = true;
+    stockMessage = `${product.name} is out of stock`;
+    break;
+  }
+
+  if (variant.stock < item.quantity) {
+    stockIssue = true;
+    stockMessage = `Only ${variant.stock} stock available for ${product.name}`;
+    break;
   }
 }
     let cartItems = [];
@@ -73,7 +120,9 @@ for (const item of cart.items) {
       cartItems,
       subtotal,
       success: req.flash("success"),
-      error: req.flash("error")
+      error: req.flash("error"),
+      stockIssue,
+      stockMessage,
     });
 
   } catch (error) {
@@ -322,7 +371,7 @@ const placeOrder = async (req, res) => {
     let totalAmount = 0;
     const orderItems = [];
 
-    // 🔴 VALIDATE PRODUCTS + BUILD ORDER ITEMS
+  
     for (const cartItem of cart.items) {
       const product = cartItem.productId;
 
@@ -348,36 +397,90 @@ const placeOrder = async (req, res) => {
         return res.redirect("/checkout");
       }
 
-      const selectedVariant = product.variants.id(cartItem.variantId);
-      if (!selectedVariant) {
-        req.flash("error", `Variant not found for ${product.name}`);
-        return res.redirect("/checkout");
-      }
+    let selectedVariant = product.variants.find(
+        v => v._id.toString() === String(cartItem.variantId)
+    );
 
-      if (selectedVariant.stock < cartItem.quantity) {
-        req.flash(
-          "error",
-          `Only ${selectedVariant.stock} ${product.name} left`
+
+      if (!selectedVariant && cartItem.variantColor) {
+          selectedVariant = product.variants.find(
+              v => v.color === cartItem.variantColor
         );
-        return res.redirect("/checkout");
-      }
+    }
+
+      if (!selectedVariant) {
+      req.flash(
+      "error",
+      `${product.name} variant was updated. Please re-add the product to cart.`
+    );
+
+    await Cart.updateOne(
+    { userId },
+    { $pull: { items: { _id: cartItem._id } } }
+  );
+
+  return res.redirect("/checkout");
+}
+
+
+if (selectedVariant.stock === 0) {
+  req.flash(
+    "error",
+    `${product.name} is out of stock`
+  );
+  return res.redirect("/checkout");
+}
+
+if (selectedVariant.stock < cartItem.quantity) {
+  req.flash(
+    "error",
+    `Only ${selectedVariant.stock} stock available for ${product.name}. Please reduce the quantity in your cart.`
+  );
+  return res.redirect("/checkout");
+}
+
+
+      if (selectedVariant.stock === 0) {
+  await Cart.updateOne(
+    { userId, "items._id": cartItem._id },
+    { $set: { "items.$.quantity": 0 } }
+  );
+
+  req.flash("error", `${product.name} is out of stock`);
+  return res.redirect("/checkout");
+}
+
+if (selectedVariant.stock < cartItem.quantity) {
+  await Cart.updateOne(
+    { userId, "items._id": cartItem._id },
+    { $set: { "items.$.quantity": selectedVariant.stock } }
+  );
+
+  req.flash(
+    "error",
+    `Only ${selectedVariant.stock} stock available for ${product.name}. Quantity updated in cart.`
+  );
+
+  return res.redirect("/checkout");
+}
 
       const itemTotal = selectedVariant.price * cartItem.quantity;
 
       orderItems.push({
-        product: product._id,
-        productName: product.name,
-        productImage: selectedVariant.images?.[0] || "",
-        variantColor: selectedVariant.color,
-        quantity: cartItem.quantity,
-        price: selectedVariant.price,
-        total: itemTotal
-      });
+          product: product._id,
+          variantId: selectedVariant._id,
+          productName: product.name,
+          productImage: selectedVariant.images?.[0] || "",
+          variantColor: selectedVariant.color,
+           quantity: cartItem.quantity,
+           price: selectedVariant.price,
+          total: itemTotal
+});
 
       totalAmount += itemTotal;
     }
 
-    // 🔴 ADDRESS
+    
     const shippingAddressDoc = user.addresses.id(addressId);
     if (!shippingAddressDoc) {
       req.flash("error", "Address not found");
@@ -392,37 +495,40 @@ const placeOrder = async (req, res) => {
       state: shippingAddressDoc.state,
       pincode: shippingAddressDoc.pincode
     };
+     
+    for(const item of orderItems){
+      const result = await Product.updateOne({
+        _id: item.product,
+        "variants._id":item.variantId,
+        "variants.stock":{$gte:item.quantity}
+      },
+      {
+          $inc:{"variants.$.stock": -item.quantity}
+      }
+    );
 
-    // 🔴 CREATE ORDER
+     if(result.modifiedCount ===0){
+      req.flash("error",`stock changed for ${item.productName}`);
+      return res.redirect("/checkout");
+     }
+    }
+
     const order = await Order.create({
-      user: userId,
-      items: orderItems,
+      user:userId,
+      items:orderItems,
       totalAmount,
       shippingAddress,
       paymentMethod,
-      paymentStatus: "pending",
-      orderStatus: "pending",
-      orderId: generateOrderId()
-    });
+      paymentStatus:"pending",
+      orderStatus:"pending",
+      orderId:generateOrderId()
+    })
 
-    // 🔴 CLEAR CART
     await Cart.updateOne(
-      { userId },
-      { $set: { items: [] } }
-    );
-
-    // 🔴 UPDATE STOCK
-    for (const item of orderItems) {
-      await Product.updateOne(
-        {
-          _id: item.product,
-          "variants.color": item.variantColor
-        },
-        {
-          $inc: { "variants.$.stock": -item.quantity }
-        }
-      );
-    }
+      {userId},
+      {$set:{items:[]}}
+    )
+   
 
     req.flash("success", "Order placed successfully!");
     return res.redirect(`/order-success/${order._id}`);

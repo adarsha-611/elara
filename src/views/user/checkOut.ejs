@@ -400,7 +400,7 @@ tailwind.config = {
     </style>
 </head>
 <body>
-
+<div id="toast-container" style="position:fixed; top:20px; right:20px; z-index:9999;"></div>
     <!-- Header (you can keep your partial) -->
         <%- include('../partials/header') %>
 
@@ -409,27 +409,6 @@ tailwind.config = {
         <main>
 
             <h1 class="page-title">Checkout</h1>
-
-            <!-- Messages -->
-            <% if (error && error.length) { %>
-  <div style="background:#ffebee; color:#c62828; padding:14px; border-radius:6px; margin-bottom:24px;">
-    <ul style="margin:0; padding-left:18px;">
-      <% error.forEach(msg => { %>
-        <li><%= msg %></li>
-      <% }) %>
-    </ul>
-  </div>
-<% } %>
-
-<% if (success && success.length) { %>
-  <div style="background:#e8f5e9; color:#2e7d32; padding:14px; border-radius:6px; margin-bottom:24px;">
-    <ul style="margin:0; padding-left:18px;">
-      <% success.forEach(msg => { %>
-        <li><%= msg %></li>
-      <% }) %>
-    </ul>
-  </div>
-<% } %>
 
             <!-- 1. Delivery Address -->
             <section class="section">
@@ -721,6 +700,53 @@ tailwind.config = {
             });
         });
     </script>
+    <script>
+function showToast(message, type = "error") {
+    const toast = document.createElement("div");
+    toast.innerText = message;
+
+    toast.style.background = type === "success" ? "#4a7043" : "#c94b4b";
+    toast.style.color = "white";
+    toast.style.padding = "12px 18px";
+    toast.style.marginTop = "10px";
+    toast.style.borderRadius = "6px";
+    toast.style.boxShadow = "0 4px 10px rgba(0,0,0,0.15)";
+    toast.style.fontSize = "14px";
+    toast.style.minWidth = "200px";
+    toast.style.opacity = "0";
+    toast.style.transition = "opacity 0.3s ease";
+
+    document.getElementById("toast-container").appendChild(toast);
+
+    setTimeout(() => { toast.style.opacity = "1"; }, 50);
+    setTimeout(() => {
+        toast.style.opacity = "0";
+        setTimeout(() => toast.remove(), 300);
+    }, 3000);
+}
+</script>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const flashDiv = document.getElementById("flash-data");
+
+    const successMessages = JSON.parse(flashDiv.dataset.success || "[]");
+    const errorMessages = JSON.parse(flashDiv.dataset.error || "[]");
+
+    successMessages.forEach(msg => showToast(msg, "success"));
+    errorMessages.forEach(msg => showToast(msg, "error"));
+
+    const stockIssue = <%= stockIssue ? "true" : "false" %>;
+    const stockMessage = "<%= stockMessage %>";
+
+    if (stockIssue && stockMessage) {
+        showToast(stockMessage, "error");
+    }
+});
+</script>
+<div id="flash-data"
+     data-success='<%- JSON.stringify(success || []) %>'
+     data-error='<%- JSON.stringify(error || []) %>'>
+</div>
     <%- include('../partials/footer') %>
 
 </body>

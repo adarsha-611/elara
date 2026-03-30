@@ -368,11 +368,13 @@ nav a {
     data-variant="<%= item.variantId %>"
     data-price="<%= item.price %>"
     data-stock="<%= item.stock %>"
+    data-qty="<%= item.quantity %>"
+    data-name="<%= item.name %>"
     data-blocked="<%= item.isBlocked %>">
              <!-- Product Info -->
         <div class="product-info">
           <img src="<%= item.image %>" alt="<%= item.name %>">
-          <<div>
+          <div>
   <h4><%= item.name %></h4>
   <p class="price">₹ <%= item.price %></p>
 
@@ -563,16 +565,26 @@ function updateDatabase(productId, variantId, quantity) {
 /* ---------------- CHECKOUT BLOCK CHECK ---------------- */
 
 function checkBlockedBeforeCheckout() {
-  const blockedItem = document.querySelector('[data-blocked="true"]');
+  fetch('/cart/validate-checkout', {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    }
+  })
+  .then(res => res.json())
+  .then(data => {
+    if (!data.success) {
+      showToast(data.message);
+      return;
+    }
 
-  if (blockedItem) {
-    showToast("Remove unavailable products before checkout");
-    return;
-  }
-
-  window.location.href = "/checkout";
+    window.location.href = "/checkout";
+  })
+  .catch(err => {
+    console.log(err);
+    showToast("Something went wrong");
+  });
 }
-
 /* ---------------- SUCCESS TOAST ---------------- */
 
 const toast = document.getElementById("toast");

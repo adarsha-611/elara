@@ -46,10 +46,18 @@ export const getUserOrders = async (userId, page = 1, limit = 3) => {
 
 
   orders.forEach(order => {
-    order.items.forEach(item => {
-      item.productDetails = productMap[item.product.toString()];
-    });
+  order.items.forEach(item => {
+    const product = productMap[item.product.toString()];
+
+    if (product) {
+      item.productDetails = product;
+    } else {
+      item.productDetails = {
+        images: ["default.png"]
+      };
+    }
   });
+});
 
   const totalOrders = await Order.countDocuments({ user: userId });
 

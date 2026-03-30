@@ -15,7 +15,7 @@ const getOrderlistPage = async (req, res) => {
         const { orders, totalPages, currentPage } = await getUserOrders(userId, page);
         const user = await User.findById(userId);
 
-        // Add trackerStatus for each order
+     
         const ordersWithStatus = orders.map(order => {
             let trackerStatus = "pending";
 

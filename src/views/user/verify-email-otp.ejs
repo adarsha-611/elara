@@ -5,48 +5,157 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ELARA - Verify Email</title>
     <link rel="stylesheet" href="/css/profile.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            'elara-brown': '#7A5C4D',
+            'elara-dark': '#3D2B24',
+            'elara-ivory': '#FDFBF9',
+            'elara-beige': '#F4F1EE'
+          },
+          fontFamily: {
+            'display': ['Cormorant Garamond', 'serif'],
+            'sans': ['Plus Jakarta Sans', 'sans-serif']
+          }
+        }
+      }
+    }
+    </script>
+    <style>
+        .main-content {
+            padding: 40px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .content-wrapper {
+            width: 100%;
+            max-width: 1000px;
+            display: flex;
+            gap: 40px;
+            align-items: start;
+        }
+
+        /* Smaller, centered OTP card */
+        .profile-card {
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+            padding: 50px 40px;
+            border: 1px solid #f0eee9;
+            flex: 1;
+            max-width: 500px; /* Slimmer width for OTP */
+            text-align: center;
+        }
+
+        .card-header h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 24px;
+            color: #3D2B24;
+            margin-bottom: 15px;
+            letter-spacing: 1px;
+        }
+
+        .card-header p {
+            font-size: 13px;
+            color: #8b6f5f;
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: #8b6f5f;
+            margin-bottom: 12px;
+            font-weight: 700;
+        }
+
+        /* Specialized OTP Input style */
+        .otp-input {
+            width: 100%;
+            max-width: 280px;
+            margin: 0 auto;
+            padding: 15px;
+            border: 1px solid #e2ded5;
+            border-radius: 8px;
+            font-size: 20px;
+            text-align: center;
+            letter-spacing: 8px; /* Spaces out the digits */
+            background-color: #faf9f6;
+            font-family: 'monospace';
+            transition: all 0.3s ease;
+        }
+
+        .otp-input:focus {
+            outline: none;
+            border-color: #A68B67;
+            background-color: #fff;
+            box-shadow: 0 0 0 4px rgba(166, 139, 103, 0.05);
+        }
+
+        .btn-primary {
+            width: 100%;
+            max-width: 280px;
+            background-color: #A68B67;
+            color: white;
+            padding: 14px;
+            border: none;
+            border-radius: 8px;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+
+        .btn-primary:hover {
+            background-color: #3D2B24;
+            transform: translateY(-2px);
+        }
+
+        .alert {
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 13px;
+            margin-bottom: 20px;
+            text-align: left;
+        }
+    </style>
 </head>
-<body>
+<body class="bg-elara-beige font-sans text-gray-900"> 
+    <%- include('../partials/header') %>
 
-    <!-- Navigation Bar -->
-    <header class="navbar">
-        <div class="nav-container">
-            <div class="logo">ELARA</div>
-            <nav class="nav-links">
-                <a href="/home">HOME</a>
-                <a href="#shop">SHOP</a>
-                <a href="#about">ABOUT US</a>
-                <a href="#contact">CONTACT</a>
-            </nav>
-            <div class="nav-icons">
-                <a href="/wishlist">❤️</a>
-                <a href="/profile">👤</a>
-                <a href="/cart">🛒</a>
-            </div>
-        </div>
-    </header>
-
-    <div class="page-header">
-        <h2>Welcome, <%= user.fullName %></h2>
+    <div class="page-header py-10">
+        <h2 class="text-center text-2xl font-display text-elara-dark tracking-widest uppercase">Verification</h2>
     </div>
 
     <main class="main-content">
         <div class="content-wrapper">
 
-            <!-- Left Sidebar -->
             <%- include('../partials/profileSidebar', { user, path: '/profileEdit' }) %>
 
-            <!-- Right Content Card -->
             <section class="profile-card">
 
                 <% if (success && success.length > 0) { %>
-                    <div style="background:#d4edda;color:#155724;padding:10px;margin-bottom:10px;">
+                    <div class="alert" style="background:#f0f9f1; color:#155724; border-left: 4px solid #155724;">
                         <%= success %>
                     </div>
                 <% } %>
 
                 <% if (error && error.length > 0) { %>
-                    <div style="background:#f8d7da;color:#721c24;padding:10px;margin-bottom:10px;">
+                    <div class="alert" style="background:#fff5f5; color:#c53030; border-left: 4px solid #c53030;">
                         <%= error %>
                     </div>
                 <% } %>
@@ -54,26 +163,31 @@
                 <div class="card-header">
                     <h1>Verify Email</h1>
                     <p>
-                        OTP has been sent to 
-                        <strong><%= newEmail %></strong>
+                        We’ve sent a 6-digit code to <br>
+                        <strong class="text-elara-dark"><%= newEmail %></strong>
                     </p>
                 </div>
 
-                <!-- ✅ OTP FORM (ADDED) -->
                 <form action="/profile/email/verify" method="POST">
                     <div class="form-group">
-                        <label>Enter OTP</label>
+                        <label>Enter Security Code</label>
                         <input 
                             type="text" 
                             name="otp" 
-                            placeholder="Enter 6-digit OTP"
+                            class="otp-input"
+                            placeholder="000000"
+                            maxlength="6"
                             required
                         >
                     </div>
 
                     <button type="submit" class="btn btn-primary">
-                        Verify Email
+                        Confirm Verification
                     </button>
+                    
+                    <div class="mt-6">
+                        <a href="/profile" class="text-xs uppercase tracking-widest text-gray-400 hover:text-elara-brown transition-colors">Cancel Request</a>
+                    </div>
                 </form>
 
             </section>

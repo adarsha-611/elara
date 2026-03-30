@@ -10,13 +10,12 @@ export const addToCart = async (userId, productId, qty = 1, variantId) => {
   if (!product.variants || product.variants.length === 0)
     throw new Error("Product has no variants");
 
- 
   let variant;
   if (variantId) {
     variant = product.variants.id(variantId);
     if (!variant) throw new Error("Selected variant not found");
   } else {
-    variant = product.variants[0]; 
+    variant = product.variants[0];
   }
 
   const availableStock = variant.stock;
@@ -28,12 +27,12 @@ export const addToCart = async (userId, productId, qty = 1, variantId) => {
   let cart = await Cart.findOne({ userId });
   if (!cart) cart = new Cart({ userId, items: [] });
 
-    const itemIndex = cart.items.findIndex(item => {
-      return (
-    item.productId.toString() === productId.toString() &&
-    String(item.variantId) === String(variant._id)
-  );
-});
+  const itemIndex = cart.items.findIndex(item => {
+    return (
+      item.productId.toString() === productId.toString() &&
+      String(item.variantId) === String(variant._id)
+    );
+  });
 
   if (itemIndex > -1) {
     const newQuantity = cart.items[itemIndex].quantity + qty;
@@ -41,12 +40,15 @@ export const addToCart = async (userId, productId, qty = 1, variantId) => {
     if (newQuantity > availableStock) throw new Error(`Only ${availableStock} items available`);
     cart.items[itemIndex].quantity = newQuantity;
   } else {
-    cart.items.push({
-      productId,
-      variantId: variant._id,
-      quantity: qty,
-      price: variant.price
-    });
+   cart.items.push({
+  productId,
+  variantId: variant._id,
+  variantColor: variant.color, 
+  quantity: qty,
+  price: variant.price,
+  name: product.name,
+  image: variant.images?.[0] || product.images?.[0] || "/images/default.png"
+});
   }
 
   await cart.save();
@@ -59,7 +61,7 @@ export const removeFromCart = async (userId, productId, variantId) => {
   if (!cart) throw Error("Cart not found");
 
   cart.items = cart.items.filter(item =>
-  !(item.productId.toString() === productId &&
+  !(item.productId.toString() === productId.toString() &&
     String(item.variantId) === String(variantId))
 );
 

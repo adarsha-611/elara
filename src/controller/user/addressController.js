@@ -1,9 +1,6 @@
 import User from "../../model/userSchema.js";
 import { validateAddress } from "../../utils/validators/joi_address.js";
 
-/* ===========================
-   GET ADDRESSES WITH PAGINATION
-=========================== */
 const getAddresses = async (req, res) => {
   try {
     const userId = req.session.userId;
@@ -44,9 +41,7 @@ const getAddresses = async (req, res) => {
 };
 
 
-/* ===========================
-   ADD ADDRESS
-=========================== */
+
 const addAddress = async (req, res) => {
   try {
     req.body.isDefault = req.body.isDefault === "on" || req.body.isDefault === true;
@@ -110,9 +105,7 @@ const addAddress = async (req, res) => {
 };
 
 
-/* ===========================
-   EDIT ADDRESS
-=========================== */
+
 const editAddress = async (req, res) => {
   try {
     const userId = req.session.userId;
@@ -169,9 +162,7 @@ const editAddress = async (req, res) => {
 };
 
 
-/* ===========================
-   DELETE ADDRESS
-=========================== */
+
 const deleteAddress = async (req, res) => {
   try {
     const user = await User.findById(req.session.userId);
@@ -199,9 +190,6 @@ const deleteAddress = async (req, res) => {
 };
 
 
-/* ===========================
-   SET DEFAULT ADDRESS
-=========================== */
 const setDefaultAddress = async (req, res) => {
   try {
     const user = await User.findById(req.session.userId);
