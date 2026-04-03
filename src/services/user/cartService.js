@@ -2,69 +2,184 @@ import cartSchema from "../../model/cartSchema.js";
 import Cart from "../../model/cartSchema.js";
 import Product from "../../model/productSchema.js";
 
-export const addToCart = async (userId, productId, qty = 1, variantId) => {
+
+export const syncCartProducts = async(userId)=>{
+  const cart = await Cart.findOne({userId});
+  if(!cart|| cart.items.length === 0){
+    return {stockChangedMessage:null};
+  }
+  let stockChangedMessage = null;
+
+  for(const item of cart.items){
+    const product = await Product.findById(item.productId);
+
+    if(!product){
+      continue;
+    }
+
+    const variant = product.variants.id(item.variantId);
+    if(!variant){
+      continue;
+    }
+
+    if(item.quantity > variant.stock){
+      const oldQty = item.quantity;
+      item.quantity = Math.max(1,variant.stock);
+
+      stockChangedMessage = `Quantity reduce to ${item.quantity},`;
+    }
+  }
+
+  if(stockChangedMessage){
+    await cart.save();
+  }
+  return {stockChangedMessage};
+}
+
+
+export const addToCart = async(userId,productId,qty,variantId)=>{
   qty = Number(qty);
 
   const product = await Product.findById(productId);
-  if (!product) throw new Error("Product not found");
-  if (!product.variants || product.variants.length === 0)
-    throw new Error("Product has no variants");
-
-  let variant;
-  if (variantId) {
-    variant = product.variants.id(variantId);
-    if (!variant) throw new Error("Selected variant not found");
-  } else {
-    variant = product.variants[0];
+  if(!product || product.isDeleted||!product.isActive){
+    throw new Error("Product is Unavailable")
   }
 
-  const availableStock = variant.stock;
-  if (availableStock <= 0) throw new Error("Out of Stock");
-
-  if (qty > 5) throw new Error("Maximum 5 quantity allowed");
-  if (qty > availableStock) throw new Error(`Only ${availableStock} items available`);
-
-  let cart = await Cart.findOne({ userId });
-  if (!cart) cart = new Cart({ userId, items: [] });
-
-  const itemIndex = cart.items.findIndex(item => {
-    return (
-      item.productId.toString() === productId.toString() &&
-      String(item.variantId) === String(variant._id)
-    );
-  });
-
-  if (itemIndex > -1) {
-    const newQuantity = cart.items[itemIndex].quantity + qty;
-    if (newQuantity > 5) throw new Error("Maximum 5 Quantity allowed");
-    if (newQuantity > availableStock) throw new Error(`Only ${availableStock} items available`);
-    cart.items[itemIndex].quantity = newQuantity;
-  } else {
-   cart.items.push({
-  productId,
-  variantId: variant._id,
-  variantColor: variant.color, 
-  quantity: qty,
-  price: variant.price,
-  name: product.name,
-  image: variant.images?.[0] || product.images?.[0] || "/images/default.png"
-});
+  const variant = product.variants.id(variantId);
+  if(!variant){
+    throw new Error("Variant not found");
   }
 
+  if(variant.stock ===0){
+    throw new Error("Out Of Stock");
+  }
+
+  if(variant.stock < qty){
+    throw new Error(`Only ${variant.stock} items available`);
+  }
+
+  if(qty>5){
+    throw new Error("Maximum 5 items allowed ")
+  }
+
+  let cart = await Cart.findOne({userId});
+  if(!cart){
+    cart = new Cart({userId,items:[]});
+  }
+
+  const index = cart.items.findIndex(item=>
+    item.productId.toString() === productId.toString()&&
+    item.variantId.toString()=== variantId.toString()
+  )
+ 
+  if(index >-1){
+    const newQty = cart.items[index].quantity+qty;
+
+    if(newQty > variant.stock){
+      throw new Error(`Only ${variant.stock} items available`)
+    }
+
+    if(newQty>5){
+      throw new Error("Maximum 5 items allowed")
+    }
+    cart.items[index].quantity = newQty;
+  }else{
+    cart.items.push({productId,variantId,quantity:qty})
+  }
+ 
   await cart.save();
-  return cart;
-};
+}
 
-export const removeFromCart = async (userId, productId, variantId) => {
-  const cart = await cartSchema.findOne({ userId });
 
-  if (!cart) throw Error("Cart not found");
+export const removeFromCart = async(userId,productId,variantId)=>{
+  const cart = await Cart.findOne({userId});
+  if(!cart){
+    throw new Error("Cart not found");
+  }
 
   cart.items = cart.items.filter(item =>
-  !(item.productId.toString() === productId.toString() &&
-    String(item.variantId) === String(variantId))
+    !(item.productId.toString() === productId.toString() &&
+    item.variantId.toString() === variantId.toString())
+  );
+  await cart.save();
+}
+
+
+export const updateCartQty = async(userId,productId,variantId,quantity)=>{
+  quantity = Number(quantity);
+
+  await syncCartProducts(userId);
+
+  const product = await Product.findById(productId);
+  if(!product || product.isDeleted || !product.isActive){
+    return {success:false,message:"Product is no longer active"};
+  }
+
+  const variant = product.variants.id(variantId);
+  if(!variant){
+    return {success:false,message:"Variant is no longer available"};
+  }
+
+  if(quantity > 5){
+    return {success:false,stock:variant.stock,message:"Maximum 5 items allowed"}
+  }
+
+  if(variant.stock ===0){
+    return {success:false,stock:variant.stock,message:"Out Of Stock"}
+  }
+
+  if(quantity > variant.stock){
+    return {success:false,stock:variant.stock,message:`Only ${variant.stock} items available`};
+  }
+
+  const cart = await Cart.findOne({userId});
+  if(!cart){
+    return{success:false, message:"Cart not found"};
+}
+
+const item = cart.items.find(i=>
+  i.productId.toString() === productId &&
+  i.variantId.toString() === variantId
 );
 
-  await cart.save();
-  return cart;
+if(!item){
+  return{success:false,message:"Item not found in cart"}
+}
+
+item.quantity = quantity;
+await cart.save();
+
+return {success:true,stock:variant.stock};
+}
+
+
+export const validateCheckout = async(userId) =>{
+  await syncCartProducts(userId);
+
+  const cart = await Cart.findOne({userId});
+  if(!cart || cart.items.length === 0){
+    throw new Error("Your cart is empty");
+  }
+
+  for(const item of cart.items){
+    const product = await Product.findById(item.productId);
+
+    if(!product || product.isDeleted||!product.isActive){
+      throw new Error(`${product.name} is no longer available`)
+    }
+
+    const variant = product.variants.id(item.variantId);
+    if(!variant){
+      throw new Error("Some product variants are no longer available");
+    }
+
+    if(variant.stock === 0){
+      throw new Error(`${product.name} is Out of stock`);
+    }
+
+    if(item.quantity > variant.stock){
+      throw new Error(`Only ${variant.stock} items available for ${product.name}`)
+    }
+  }
+  return true
 };

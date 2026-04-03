@@ -3,7 +3,7 @@ import Order from '../../model/orderSchema.js';
     import Product from "../../model/productSchema.js";
     import mongoose from "mongoose";
 
-    export const getOrderlist = async({
+export const getOrderlist = async({
         page = 1,
         limit = 5,
         search ="",
@@ -82,7 +82,7 @@ if (search) {
         }
     }
 
-   export const changeItemStatus = async (orderId, itemId, newStatus) => {
+export const changeItemStatus = async (orderId, itemId, newStatus) => {
   const order = await Order.findById(orderId);
   if (!order) throw new Error("Order not found");
 
@@ -91,7 +91,11 @@ if (search) {
 
   item.itemStatus = newStatus;
 
+ 
+  
+
   const statuses = order.items.map(i => i.itemStatus);
+    
 
   if (statuses.every(s => s === "cancelled")) {
     order.orderStatus = "cancelled";

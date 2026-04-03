@@ -484,21 +484,21 @@ tailwind.config = {
                     <% cartItems.forEach(item => { %>
                         <div class="summary-item">
                            <div class="item-thumb">
-<img src="<%= item.product.image.startsWith('/') 
-    ? item.product.image 
-    : '/' + item.product.image %>" 
-     alt="<%= item.product.name %>">
+<img src="<%= item.image && item.image.startsWith('/') 
+    ? item.image 
+    : '/' + item.image %>" 
+     alt="<%= item.name %>">
 
 </div>
 
                             <div class="item-info">
-                                <h4><%= item.product.name %></h4>
+                                <h4><%= item.name %></h4>
 <div class="item-qty">
-  Qty: <%= item.quantity %> × ₹<%= item.product.price.toLocaleString('en-IN') %>
+Qty: <%= item.quantity %> × ₹<%= (item.price || 0).toLocaleString('en-IN') %>
 </div>
 
 <div style="font-weight:600; margin-top:4px;">
-  ₹ <%= item.itemTotal.toLocaleString('en-IN') %>
+₹ <%= (item.itemTotal || 0).toLocaleString('en-IN') %>
 </div>
                             </div>
                         </div>
@@ -729,11 +729,13 @@ function showToast(message, type = "error") {
 document.addEventListener("DOMContentLoaded", function () {
     const flashDiv = document.getElementById("flash-data");
 
-    const successMessages = JSON.parse(flashDiv.dataset.success || "[]");
-    const errorMessages = JSON.parse(flashDiv.dataset.error || "[]");
+    if (flashDiv) {
+        const successMessages = JSON.parse(flashDiv.dataset.success || "[]");
+        const errorMessages = JSON.parse(flashDiv.dataset.error || "[]");
 
-    successMessages.forEach(msg => showToast(msg, "success"));
-    errorMessages.forEach(msg => showToast(msg, "error"));
+        successMessages.forEach(msg => showToast(msg, "success"));
+        errorMessages.forEach(msg => showToast(msg, "error"));
+    }
 
     const stockIssue = <%= stockIssue ? "true" : "false" %>;
     const stockMessage = "<%= stockMessage %>";
@@ -744,8 +746,8 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 </script>
 <div id="flash-data"
-     data-success='<%- JSON.stringify(success || []) %>'
-     data-error='<%- JSON.stringify(error || []) %>'>
+     data-success='<%- JSON.stringify(successMessages || []) %>'
+     data-error='<%- JSON.stringify(errorMessages || []) %>'>
 </div>
     <%- include('../partials/footer') %>
 

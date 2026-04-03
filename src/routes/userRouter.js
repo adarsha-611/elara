@@ -28,7 +28,7 @@ router.post('/cart/qtyupdate', isLoggedIn, cartController.updateQuantity);
 router.post('/cart/validate-checkout',cartController.validationCheckout);
 
 //checkOut
-router.get('/checkout', isLoggedIn, checkoutController.getCheckoutPage);
+router.get('/checkout', isLoggedIn, checkoutController.getCheckOutPage);
 router.post('/checkout/address/add', isLoggedIn, checkoutController.checkaddAddress);
 router.post('/checkout/address/edit', isLoggedIn, checkoutController.checkeditAddress);
 router.post('/checkout/address/delete/:addressId', isLoggedIn, checkoutController.checkdeleteAddress);

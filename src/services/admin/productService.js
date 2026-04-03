@@ -92,40 +92,47 @@ export const updateProduct = async (id, data, files) => {
 
     const rawVariants = data.variants || {};
 
-    const updatedVariants = [];
-
     for (const key in rawVariants) {
-
-      const vIndex = parseInt(key);
       const incoming = rawVariants[key];
 
       let images = incoming.existingImages
         ? Object.values(incoming.existingImages)
         : [];
 
-     
+      
       files.forEach(file => {
         const match = file.fieldname.match(/variants\[(\d+)\]\[images\]\[(\d+)\]/);
         if (!match) return;
 
         const fileVIdx = parseInt(match[1]);
-        const imgIdx   = parseInt(match[2]);
+        const imgIdx = parseInt(match[2]);
 
-        if (fileVIdx === vIndex) {
+        if (fileVIdx == key) {
           images[imgIdx] = "/uploads/products/" + file.filename;
         }
       });
 
-      updatedVariants.push({
-        color: incoming.color,
-        price: Number(incoming.price),
-        stock: Number(incoming.stock),
-        images: images
-      });
-    }
+      
+      if (incoming._id) {
+        
+        const existingVariant = product.variants.id(incoming._id);
 
-    
-    product.variants = updatedVariants;
+        if (existingVariant) {
+          existingVariant.color = incoming.color;
+          existingVariant.price = Number(incoming.price);
+          existingVariant.stock = Number(incoming.stock);
+          existingVariant.images = images;
+        }
+      } else {
+       
+        product.variants.push({
+          color: incoming.color,
+          price: Number(incoming.price),
+          stock: Number(incoming.stock),
+          images
+        });
+      }
+    }
 
     await product.save();
     return product;

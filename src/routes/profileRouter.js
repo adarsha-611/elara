@@ -21,6 +21,7 @@ router.post('/profile/email/verify', isLoggedIn, profileController.verifyEmailUp
 //Profile Address
 router.get('/profile/address', isLoggedIn, addressController.getAddresses);
 router.post('/profile/address/add', isLoggedIn, addressController.addAddress);
+router.get('/profile/address/get/:addressId', isLoggedIn, addressController.getAddress);
 router.post('/profile/address/edit', isLoggedIn, addressController.editAddress); 
 router.get('/profile/address/delete/:addressId', isLoggedIn, addressController.deleteAddress); 
 router.get('/profile/address/setdefault/:addressId', isLoggedIn, addressController.setDefaultAddress);

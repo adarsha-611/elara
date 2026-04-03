@@ -93,6 +93,7 @@
             <div id="variantsContainer">
                 <% product.variants.forEach((variant, vIndex) => { %>
                     <div class="variant-block" data-variant-index="<%= vIndex %>">
+                        <input type="hidden" name="variants[<%= vIndex %>][_id]" value="<%= variant._id %>">
                         <% if (vIndex > 0) { %>
                             <button type="button" class="variant-remove-btn" onclick="removeVariant(this)">Remove Variant</button>
                         <% } %>
