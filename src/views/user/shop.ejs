@@ -84,7 +84,35 @@
     color: #7A5C4D;
     opacity: 1;
 }
+.wishlist-icon {
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 20px;
+}
 
+.wishlist-icon:hover,
+.wishlist-icon.active {
+    color: #e74c3c;
+    transform: scale(1.15);
+}
+
+.btn-wishlist {
+    background: none;
+    border: 1px solid #ddd;
+    font-size: 24px;
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-wishlist:hover,
+.btn-wishlist.active {
+    background-color: #fff0f0;
+    color: #e74c3c;
+    border-color: #e74c3c;
+}
 
 
     </style>
@@ -237,14 +265,11 @@
 
 
     <!-- Heart Button -->
-
-    <i 
-
-      class="fa-regular fa-heart wishlist-icon"
-
-      data-id="<%= product._id %>">
-
-    </i>
+<i 
+    class="fa-regular fa-heart wishlist-icon" 
+    data-product-id="<%= product._id %>"
+    style="cursor: pointer; font-size: 20px;">
+</i>
 
 
 
@@ -352,68 +377,93 @@
 
     </script>
 
-    <script>
+   <!-- Add this just before </body> in your layout.ejs -->
+<script>
+document.addEventListener('DOMContentLoaded', () => {
 
-document.querySelectorAll(".wishlist-icon").forEach(icon => {
+    const wishlistElements = document.querySelectorAll('.wishlist-icon, .btn-wishlist');
 
+    wishlistElements.forEach(element => {
+        element.addEventListener('click', async function(e) {
+            e.preventDefault();
+            e.stopImmediatePropagation();
 
+            const productId = this.dataset.productId;
+            if (!productId) return;
 
-    icon.addEventListener("click", async function (e) {
+            try {
+                const response = await fetch(`/wishlist/toggle/${productId}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
 
+                const data = await response.json();
 
+                if (data.success) {
+                    if (data.status === "added") {
+                        this.classList.add('active');
+                        this.style.color = '#e74c3c';
 
-        e.stopPropagation(); // prevent link click
+                        // Change from regular to solid heart (Font Awesome)
+                        if (this.classList.contains('fa-regular')) {
+                            this.classList.remove('fa-regular');
+                            this.classList.add('fa-solid');
+                        }
 
-        e.preventDefault();
+                        showToast("Added to wishlist ❤️");
 
+                    } else if (data.status === "removed") {
+                        this.classList.remove('active');
+                        this.style.color = '';
 
+                        if (this.classList.contains('fa-solid')) {
+                            this.classList.remove('fa-solid');
+                            this.classList.add('fa-regular');
+                        }
 
-        const productId = this.dataset.id;
+                        showToast("Removed from wishlist");
 
+                        // Auto remove card if on wishlist page
+                        if (window.location.pathname.includes('/wishlist')) {
+                            const card = this.closest('.product-card');
+                            if (card) card.remove();
+                        }
+                    }
+                } else {
+                    showToast(data.message || "Something went wrong", "error");
+                }
 
-
-        const res = await fetch(`/wishlist/toggle/${productId}`, {
-
-            method: "POST"
-
+            } catch (error) {
+                console.error("Wishlist error:", error);
+                showToast("Failed to update wishlist", "error");
+            }
         });
-
-
-
-        const data = await res.json();
-
-
-
-        if (data.status === "added") {
-
-
-
-            this.classList.remove("fa-regular");
-
-            this.classList.add("fa-solid");
-
-
-
-        } else if (data.status === "removed") {
-
-
-
-            this.classList.remove("fa-solid");
-
-            this.classList.add("fa-regular");
-
-
-
-        }
-
-
-
     });
-
-
-
 });
 
+// Toast Notification
+function showToast(message, type = "success") {
+    const toast = document.createElement('div');
+    toast.style.position = "fixed";
+    toast.style.top = "20px";
+    toast.style.right = "20px";
+    toast.style.padding = "14px 24px";
+    toast.style.borderRadius = "8px";
+    toast.style.color = "#fff";
+    toast.style.zIndex = "10000";
+    toast.style.boxShadow = "0 4px 12px rgba(0,0,0,0.2)";
+    toast.textContent = message;
+
+    toast.style.backgroundColor = type === "error" ? "#dc3545" : "#28a745";
+
+    document.body.appendChild(toast);
+
+    setTimeout(() => {
+        toast.style.opacity = "0";
+        toast.style.transition = "opacity 0.4s";
+        setTimeout(() => toast.remove(), 500);
+    }, 2800);
+}
 </script>
 
 

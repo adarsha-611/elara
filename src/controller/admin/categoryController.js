@@ -52,7 +52,6 @@ const getAddCategory = (req, res) => {
             success: req.flash("success")
         });
     } catch (error) {
-        console.log("get addCategory error:", error);
         return res.status(500).send("Server Error");
     }
 };
@@ -69,7 +68,6 @@ const  postAddCategory = async (req,res)=>{
 
       return res.redirect("/admin/category");
     } catch (error) {
-        console.log("Post add category error:",error.message);
         req.flash("error",error.message)
       return res.redirect("/admin/add-category");    }
 };

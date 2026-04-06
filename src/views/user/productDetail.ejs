@@ -184,14 +184,35 @@
             background: var(--text-dark); 
         }
 
-        .btn-wishlist {
-            width: 60px;
-            border: 1px solid var(--border);
-            background: white;
-            font-size: 1.5rem;
-            cursor: pointer;
-            border-radius: 4px;
-        }
+       .wishlist-icon {
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 20px;
+}
+
+.wishlist-icon:hover,
+.wishlist-icon.active {
+    color: #e74c3c;
+    transform: scale(1.15);
+}
+
+.btn-wishlist {
+    background: none;
+    border: 1px solid #ddd;
+    font-size: 24px;
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-wishlist:hover,
+.btn-wishlist.active {
+    background-color: #fff0f0;
+    color: #e74c3c;
+    border-color: #e74c3c;
+}
 
         /* --- NEW ENHANCEMENTS & FIXES --- */
 
@@ -369,8 +390,12 @@
     Add to Cart
 </button>
 
-                <button class="btn-wishlist">♡</button>
-            </div>
+<button 
+    type="button"
+    class="btn-wishlist" 
+    data-product-id="<%= product._id %>">
+    ♡
+</button>            </div>
         </div>
     </section>
 
@@ -617,6 +642,57 @@ async function checkProductAvailability() {
 }
 
 setInterval(checkProductAvailability, 5000);
+</script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+
+    document.querySelectorAll('.btn-wishlist').forEach(btn => {
+        btn.addEventListener('click', async function(e) {
+            e.preventDefault();
+            e.stopImmediatePropagation();
+
+            const productId = this.dataset.productId;
+            if (!productId) {
+                showToast("Product ID missing", "error");
+                return;
+            }
+
+            console.log("🔄 Toggling wishlist for:", productId);
+
+            try {
+                const response = await fetch(`/wishlist/toggle/${productId}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+
+                console.log("Status:", response.status);
+
+                const data = await response.json();   // This line was failing before
+                console.log("Server returned:", data);
+
+                if (data.success) {
+                    if (data.status === "added") {
+                        this.classList.add('active');
+                        this.style.color = '#e74c3c';
+                        this.innerHTML = '♥';
+                        showToast("Added to wishlist ❤️");
+                    } else if (data.status === "removed") {
+                        this.classList.remove('active');
+                        this.style.color = '';
+                        this.innerHTML = '♡';
+                        showToast("Removed from wishlist");
+                    }
+                } else {
+                    showToast(data.message || "Failed to update wishlist", "error");
+                }
+
+            } catch (err) {
+                console.error("Full Error:", err);
+                showToast("Failed to update wishlist - Check console", "error");
+            }
+        });
+    });
+});
 </script>
 
 </body>

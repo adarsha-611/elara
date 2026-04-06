@@ -443,27 +443,33 @@
             });
         });
 
-        function cancelItem(orderId, itemId) {
-            Swal.fire({
-                title: 'Are you sure?',
-                text: "Do you want to cancel this item?",
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#3D2B24',
-                cancelButtonColor: '#d33',
-                confirmButtonText: 'Yes, cancel'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    fetch(`/profile/orders/${orderId}/cancel/${itemId}`, { method: "POST" })
-                    .then(res => res.json())
-                    .then(data => {
-                        if(data.success){
-                            Swal.fire('Cancelled','Item has been cancelled','success').then(()=>location.reload());
-                        }
-                    });
+      function cancelItem(orderId, itemId) {
+    Swal.fire({
+        title: 'Are you sure?',
+        text: "Do you want to cancel this item?",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#3D2B24',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Yes, cancel'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            fetch(`/profile/orders/${orderId}/cancel/${itemId}`, { method: "POST" })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    Swal.fire('Cancelled', data.message, 'success')
+                        .then(() => location.reload());
+                } else {
+                    Swal.fire('Error', data.message, 'error');
                 }
+            })
+            .catch(() => {
+                Swal.fire('Error', 'Something went wrong', 'error');
             });
         }
+    });
+}
     </script>
 </body>
 </html>

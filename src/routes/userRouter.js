@@ -41,7 +41,7 @@ router.post('/checkout/place-order', isLoggedIn, checkoutController.placeOrder);
 
 //Wishlist
 router.get('/wishlist', isLoggedIn, wishlistController.getWishlist);
-router.post("/wishlist/toggle/:id", isLoggedIn, wishlistController.addWishlist);
+router.post("/wishlist/toggle/:id", isLoggedIn, wishlistController.addOrRemoveWishlist);
 router.post("/wishlist/addtocart/:productId", isLoggedIn, wishlistController.addToCartFromWishlist);
 
 

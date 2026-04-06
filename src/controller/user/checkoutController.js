@@ -137,24 +137,19 @@ const orderSuccess = async (req, res) => {
 
  const placeOrder = async (req, res) => {
   try {
-       console.log("🔥 PLACE ORDER HIT");
-
-
     const userId = req.session.userId;
     const { addressId, paymentMethod } = req.body;
 
-    console.log("Address ID:", addressId);
-    console.log("Payment Method:", paymentMethod);
-
     const order = await placeOrderService(userId, addressId, paymentMethod);
-    console.log("✅ ORDER CREATED:", order._id);
+
     req.flash("success", "Order placed successfully");
     return res.redirect(`/order-success/${order._id}`);
 
   } catch (err) {
-    if (err.message.includes("stock")) {
-      const data = await getCheckoutData(req.session.userId);
 
+    const data = await getCheckoutData(req.session.userId);
+
+    if (err.message.toLowerCase().includes("stock")) {
       return res.render("user/checkout", {
         ...data,
         stockIssue: true,
@@ -164,11 +159,15 @@ const orderSuccess = async (req, res) => {
       });
     }
 
-    req.flash("error", err.message);
-    return res.redirect("/checkout");
+    return res.render("user/checkout", {
+      ...data,
+      stockIssue: false,
+      stockMessage: "",
+      successMessages: [],
+      errorMessages: [err.message]
+    });
   }
 };
-
 export default {
   getCheckOutPage,
   checkaddAddress,

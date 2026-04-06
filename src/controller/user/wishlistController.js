@@ -1,70 +1,99 @@
-import { wishlistIcon,wishlistToCart } from "../../services/user/wishlistService.js";
-import Wishlist from "../../model/wishlistSchema.js"
-const getWishlist = async(req,res)=>{
-    try {  
-        const userId = req.session.userId;
+// controllers/user/wishlistController.js
+import Wishlist from "../../model/wishlistSchema.js";
+import { toggleWishlist, moveToCartFromWishlist } from "../../services/user/wishlistService.js";
 
-        if(!userId){
+const getWishlist = async (req, res) => {
+    try {
+        const userId = req.session.userId;
+        if (!userId) {
             return res.redirect('/login');
         }
-       const wishlist = await Wishlist.findOne({ userId })
-         .populate("products");
 
-        const wishlistItems = wishlist ? wishlist.products : [];
+        const page = parseInt(req.query.page) || 1;
+        const limit = 8;                    
+        const skip = (page - 1) * limit;
+        const search = (req.query.search || "").trim();
+
+        
+        const wishlistDoc = await Wishlist.findOne({ userId }).populate({
+            path: "products.productId",
+            match: search ? { name: { $regex: search, $options: "i" } } : {},
+            select: "name price variants images"  
+        });
+
+        let wishlistItems = [];
+
+        if (wishlistDoc && wishlistDoc.products) {
+            wishlistItems = wishlistDoc.products
+                .filter(item => item.productId)          
+                .map(item => item.productId);
+        }
+
+        const totalItems = wishlistItems.length;
+        const totalPages = Math.ceil(totalItems / limit);
+
+       
+        wishlistItems = wishlistItems.slice(skip, skip + limit);
+
         const successMessage = req.session.successMessage || null;
+        if (req.session.successMessage) delete req.session.successMessage;
 
-        if (req.session.successMessage) {
-             delete req.session.successMessage;
-            }
-        return res.render("user/wishlist",{
+        res.render("user/wishlist", {
             wishlistItems,
-            successMessage,
-        })
-    } catch (error) {
-        console.log(error);
-        return res.status(500).send("server error")
-    }
-}
+            currentPage: page,
+            totalPages,
+            search,
+            successMessage
+        });
 
-const addWishlist = async(req,res)=>{
+    } catch (error) {
+        res.status(500).send("Server Error");
+    }
+};
+
+const addOrRemoveWishlist = async (req, res) => {
     try {
-          console.log("Session:", req.session);
-    console.log("User:", req.user);
-    console.log("UserId from session:", req.session.userId);
         const userId = req.session.userId;
         const productId = req.params.id;
 
-        if(!userId){
-            return res.status(401).json({error:"Login required"});
-
+        if (!userId) {
+            return res.status(401).json({ success: false, message: "Please login first" });
         }
-        const result = await wishlistIcon(userId,productId);
-        return res.json(result);
-    } catch (error) {
-        console.log(error);
-        return res.status(500).send("Server Error");
-    }
+
+        const result = await toggleWishlist(userId, productId);
+        return res.json(result);        
+
+    }  catch (error) {
+    return res.status(500).json({ 
+        success: false, 
+        message: "Server error while updating wishlist" 
+    });
 }
+};
 
 const addToCartFromWishlist = async (req, res) => {
     try {
         const userId = req.session.userId;
-        const { productId } = req.params;
+        const productId = req.params.productId;
 
-        await wishlistToCart(userId, productId);
+        await moveToCartFromWishlist(userId, productId);
 
-      
-        req.session.successMessage = "Product added to cart ";
+        return res.json({
+            success: true,
+            message: "Product added to cart"
+        });
 
-        return res.redirect('/wishlist');
     } catch (error) {
-        console.log(error);
-        return res.status(500).send("Server Error");
+
+        return res.json({
+            success: false,
+            message: error.message   
+        });
     }
 };
 
-export default{
+export default {
     getWishlist,
-    addWishlist,
-    addToCartFromWishlist,
-}
+    addOrRemoveWishlist,
+    addToCartFromWishlist
+};

@@ -9,7 +9,7 @@ import {
 } from "../../services/user/addressService.js";
 
 
-// GET ALL ADDRESSES
+
 const getAddresses = async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
@@ -33,7 +33,7 @@ const getAddresses = async (req, res) => {
 };
 
 
-// ADD ADDRESS
+
 const addAddress = async (req, res) => {
   const isAjax = req.xhr || req.headers['x-requested-with'] === 'XMLHttpRequest';
 
@@ -68,7 +68,7 @@ const addAddress = async (req, res) => {
 };
 
 
-// EDIT ADDRESS
+
 const editAddress = async (req, res) => {
   const isAjax = req.xhr || req.headers['x-requested-with'] === 'XMLHttpRequest';
 
@@ -102,7 +102,7 @@ const editAddress = async (req, res) => {
 };
 
 
-// DELETE ADDRESS
+
 const deleteAddress = async (req, res) => {
   try {
     await deleteUserAddress(
@@ -119,7 +119,6 @@ const deleteAddress = async (req, res) => {
 };
 
 
-// SET DEFAULT
 const setDefaultAddress = async (req, res) => {
   try {
     await setDefaultAddressService(
@@ -136,7 +135,6 @@ const setDefaultAddress = async (req, res) => {
 };
 
 
-// GET SINGLE (for edit modal)
 const getAddress = async (req, res) => {
   try {
     const address = await getSingleAddress(

@@ -58,7 +58,7 @@ nav a {
     letter-spacing: 1px;
 }
 
-/* Wishlist Header */
+
 .wishlist-header {
     display: flex;
     justify-content: space-between;
@@ -230,9 +230,7 @@ footer {
     left: 80%;
     transform: translateX(-50%) translateY(-20px);
 
-    background: #28a745;   
     color: #fff;
-
     padding: 18px 35px;    
     font-size: 16px;
     font-weight: 500;
@@ -249,6 +247,16 @@ footer {
     opacity: 1;
     transform: translateX(-50%) translateY(0);
 }
+
+
+.toast.success {
+    background: #28a745;
+}
+
+
+.toast.error {
+    background: #dc3545;
+}
     </style>
 </head>
 <body>
@@ -259,49 +267,64 @@ footer {
     <main class="container">
         <div class="wishlist-header">
             <h2 class="page-title">Wishlist</h2>
-            <div class="search-bar">
-                <input type="text" placeholder="Search products...">
-                <button>search</button>
-            </div>
+            <form class="search-bar" action="/wishlist" method="GET">
+    <input 
+        type="text" 
+        name="search" 
+        placeholder="Search products..." 
+        value="<%= search %>">
+    <button type="submit">search</button>
+</form>
         </div>
 
-       <section class="product-grid">
+ <section class="product-grid">
 
 <% if (!wishlistItems || wishlistItems.length === 0) { %>
     <p>Your wishlist is empty ❤️</p>
-<% } %>
+<% } else { %>
 
 <% wishlistItems.forEach(product => { %>
-
-    <div class="product-card">
-        <div class="img-container">
+<div class="product-card">
+    <div class="img-container">
+        <% if (product.variants && product.variants.length > 0 && product.variants[0].images && product.variants[0].images.length > 0) { %>
             <img 
-              src="<%= product.variants?.[0]?.images?.[0] %>" 
-              alt="<%= product.name %>">
+                src="<%= product.variants[0].images[0] %>" 
+                alt="<%= product.name %>"
+                onerror="this.src='/images/placeholder.jpg'">
+        <% } else if (product.images && product.images.length > 0) { %>
+            <img 
+                src="<%= product.images[0] %>" 
+                alt="<%= product.name %>">
+        <% } else { %>
+            <img src="/images/placeholder.jpg" alt="No image">
+        <% } %>
 
-            <button 
-              class="wishlist-btn"
-              data-id="<%= product._id %>">
-              ❤
-            </button>
-        </div>
-
-        <div class="product-info">
-            <h3><%= product.name %></h3>
-
-            <p class="price">
-                ₹ <%= product.price || product.variants?.[0]?.price %>
-            </p>
-
-            <form action="/wishlist/addtocart/<%= product._id %>" method="POST">
-                <button type="submit" class="add-to-cart">
-                    Add to Cart
-                </button>
-            </form>
-        </div>
+        <button 
+            class="wishlist-btn"
+            data-id="<%= product._id %>">
+            ❤
+        </button>
     </div>
 
-<% }) %>   <!-- ✅ CLOSE LOOP HERE -->
+    <div class="product-info">
+        <h3><%= product.name %></h3>
+
+        <p class="price">
+            ₹ <%= product.price || (product.variants?.[0]?.price || 'N/A') %>
+        </p>
+
+        <!-- ✅ Changed to button with onclick instead of form -->
+        <button 
+            type="button"
+            class="add-to-cart"
+            onclick="addToCartFromWishlist('<%= product._id %>', this)">
+            Add to Cart
+        </button>
+    </div>
+</div>
+<% }) %>
+
+<% } %>
 
 </section>
 
@@ -312,42 +335,107 @@ footer {
 <% } %>
 
         <div class="pagination">
-            <span class="arrow">‹</span>
-            <span>1</span>
-            <span class="active">2</span>
-            <span>3</span>
-            <span>4</span>
-            <span class="arrow">›</span>
-        </div>
+
+    <% if (currentPage > 1) { %>
+        <a href="/wishlist?page=<%= currentPage - 1 %>&search=<%= search %>">‹</a>
+    <% } %>
+
+    <% for (let i = 1; i <= totalPages; i++) { %>
+        <a 
+          href="/wishlist?page=<%= i %>&search=<%= search %>" 
+          class="<%= i === currentPage ? 'active' : '' %>">
+          <%= i %>
+        </a>
+    <% } %>
+
+    <% if (currentPage < totalPages) { %>
+        <a href="/wishlist?page=<%= currentPage + 1 %>&search=<%= search %>">›</a>
+    <% } %>
+
+</div>
     </main>
-    <script>
-document.querySelectorAll(".wishlist-btn").forEach(btn => {
-    btn.addEventListener("click", async function () {
+  <script>
+document.addEventListener('DOMContentLoaded', () => {
 
-        const productId = this.dataset.id;
+    // Wishlist Heart Toggle
+    document.querySelectorAll(".wishlist-btn").forEach(btn => {
+        btn.addEventListener("click", async function () {
+            const productId = this.dataset.id;
+            const card = this.closest(".product-card");
 
-        const res = await fetch(`/wishlist/toggle/${productId}`, {
-            method: "POST"
+            try {
+                const res = await fetch(`/wishlist/toggle/${productId}`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" }
+                });
+
+                const data = await res.json();
+
+                if (data.success) {
+                    if (data.status === "removed") {
+                        card.remove();
+                        showToast("Removed from wishlist", "success");
+                    } else {
+                        this.style.color = "#e74c3c";
+                        showToast("Added to wishlist", "success");
+                    }
+                } else {
+                    showToast(data.message || "Failed to update wishlist", "error");
+                }
+            } catch (err) {
+                console.error("Wishlist toggle failed", err);
+                showToast("Something went wrong", "error");
+            }
+        });
+    });
+
+});
+
+// ---------- Add to Cart from Wishlist ----------
+async function addToCartFromWishlist(productId, buttonElement) {
+    const originalText = buttonElement.innerText;
+    buttonElement.innerText = "Adding...";
+    buttonElement.disabled = true;
+
+    try {
+        const res = await fetch(`/wishlist/addtocart/${productId}`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" }
         });
 
         const data = await res.json();
 
-        if (data.status === "removed") {
-            this.closest(".product-card").remove();
+        if (data.success) {
+            showToast("Product added to cart successfully!", "success");
+
+            // Remove card after adding to cart
+            buttonElement.closest('.product-card').remove();
+        } else {
+            showToast(data.message || "Failed to add to cart", "error");
         }
-    });
-});
-</script>
-<script>
-    const toast = document.getElementById("toast");
 
-    if (toast) {
-        toast.classList.add("show");
-
-        setTimeout(() => {
-            toast.classList.remove("show");
-        }, 3000);
+    } catch (error) {
+        console.error("Add to cart from wishlist failed:", error);
+        showToast("Server error. Please try again.", "error");
+    } finally {
+        buttonElement.innerText = originalText;
+        buttonElement.disabled = false;
     }
+}
+
+// ---------- Toast ----------
+function showToast(message, type = "success") {
+    const toast = document.createElement('div');
+    toast.className = `toast show ${type}`;
+    toast.textContent = message;
+
+    document.body.appendChild(toast);
+
+    setTimeout(() => {
+        toast.classList.remove("show");
+        setTimeout(() => toast.remove(), 300);
+    }, 3000);
+}
 </script>
 </body>
 </html>

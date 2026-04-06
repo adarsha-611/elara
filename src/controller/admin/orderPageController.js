@@ -70,7 +70,6 @@ const getOrderdetailPage = async (req, res) => {
 
     if (!order) return res.status(404).send("Order not found");
 
-    console.log("POPULATED:", order.items);
 
     res.render("admin/orderDetail", { order });
 

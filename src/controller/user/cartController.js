@@ -23,10 +23,7 @@ import { addToCart,removeFromCart, syncCartProducts, updateCartQty, validateChec
         continue;
       }
 
-      
       const isBlocked = !!(product.isDeleted || !product.isActive);
-
-      
 
       cartItems.push({
         productId: product._id,
@@ -50,6 +47,7 @@ import { addToCart,removeFromCart, syncCartProducts, updateCartQty, validateChec
     res.status(500).send("Server error");
   }
 };
+
 
   const addCartItem = async(req,res)=>{
       try {
@@ -100,6 +98,7 @@ const updateQuantity = async(req,res)=>{
     })
   }
 }
+
 
 const validationCheckout = async(req,res)=>{
   try {

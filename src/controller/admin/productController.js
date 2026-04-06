@@ -9,6 +9,8 @@ export const getProductPage = async (req, res) => {
     const { products, totalPages, currentPage } =
       await productsPage(page, 5);
 
+      
+
    return res.render("admin/product", {
       products,
       totalPages,

@@ -66,7 +66,8 @@ export const addToCart = async(userId,productId,qty,variantId)=>{
   if(!cart){
     cart = new Cart({userId,items:[]});
   }
-
+  
+  
   const index = cart.items.findIndex(item=>
     item.productId.toString() === productId.toString()&&
     item.variantId.toString()=== variantId.toString()

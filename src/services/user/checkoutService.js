@@ -42,7 +42,7 @@ export const getCheckoutData = async (userId) => {
       name: product.name,
       image: image,
       price: price,
-     quantity: item.quantity,
+      quantity: item.quantity,
       itemTotal: itemTotal
 });
   }
@@ -73,7 +73,10 @@ export const placeOrderService = async (userId, addressId, paymentMethod) => {
 
   for (const cartItem of cart.items) {
     const product = cartItem.productId;
-
+     
+    if(!product|| product.isDeleted || product.isBlocked|| product.isActive === false){
+      throw new Error(`${product?.name || "item"} unavailable`);
+    }
     let variant = product.variants.find(
       v => v._id.toString() === String(cartItem.variantId)
     );
@@ -87,6 +90,7 @@ export const placeOrderService = async (userId, addressId, paymentMethod) => {
     }
 
     const itemTotal = variant.price * cartItem.quantity;
+    
 
     orderItems.push({
       product: product._id,
