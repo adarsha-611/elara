@@ -249,12 +249,91 @@
         .progress-bg { flex: 1; height: 8px; background: #eee; border-radius: 4px; overflow: hidden; }
         .progress-fill { height: 100%; background: var(--accent-tan); border-radius: 4px; }
 
-        .review-card { background: white; padding: 30px; border-radius: 6px; margin-bottom: 20px; border: 1px solid var(--border); }
-        .review-meta { display: flex; justify-content: space-between; margin-bottom: 15px; }
-        .review-author { font-weight: 600; }
-        .review-date { font-size: 0.8rem; color: #888; }
+.review-card {
+  background: #fff;
+  padding: 28px;
+  border-radius: 12px;
+  margin-bottom: 22px;
+  border: 1px solid var(--border);
+  transition: 0.3s ease;
+}
 
-        /* FIXED RELATED PRODUCTS */
+.review-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 25px rgba(0,0,0,0.06);
+}
+
+/* Header layout */
+.review-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+/* Left section */
+.review-left {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+/* Avatar */
+.review-avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: var(--accent-tan);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  font-weight: 600;
+}
+
+/* Name */
+.review-author {
+  font-size: 1.05rem;
+  font-weight: 600;
+}
+
+/* Stars */
+.star-rating {
+  color: #D4AF37;
+  font-size: 1.1rem;
+  margin-top: 4px;
+}
+
+/* Date */
+.review-date {
+  font-size: 0.9rem;
+  color: #777;
+  white-space: nowrap;
+}
+
+/* Comment */
+.review-comment {
+  margin-top: 14px;
+  font-size: 1.05rem;
+  line-height: 1.7;
+  color: #444;
+}
+
+/* Section spacing */
+.reviews-section h2 {
+  font-size: 2.4rem;
+  margin-bottom: 50px;
+}
+
+/* Empty state */
+.no-reviews {
+  text-align: center;
+  font-size: 1.1rem;
+  color: #888;
+  margin-top: 20px;
+}
+
+        
         .related-products { margin: 100px 0; }
         .section-title { font-family: var(--font-serif); font-size: 2.2rem; text-align: center; margin-bottom: 40px; }
         .product-grid { 
@@ -347,15 +426,49 @@
                 : 'In Stock' %>
     </span>
 
-    <span class="coupon-tag">✨ Use ELARA10 for 10% OFF</span>
+    
 </div>
 
 
-            <div class="product-price" id="price">
-                ₹<%= product.variants[0].price %> 
-                <span style="font-size: 1rem; color: #888; text-decoration: line-through; margin-left: 10px;">₹<%= (product.variants[0].price * 1.2).toFixed(0) %></span>
-            </div>
+<div class="product-price" id="price">
 
+  <% if (offerData) { %>
+
+    <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+
+      <!-- Final Price -->
+      <span style="font-size: 2rem; font-weight: 600; color: #4A302C;">
+        ₹<%= offerData.finalPrice.toFixed(0) %>
+      </span>
+
+      <!-- Original Price -->
+      <span style="text-decoration: line-through; color: #888; font-size: 1.1rem;">
+        ₹<%= product.variants[0].price %>
+      </span>
+
+      <!-- Discount Badge -->
+      <span style="
+        background: #e8f5e9;
+        color: #2e7d32;
+        font-size: 0.85rem;
+        font-weight: 600;
+        padding: 4px 10px;
+        border-radius: 20px;
+      ">
+        <%= Math.round((offerData.discount / product.variants[0].price) * 100) %>% OFF
+      </span>
+
+    </div>
+
+  <% } else { %>
+
+    <span style="font-size: 2rem; font-weight: 600;">
+      ₹<%= product.variants[0].price %>
+    </span>
+
+  <% } %>
+
+</div>
             <div class="product-config">
                 <div class="config-group">
                     <label>Select Metal Color</label>
@@ -401,43 +514,51 @@
 
     <section class="reviews-section">
         <h2>Customer Reviews</h2>
-        <div class="reviews-header">
-            <div class="rating-summary">
-                <h2>4.8 <span class="star-rating">★★★★★</span></h2>
-                <p>Based on 24 reviews</p>
-                <button class="btn-primary" style="padding: 12px 25px; margin-top: 20px; font-size: 0.8rem; width: auto; flex: none;">
-                    Write a Review
-                </button>
-            </div>
-            <div class="rating-bars">
-                <div class="progress-bar-container">
-                    <span>5★</span>
-                    <div class="progress-bg"><div class="progress-fill" style="width: 80%"></div></div>
-                    <span>80%</span>
-                </div>
-                <div class="progress-bar-container">
-                    <span>4★</span>
-                    <div class="progress-bg"><div class="progress-fill" style="width: 15%"></div></div>
-                    <span>15%</span>
-                </div>
-                <div class="progress-bar-container">
-                    <span>3★</span>
-                    <div class="progress-bg"><div class="progress-fill" style="width: 5%"></div></div>
-                    <span>5%</span>
-                </div>
-            </div>
+
+       <% if (reviews.length > 0) { %>
+
+  <% reviews.forEach(review => { %>
+
+   <div class="review-card">
+  <div class="review-meta">
+
+    <div class="review-left">
+      
+      <!-- Avatar (First Letter) -->
+      <div class="review-avatar">
+        <%= review.userId?.name?.charAt(0).toUpperCase() || "U" %>
+      </div>
+
+      <div>
+        <div class="review-author">
+          <%= review.userId?.name || "User" %>
         </div>
 
-        <div class="review-card">
-            <div class="review-meta">
-                <div>
-                    <div class="star-rating" style="font-size: 0.9rem;">★★★★★</div>
-                    <span class="review-author">Sophia R.</span>
-                </div>
-                <span class="review-date">Feb 02, 2026</span>
-            </div>
-            <p>The craftsmanship is incredible. They are even more beautiful in person and very lightweight!</p>
+        <div class="star-rating">
+          <%= "⭐".repeat(review.rating) %>
         </div>
+      </div>
+    </div>
+
+    <span class="review-date">
+      <%= new Date(review.createdAt).toLocaleDateString() %>
+    </span>
+
+  </div>
+
+  <p class="review-comment">
+    <%= review.comment %>
+  </p>
+</div>
+  <% }) %>
+
+<% } else { %>
+
+  <p style="text-align:center; color:#888;">
+    No reviews yet. Be the first to review!
+  </p>
+
+<% } %>
     </section>
 
   <section class="related-products">

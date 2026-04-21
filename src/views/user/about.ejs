@@ -3,109 +3,181 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>About Us - ELARA</title>
-
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet">
-
-    <link rel="stylesheet" href="/css/about.css">
-
-    <!-- ADD THIS -->
+    <title>Our Story | ELARA</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Plus+Jakarta+Sans:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --elara-dark: #3D2B24;
+            --elara-gold: #A68B67;
+            --elara-beige: #F4F1EE;
+            --elara-ivory: #FDFBF9;
+        }
+
+        body {
+            background-color: var(--elara-ivory);
+            color: var(--elara-dark);
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            overflow-x: hidden;
+        }
+
+        .font-display { font-family: 'Playfair Display', serif; }
+
+        /* Hero Section */
+        .hero-split {
+            display: grid;
+            grid-template-columns: 1fr 1.2fr;
+            min-height: 90vh;
+            align-items: center;
+        }
+
+        .hero-image-wrapper {
+            position: relative;
+            height: 80vh;
+            background: var(--elara-beige);
+            overflow: hidden;
+        }
+
+        .hero-image-wrapper img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            filter: sepia(20%) brightness(95%);
+        }
+
+        /* Decorative Elements */
+        .gold-leaf {
+            color: var(--elara-gold);
+            font-size: 10px;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            margin-bottom: 20px;
+            display: block;
+        }
+
+        /* Narrative Section */
+        .narrative-grid {
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            gap: 20px;
+            padding: 100px 0;
+        }
+
+        .floating-card {
+            background: white;
+            padding: 60px;
+            box-shadow: 0 20px 60px rgba(61, 43, 36, 0.05);
+            z-index: 10;
+        }
+
+        /* Parallax-style images */
+        .detail-img {
+            aspect-ratio: 3/4;
+            object-fit: cover;
+            width: 100%;
+        }
+
+        .stat-circle {
+            border: 1px solid var(--elara-gold);
+            width: 180px;
+            height: 180px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: all 0.5s ease;
+        }
+
+        .stat-circle:hover {
+            background: var(--elara-gold);
+            color: white;
+        }
+    </style>
 </head>
 <body>
-       <%- include('../partials/header') %>
 
 
-    <!-- Hero Section -->
-    <section class="about-hero">
-        <div class="hero-content">
-            <h1>Our Story</h1>
-            <p>Crafting timeless elegance, one piece at a time</p>
-        </div>
-    </section>
+      <%- include('../partials/header') %>
 
-    <!-- About Content Section -->
-    <section class="about-content">
-        <div class="container">
-            <div class="content-grid">
-                <div class="content-image">
-                    <img src="/Images/🤎✨️.jfif" alt="Jewelry craftsmanship">
+    <main>
+        <section class="hero-split">
+            <div class="px-12 lg:px-24">
+                <span class="gold-leaf">Since 2024</span>
+                <h1 class="font-display text-5xl lg:text-7xl mb-8 leading-tight">
+                    Artistry for the <br> <i class="font-light">Modern Ear</i>
+                </h1>
+                <p class="text-lg opacity-80 leading-relaxed mb-12 max-w-md">
+                    ELARA was born from a singular obsession: the belief that earrings are not just accessories, but the closest frame to one’s expression.
+                </p>
+                <a href="/shop" class="inline-block border-b border-elara-dark pb-2 text-sm uppercase tracking-widest font-bold hover:text-elara-gold hover:border-elara-gold transition-all">
+                    Explore the Collection
+                </a>
+            </div>
+            <div class="hero-image-wrapper">
+                <img src="/Images/Gemini_Generated_Image_i22pa3i22pa3i22p.png" alt="Fine Jewelry Craftsmanship">
+            </div>
+        </section>
+
+        <section class="max-w-7xl mx-auto px-6 py-32">
+            <div class="narrative-grid">
+                <div class="col-span-12 lg:col-span-5 mb-12 lg:mb-0">
+                    <img src="/Images/night women.jfif" class="detail-img rounded-sm shadow-2xl" alt="Design Process">
                 </div>
-                <div class="content-text">
-                    <h2>Welcome to ELARA</h2>
-                    <p>Founded in 2020, ELARA was born from a passion for creating jewelry that tells a story. Each piece in our collection is meticulously handcrafted by skilled artisans, blending traditional techniques with contemporary design.</p>
-                    <p>We believe in slow luxury—pieces that are thoughtfully created, sustainably sourced, and designed to be treasured for generations. Our commitment to quality and craftsmanship ensures that every ELARA piece is not just jewelry, but a work of art.</p>
+                <div class="col-span-12 lg:col-span-7 lg:-ml-20 mt-20">
+                    <div class="floating-card">
+                        <h2 class="font-display text-4xl mb-8">The Elara Philosophy</h2>
+                        <div class="space-y-6 opacity-90 leading-loose text-sm lg:text-base">
+                            <p>
+                                In a world of mass production, we choose the deliberate path. Every pair of ELARA earrings begins as a pencil sketch in our studio, evolving through countless iterations to find the perfect balance of weight, light, and movement.
+                            </p>
+                            <p>
+                                We specialize exclusively in earrings because we believe in mastery over variety. By focusing our craft, we ensure that every curve of gold and every placement of a stone is engineered for comfort and timeless elegance.
+                            </p>
+                            <blockquote class="border-l-4 border-elara-gold pl-6 py-2 italic font-display text-xl my-8">
+                                "Jewelry is a quiet language. ELARA is the whisper of confidence."
+                            </blockquote>
+                        </div>
+                    </div>
                 </div>
             </div>
-        </div>
-    </section>
+        </section>
 
-    <!-- Values Section -->
-    <section class="values-section">
-        <div class="container">
-            <h2 class="section-title">Our Values</h2>
-            <div class="values-grid">
-                <div class="value-card">
-                    <div class="value-icon">
-                        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path>
-                        </svg>
-                    </div>
-                    <h3>Quality Craftsmanship</h3>
-                    <p>Every piece is handcrafted with precision and care by our master artisans.</p>
+        <section class="bg-[#F8F6F4] py-32">
+            <div class="max-w-7xl mx-auto px-6">
+                <div class="text-center mb-20">
+                    <span class="gold-leaf">Uncompromising Quality</span>
+                    <h2 class="font-display text-4xl lg:text-5xl">Gilded in Integrity</h2>
                 </div>
-                <div class="value-card">
-                    <div class="value-icon">
-                        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                            <path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"></path>
-                            <path d="M12 6v6l4 2"></path>
-                        </svg>
+
+                <div class="flex flex-wrap justify-center gap-12 lg:gap-24">
+                    <div class="stat-circle">
+                        <span class="font-display text-3xl">18K</span>
+                        <span class="text-[10px] uppercase tracking-widest mt-2">Solid Gold</span>
                     </div>
-                    <h3>Timeless Design</h3>
-                    <p>Classic elegance meets modern aesthetics in every collection.</p>
-                </div>
-                <div class="value-card">
-                    <div class="value-icon">
-                        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                            <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
-                        </svg>
+                    <div class="stat-circle">
+                        <span class="font-display text-3xl">Pure</span>
+                        <span class="text-[10px] uppercase tracking-widest mt-2">Ethical Stones</span>
                     </div>
-                    <h3>Sustainable Luxury</h3>
-                    <p>Ethically sourced materials and responsible production practices.</p>
+                    <div class="stat-circle">
+                        <span class="font-display text-3xl">Hand</span>
+                        <span class="text-[10px] uppercase tracking-widest mt-2">Finished</span>
+                    </div>
                 </div>
             </div>
-        </div>
-    </section>
+        </section>
 
-    <!-- Story Section -->
-    <section class="story-section">
-        <div class="container">
-            <div class="story-grid">
-                <div class="story-text">
-                    <h2>The Art of Creation</h2>
-                    <p>Each ELARA piece begins as a sketch, brought to life through hours of meticulous work. Our artisans use time-honored techniques passed down through generations, combined with innovative modern methods to create jewelry that stands the test of time.</p>
-                    <p>From selecting the finest materials to the final polish, every step is guided by our commitment to excellence. We don't just make jewelry—we create heirlooms.</p>
-                </div>
-                <div class="story-image">
-                    <img src="/Images/Tainted Love Hoops.jfif" alt="Jewelry design process">
-                </div>
+        <section class="py-40 text-center">
+            <h3 class="font-display text-3xl lg:text-5xl mb-12">Adorn your journey.</h3>
+            <div class="flex justify-center gap-8">
+                <a href="/shop" class="bg-[#3D2B24] text-white px-12 py-5 text-xs uppercase tracking-[0.3em] font-bold hover:bg-[#A68B67] transition-colors">
+                    Shop Earrings
+                </a>
             </div>
-        </div>
-    </section>
-
-    <!-- CTA Section -->
-    <section class="cta-section">
-        <div class="cta-content">
-            <h2>Discover Our Collection</h2>
-            <p>Explore timeless pieces crafted with passion and precision</p>
-            <a href="/shop" class="cta-button">Shop Now</a>
-        </div>
-    </section>
-
-      <%- include('../partials/footer') %>
+        </section>
+    </main>
+    
+ <%- include('../partials/footer') %>
 
 </body>
 </html>

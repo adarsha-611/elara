@@ -190,17 +190,24 @@ nav a {
 }
 
 .btn-checkout {
+    background-color: #2D1B14; /* Deep Dark Brown */
+    color: #FFFFFF;
     width: 100%;
-    background-color: var(--accent-gold);
-    color: var(--white);
-    border: none;
-    padding: 10px;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 12px;
+    padding: 18px;
+    font-size: 11px;
     text-transform: uppercase;
-    letter-spacing: 1px;
+    letter-spacing: 3px;
+    font-weight: 700;
+    border: none;
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
     margin-bottom: 15px;
+    cursor: pointer;
+}
+
+.btn-checkout:hover {
+    background-color: #4A302C; 
+    letter-spacing: 4px; 
+    box-shadow: 0 10px 20px rgba(45, 27, 20, 0.15);
 }
 
 .btn-back {

@@ -1,0 +1,997 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+<title>ELARA — Sales Report | Admin</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  :root {
+    --pr: #5D4037;
+    --pr-l: #7B5E52;
+    --sc: #B18E7B;
+    --sc-l: #D4B5A5;
+    --bg: #F4F4F4;
+    --wh: #FFFFFF;
+    --tx: #2C2C2C;
+    --mu: #8A8A8A;
+    --bd: #E8E0DC;
+    --bdl: #F0EAE6;
+    --sh: 0 2px 6px rgba(93, 64, 55, 0.06), 0 0 0 0.5px rgba(93, 64, 55, 0.04);
+    --sh2: 0 12px 28px rgba(93, 64, 55, 0.12), 0 0 0 0.5px rgba(93, 64, 55, 0.1);
+    --r: 12px;
+    --r2: 16px;
+  }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--tx);
+    min-height: 100vh;
+    display: flex;
+  }
+
+  /* ========= SIDEBAR (fixed, covers left side, no overlap on main) ========= */
+  .sidebar {
+    width: 260px;
+    flex-shrink: 0;
+    background: var(--pr);
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    z-index: 100;
+    overflow-y: auto;
+    box-shadow: 2px 0 12px rgba(0, 0, 0, 0.05);
+  }
+
+  .sb-brand {
+    padding: 28px 24px 20px;
+    border-bottom: 0.5px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .sb-brand h1 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 26px;
+    font-weight: 400;
+    letter-spacing: 0.2em;
+    color: #fff;
+  }
+
+  .sb-brand p {
+    font-size: 9px;
+    color: rgba(255, 255, 255, 0.35);
+    letter-spacing: 0.14em;
+    margin-top: 4px;
+  }
+
+  .nav {
+    flex: 1;
+    padding-top: 20px;
+  }
+
+  .nav-grp {
+    font-size: 9px;
+    color: rgba(255, 255, 255, 0.3);
+    letter-spacing: 0.14em;
+    padding: 14px 24px 6px;
+    text-transform: uppercase;
+  }
+
+  .ni {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 24px;
+    color: rgba(255, 255, 255, 0.55);
+    font-size: 12.5px;
+    cursor: pointer;
+    transition: all 0.15s;
+    border-left: 2px solid transparent;
+  }
+
+  .ni:hover {
+    color: #fff;
+    background: rgba(255, 255, 255, 0.06);
+  }
+
+  .ni.active {
+    color: #fff;
+    background: rgba(255, 255, 255, 0.1);
+    border-left-color: var(--sc);
+  }
+
+  .ni svg {
+    opacity: 0.75;
+    flex-shrink: 0;
+  }
+
+  .sb-foot {
+    padding: 16px 24px;
+    border-top: 0.5px solid rgba(255, 255, 255, 0.1);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .sb-av {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--sc);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 600;
+  }
+
+  .sb-av-info p {
+    font-size: 11.5px;
+    color: #fff;
+  }
+
+  .sb-av-info span {
+    font-size: 9.5px;
+    color: rgba(255, 255, 255, 0.45);
+  }
+
+  /* ========= MAIN CONTENT (offset by sidebar width) ========= */
+  .main {
+    margin-left: 260px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    width: calc(100% - 260px);
+  }
+
+  /* top bar */
+  .topbar {
+    background: var(--wh);
+    border-bottom: 0.5px solid var(--bd);
+    height: 60px;
+    padding: 0 28px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 90;
+  }
+
+  .tb-left h2 {
+    font-size: 26px;
+    font-weight: 600;
+    color: var(--pr);
+    letter-spacing: 0.02em;
+  }
+
+  .tb-left p {
+    font-size: 10px;
+    color: var(--mu);
+    margin-top: 2px;
+  }
+
+  .tb-right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .dl-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 14px;
+    border-radius: 30px;
+    border: 0.5px solid var(--bd);
+    background: var(--wh);
+    color: var(--mu);
+    font-size: 11px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.14s;
+  }
+
+  .dl-btn:hover {
+    border-color: var(--sc);
+    color: var(--pr);
+    background: #FBF8F6;
+  }
+
+  .dl-btn.solid {
+    background: var(--pr);
+    color: #fff;
+    border-color: var(--pr);
+  }
+
+  .dl-btn.solid:hover {
+    background: var(--pr-l);
+  }
+
+  .tb-av {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--pr);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  /* content area */
+  .content {
+    padding: 22px 28px;
+  }
+
+  /* ---------- NEW FILTER BAR: compact, inline dropdown + active badge ---------- */
+  .compact-filter {
+    background: var(--wh);
+    border-radius: var(--r2);
+    border: 0.5px solid var(--bd);
+    box-shadow: var(--sh);
+    padding: 12px 20px;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .filter-group {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  .period-dropdown {
+    padding: 8px 28px 8px 14px;
+    border-radius: 40px;
+    border: 0.5px solid var(--bd);
+    background: var(--wh);
+    font-size: 12px;
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 500;
+    color: var(--pr);
+    cursor: pointer;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%235D4037' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+  }
+
+  .custom-range-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: #FBF8F6;
+    padding: 4px 12px;
+    border-radius: 40px;
+    border: 0.5px solid var(--bd);
+  }
+
+  .custom-range-wrapper input {
+    border: none;
+    background: transparent;
+    font-size: 11px;
+    padding: 6px 0;
+    font-family: 'DM Sans', sans-serif;
+    outline: none;
+    width: 110px;
+  }
+
+  .apply-sm {
+    background: var(--pr);
+    color: #fff;
+    border: none;
+    padding: 5px 14px;
+    border-radius: 30px;
+    font-size: 10.5px;
+    font-weight: 500;
+    cursor: pointer;
+  }
+
+  .reset-sm {
+    background: transparent;
+    border: 0.5px solid var(--bd);
+    padding: 5px 14px;
+    border-radius: 30px;
+    font-size: 10.5px;
+    cursor: pointer;
+  }
+
+  .active-badge {
+    background: #F0EAE6;
+    color: var(--pr);
+    font-size: 11px;
+    padding: 5px 14px;
+    border-radius: 30px;
+    font-weight: 500;
+    white-space: nowrap;
+  }
+
+  /* ----- 2x2 card layout: first row two cards, second row two cards ----- */
+  .sc-grid-2x2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin-bottom: 24px;
+  }
+
+  .stat-card {
+    background: var(--wh);
+    border-radius: var(--r2);
+    border: 0.5px solid var(--bd);
+    box-shadow: var(--sh);
+    padding: 18px 20px;
+    transition: all 0.2s;
+  }
+
+  .stat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--sh2);
+    border-color: var(--sc-l);
+  }
+
+  .card-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+
+  .card-icon {
+    width: 34px;
+    height: 34px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .card-label {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--mu);
+  }
+
+  .card-value {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 28px;
+    font-weight: 600;
+    color: var(--tx);
+    line-height: 1.1;
+    margin-top: 6px;
+  }
+
+  .trend {
+    font-size: 10.5px;
+    margin-top: 6px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .up {
+    color: #4CAF50;
+  }
+
+  .dn {
+    color: #E57373;
+  }
+
+  .nt {
+    color: var(--mu);
+  }
+
+  /* chart & table styling */
+  .chart-card {
+    background: var(--wh);
+    border-radius: var(--r2);
+    border: 0.5px solid var(--bd);
+    box-shadow: var(--sh);
+    padding: 18px 20px;
+    margin-bottom: 24px;
+  }
+
+  .ch-hdr {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+  }
+
+  .ch-ttl {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 16px;
+    font-weight: 500;
+    color: var(--pr);
+  }
+
+  .ch-leg {
+    display: flex;
+    gap: 16px;
+  }
+
+  .cl {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 10.5px;
+    color: var(--mu);
+  }
+
+  .cll {
+    width: 18px;
+    height: 2px;
+    border-radius: 2px;
+  }
+
+  .table-card {
+    background: var(--wh);
+    border-radius: var(--r2);
+    border: 0.5px solid var(--bd);
+    overflow: hidden;
+  }
+
+  .tc-hdr {
+    padding: 14px 20px;
+    border-bottom: 0.5px solid var(--bdl);
+    display: flex;
+    justify-content: space-between;
+  }
+
+  .tw {
+    overflow-x: auto;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 680px;
+  }
+
+  th {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--mu);
+    padding: 12px 16px;
+    text-align: left;
+    border-bottom: 0.5px solid var(--bdl);
+    font-weight: 500;
+    cursor: pointer;
+    user-select: none;
+  }
+
+  th:hover {
+    color: var(--pr);
+  }
+
+  td {
+    padding: 10px 16px;
+    font-size: 12px;
+    border-bottom: 0.5px solid #FAF7F5;
+  }
+
+  tr:last-child td {
+    border-bottom: none;
+  }
+
+  tr:hover td {
+    background: #FBF8F7;
+  }
+
+  .td-dt {
+    color: var(--mu);
+  }
+
+  .td-n {
+    font-weight: 500;
+    color: var(--pr);
+  }
+
+  .td-d {
+    color: #E57373;
+  }
+
+  .td-c {
+    color: #D4875A;
+  }
+
+  .td-r {
+    color: #4CAF50;
+    font-weight: 500;
+  }
+
+  .pag {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 20px;
+    border-top: 0.5px solid var(--bdl);
+  }
+
+  .pg-btns {
+    display: flex;
+    gap: 5px;
+  }
+
+  .pb {
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    border: 0.5px solid var(--bd);
+    background: transparent;
+    font-size: 12px;
+    cursor: pointer;
+  }
+
+  .pb.active {
+    background: var(--pr);
+    color: #fff;
+    border-color: var(--pr);
+  }
+
+  .toast {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    background: var(--pr);
+    color: white;
+    padding: 10px 20px;
+    border-radius: 40px;
+    font-size: 12px;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: all 0.2s ease;
+    pointer-events: none;
+    z-index: 999;
+  }
+
+  .toast.show {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  @media (max-width: 900px) {
+    .sidebar {
+      width: 220px;
+    }
+    .main {
+      margin-left: 220px;
+      width: calc(100% - 220px);
+    }
+    .sc-grid-2x2 {
+      gap: 12px;
+    }
+    .card-value {
+      font-size: 24px;
+    }
+  }
+
+  @media (max-width: 760px) {
+    .sidebar {
+      display: none;
+    }
+    .main {
+      margin-left: 0;
+      width: 100%;
+    }
+    .compact-filter {
+      flex-direction: column;
+      align-items: stretch;
+    }
+  }
+</style>
+</head>
+<body>
+
+    <%- include('../partials/adminSidebar') %>
+
+
+<!-- MAIN CONTENT -->
+<div class="main">
+  <header class="topbar">
+    <div class="tb-left"><h2>Sales Report</h2><p>Discounts, coupons & revenue insights</p></div>
+    <div class="tb-right">
+      <button class="dl-btn" onclick="dlExcel()">📎 Download Excel</button>
+      <button class="dl-btn solid" onclick="dlPDF()">📄 Download PDF</button>
+      
+    </div>
+  </header>
+
+  <div class="content">
+    <!-- COMPACT FILTER (dropdown + small custom row above graph) -->
+    <div class="compact-filter">
+      <div class="filter-group">
+        <select id="periodSelect" class="period-dropdown" onchange="onPeriodChange()">
+          <option value="monthly" selected> Monthly </option>
+          <option value="weekly">Weekly </option>
+          <option value="daily">Daily </option>
+          <option value="yearly">Yearly </option>
+          <option value="custom"> Custom Range</option>
+        </select>
+        <div id="customDateBlock" style="display: none;"> align-items: center; gap: 8px;">
+          <div class="custom-range-wrapper">
+            <input type="date" id="fromDate" value="2025-01-01" style="width:110px">
+            <span>—</span>
+            <input type="date" id="toDate" value="2025-12-31" style="width:110px">
+          </div>
+          <button class="apply-sm" onclick="applyCustomFromPicker()">Apply</button>
+          <button class="reset-sm" onclick="resetToDefault()">Reset</button>
+        </div>
+      </div>
+      
+    </div>
+
+    <!-- 2x2 CARDS: first row two, second row two -->
+    <div class="sc-grid-2x2">
+      <div class="stat-card"><div class="card-header"><div class="card-icon" style="background:#FFF3E0;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#E65100"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg></div><span class="card-label">Overall Sales Count</span></div><div class="card-value"><%= totals.totalOrders %></div><div class="trend up" id="sTrendOrders">▲ 12.4%</div></div>
+      <div class="stat-card"><div class="card-header"><div class="card-icon" style="background:#E8EAF6;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#283593"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg></div><span class="card-label">Order Amount</span></div><div class="card-value">₹<%= totals.totalSales %></div><div class="trend up" id="sTrendAmt">▲ 18.7%</div></div>
+      <div class="stat-card"><div class="card-header"><div class="card-icon" style="background:#FFEBEE;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#C62828"><path d="M20 12V22H4V12"/><path d="M22 7H2v5h20V7z"/><path d="M12 22V7"/><path d="M12 7H7.5a2.5 2.5 0 010-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 000-5C13 2 12 7 12 7z"/></svg></div><span class="card-label">Total Discounts</span></div><div class="card-value">₹<%= totals.totalDiscount %></div><div class="trend dn" id="sTrendDisc">▼ 2.3%</div></div>
+      <div class="stat-card"><div class="card-header"><div class="card-icon" style="background:#FFF8E1;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#F57F17"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg></div><span class="card-label">Coupon Deductions</span></div><div class="card-value">₹<%= totals.totalCoupon %></div><div class="trend nt" id="sTrendCpn">— stable</div></div>
+    </div>
+
+    <!-- GRAPH CARD -->
+    <div class="chart-card">
+      <div class="ch-hdr"><span class="ch-ttl">Sales Trend</span><div class="ch-leg"><div class="cl"><span class="cll" style="background:#5D4037;"></span>Amount (₹L)</div><div class="cl"><span style="width:16px;display:inline-block;border-top:2px dashed #B18E7B;"></span>Orders</div></div></div>
+      <div style="position:relative;width:100%;height:210px;"><canvas id="mainChart"></canvas></div>
+    </div>
+
+    <!-- TABLE -->
+    <div class="table-card">
+      <div class="tc-hdr"><span class="ch-ttl">Sales Breakdown</span><span id="tcMeta">12 records</span></div>
+      <div class="tw"><table><thead><tr><th onclick="srt(0)">Date <span class="si"></span></th><th onclick="srt(1)">Orders <span class="si"></span></th><th onclick="srt(2)">Order Amount <span class="si"></span></th><th onclick="srt(3)">Discount <span class="si"></span></th><th onclick="srt(4)">Coupon Deduction <span class="si"></span></th><th onclick="srt(5)">Net Revenue <span class="si"></span></th></tr></thead><tbody id="tbody"></tbody></table></div>
+    </div>
+  </div>
+</div>
+<div id="toast" class="toast"></div>
+
+<script>
+// ==================== DATA INITIALIZATION ====================
+const backendData = <%- JSON.stringify(chartData) %> || [];
+
+let rows = backendData.map(item => {
+    const monthNames = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    return {
+        date: `${monthNames[item._id.month - 1]} ${item._id.year}`,
+        year: item._id.year,
+        month: item._id.month,
+        orders: item.orders || 0,
+        amount: item.amount || 0,
+        discount: item.discount || 0,
+        coupon: item.coupon || 0,
+        // Display values in Lakhs
+        amt: (item.amount || 0) / 100000,
+        disc: (item.discount || 0) / 100000,
+        cpn: (item.coupon || 0) / 100000,
+        net: ((item.amount || 0) - (item.discount || 0) - (item.coupon || 0)) / 100000
+    };
+});
+
+// Sort rows chronologically by default
+rows.sort((a, b) => {
+    if (a.year !== b.year) return a.year - b.year;
+    return a.month - b.month;
+});
+
+let currentRows = [...rows];
+let chartInstance = null;
+
+// Pagination variables
+let currentPage = 1;
+const rowsPerPage = 10;
+
+// Utility functions
+const fL = v => '₹' + Number(v).toFixed(1) + 'L';
+const fN = v => Number(v).toLocaleString();
+
+// ==================== UPDATE SUMMARY CARDS ====================
+function updateSummaryCards(data) {
+    const totalOrders = data.reduce((sum, row) => sum + row.orders, 0);
+    const totalAmount = data.reduce((sum, row) => sum + row.amount, 0);
+    const totalDiscount = data.reduce((sum, row) => sum + row.discount, 0);
+    const totalCoupon = data.reduce((sum, row) => sum + row.coupon, 0);
+
+    const cards = document.querySelectorAll('.stat-card .card-value');
+    
+    if (cards[0]) cards[0].textContent = fN(totalOrders);
+    if (cards[1]) cards[1].innerHTML = `₹${(totalAmount / 100000).toFixed(1)}L`;
+    if (cards[2]) cards[2].innerHTML = `₹${(totalDiscount / 100000).toFixed(1)}L`;
+    if (cards[3]) cards[3].innerHTML = `₹${(totalCoupon / 100000).toFixed(1)}L`;
+}
+
+// ==================== BUILD CHART ====================
+function buildChart(data) {
+    if (chartInstance) chartInstance.destroy();
+
+    const ctx = document.getElementById('mainChart').getContext('2d');
+    
+    chartInstance = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: data.map(r => r.date),
+            datasets: [
+                {
+                    label: 'Amount (₹L)',
+                    data: data.map(r => r.amt),
+                    borderColor: '#5D4037',
+                    backgroundColor: 'rgba(93, 64, 55, 0.08)',
+                    borderWidth: 2.5,
+                    tension: 0.35,
+                    fill: true,
+                    yAxisID: 'y'
+                },
+                {
+                    label: 'Orders',
+                    data: data.map(r => r.orders),
+                    borderColor: '#B18E7B',
+                    borderDash: [6, 4],
+                    borderWidth: 2,
+                    tension: 0.35,
+                    fill: false,
+                    yAxisID: 'y2'
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    callbacks: {
+                        label: function(ctx) {
+                            if (ctx.dataset.label === 'Amount (₹L)') {
+                                return `Amount: ₹${ctx.parsed.y.toFixed(1)}L`;
+                            }
+                            return `Orders: ${ctx.parsed.y.toLocaleString()}`;
+                        }
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    title: { display: true, text: 'Amount (₹ Lakhs)', color: '#5D4037' },
+                    grid: { color: 'rgba(0,0,0,0.04)' }
+                },
+                y2: {
+                    position: 'right',
+                    title: { display: true, text: 'Number of Orders', color: '#B18E7B' },
+                    grid: { display: false }
+                }
+            }
+        }
+    });
+}
+
+// ==================== RENDER TABLE + PAGINATION ====================
+function renderTableAndPagination() {
+    const tbody = document.getElementById('tbody');
+    tbody.innerHTML = '';
+
+    const start = (currentPage - 1) * rowsPerPage;
+    const end = start + rowsPerPage;
+    const paginatedData = currentRows.slice(start, end);
+
+    if (paginatedData.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:40px; color:#888;">No records found</td></tr>`;
+    } else {
+        paginatedData.forEach(row => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td class="td-dt">${row.date}</td>
+                <td class="td-n">${fN(row.orders)}</td>
+                <td class="td-a">${fL(row.amt)}</td>
+                <td class="td-d">− ${fL(row.disc)}</td>
+                <td class="td-c">− ${fL(row.cpn)}</td>
+                <td class="td-r">${fL(row.net)}</td>
+            `;
+            tbody.appendChild(tr);
+        });
+    }
+
+    // Update meta
+    document.getElementById('tcMeta').textContent = `${currentRows.length} records`;
+
+    // Render pagination
+    renderPagination();
+}
+
+function renderPagination() {
+    const totalPages = Math.max(Math.ceil(currentRows.length / rowsPerPage), 1);
+    const pgBtnsContainer = document.getElementById('pgBtns');
+    pgBtnsContainer.innerHTML = '';
+
+    // Previous button
+    const prevBtn = document.createElement('button');
+    prevBtn.className = `pb ${currentPage === 1 ? 'disabled' : ''}`;
+    prevBtn.innerHTML = '‹';
+    prevBtn.disabled = currentPage === 1;
+    prevBtn.onclick = () => goToPage(currentPage - 1);
+    pgBtnsContainer.appendChild(prevBtn);
+
+    // Page numbers
+    for (let i = 1; i <= totalPages; i++) {
+        const btn = document.createElement('button');
+        btn.className = `pb ${i === currentPage ? 'active' : ''}`;
+        btn.textContent = i;
+        btn.onclick = () => goToPage(i);
+        pgBtnsContainer.appendChild(btn);
+    }
+
+    // Next button
+    const nextBtn = document.createElement('button');
+    nextBtn.className = `pb ${currentPage === totalPages ? 'disabled' : ''}`;
+    nextBtn.innerHTML = '›';
+    nextBtn.disabled = currentPage === totalPages;
+    nextBtn.onclick = () => goToPage(currentPage + 1);
+    pgBtnsContainer.appendChild(nextBtn);
+
+    // Update page info
+    document.getElementById('pgInfo').textContent = `Page ${currentPage} of ${totalPages}`;
+}
+
+function goToPage(page) {
+    const totalPages = Math.ceil(currentRows.length / rowsPerPage);
+    if (page < 1 || page > totalPages) return;
+    
+    currentPage = page;
+    renderTableAndPagination();
+}
+
+// ==================== FILTER & PERIOD HANDLING ====================
+function setRows(period = 'monthly') {
+    if (period === 'yearly') {
+        const yearlyMap = new Map();
+
+        rows.forEach(row => {
+            if (!yearlyMap.has(row.year)) {
+                yearlyMap.set(row.year, {
+                    date: row.year.toString(),
+                    year: row.year,
+                    month: 0,
+                    orders: 0,
+                    amount: 0,
+                    discount: 0,
+                    coupon: 0
+                });
+            }
+            const y = yearlyMap.get(row.year);
+            y.orders += row.orders;
+            y.amount += row.amount;
+            y.discount += row.discount;
+            y.coupon += row.coupon;
+        });
+
+        currentRows = Array.from(yearlyMap.values()).map(row => ({
+            ...row,
+            amt: row.amount / 100000,
+            disc: row.discount / 100000,
+            cpn: row.coupon / 100000,
+            net: (row.amount - row.discount - row.coupon) / 100000
+        }));
+
+        currentRows.sort((a, b) => a.year - b.year);
+    } 
+    else {
+        currentRows = [...rows]; // monthly or default
+    }
+
+    currentPage = 1;
+    updateSummaryCards(currentRows);
+    buildChart(currentRows);
+    renderTableAndPagination();
+}
+
+// Period dropdown
+function onPeriodChange() {
+    const val = document.getElementById('periodSelect').value;
+    const customBlock = document.getElementById('customDateBlock');
+
+    if (val === 'custom') {
+        customBlock.style.display = 'flex';
+    } else {
+        customBlock.style.display = 'none';
+        setRows(val);
+    }
+}
+
+// Custom range apply
+function applyCustomFromPicker() {
+    const fromStr = document.getElementById('fromDate').value;
+    const toStr = document.getElementById('toDate').value;
+
+    if (!fromStr || !toStr) {
+        toast('Please select both From and To dates');
+        return;
+    }
+
+    const fromDate = new Date(fromStr);
+    const toDate = new Date(toStr);
+    toDate.setHours(23, 59, 59); // include whole day
+
+    const filtered = rows.filter(item => {
+        const itemDate = new Date(item.year, item.month - 1, 1);
+        return itemDate >= fromDate && itemDate <= toDate;
+    });
+
+    if (filtered.length === 0) {
+        toast('No data found in selected range');
+        return;
+    }
+
+    currentRows = filtered;
+    currentPage = 1;
+    updateSummaryCards(currentRows);
+    buildChart(currentRows);
+    renderTableAndPagination();
+
+    toast(`Showing data from ${fromStr} to ${toStr}`);
+}
+
+function resetToDefault() {
+    document.getElementById('fromDate').value = '2025-01-01';
+    document.getElementById('toDate').value = '2025-12-31';
+    document.getElementById('periodSelect').value = 'monthly';
+    setRows('monthly');
+    toast('Reset to default view');
+}
+
+// Toast notification
+function toast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2800);
+}
+
+// ==================== DOWNLOAD FUNCTIONS ====================
+function dlPDF() {
+    toast('Generating PDF...');
+    // You can enhance this later with better PDF library (jsPDF + autoTable)
+    setTimeout(() => {
+        window.open(`/admin/sales-report/pdf?startDate=${document.getElementById('fromDate').value}&endDate=${document.getElementById('toDate').value}`, '_blank');
+    }, 300);
+}
+
+function dlExcel() {
+    toast('Exporting Excel...');
+    setTimeout(() => {
+        window.open(`/admin/sales-report/excel?startDate=${document.getElementById('fromDate').value}&endDate=${document.getElementById('toDate').value}`, '_blank');
+    }, 300);
+}
+
+// ==================== INITIALIZE ====================
+document.addEventListener('DOMContentLoaded', () => {
+    // Initial render
+    updateSummaryCards(currentRows);
+    buildChart(currentRows);
+    renderTableAndPagination();
+
+    // Set default period
+    document.getElementById('periodSelect').value = 'monthly';
+});
+</script>
+</body>
+</html>

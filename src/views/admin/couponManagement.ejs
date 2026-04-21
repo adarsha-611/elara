@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Coupon Management — ELARA Admin</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --elara-gold: #A68B67;
+            --elara-dark: #3D2B24; 
+            --elara-beige: #F4F1EE;
+            --elara-ivory: #FDFBF9;
+            --bg: #FAF9F7;
+            --surface: #FFFFFF;
+            --text: #2E2E2E;
+            --muted: #7A7A7A;
+            --border: #EDE9E3;
+            --shadow: 0 10px 40px rgba(61, 43, 36, 0.15);
+            --success: #4A7C59;
+            --error: #A0392E;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            font-size: 13px;
+            min-height: 100vh;
+        }
+        .page {
+            margin-left: 280px;
+        }
+
+        .serif { font-family: 'Playfair Display', serif; }
+
+        .header {
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+            padding: 1.2rem 3rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-left: 6px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-left h1 { font-size: 26px; color: var(--elara-dark); letter-spacing: 1px; }
+
+        .main { padding: 2.5rem 3rem; max-width: 1400px; margin: 0 auto; width: 100%; }
+
+        .btn {
+            display: inline-flex; align-items: center; gap: 8px;
+            padding: 12px 24px; cursor: pointer; border: none; 
+            transition: 0.3s; text-decoration: none;
+            text-transform: uppercase; letter-spacing: 1.5px; font-size: 10px; font-weight: 700;
+        }
+        .btn-gold { background: var(--elara-dark); color: #fff; }
+        .btn-gold:hover { background: var(--elara-gold); transform: translateY(-1px); }
+        .btn-outline { background: transparent; color: var(--elara-dark); border: 1px solid var(--elara-dark); }
+
+        .modal-overlay {
+            position: fixed; inset: 0; background: rgba(61, 43, 36, 0.4);
+            backdrop-filter: blur(4px); z-index: 1000; 
+            display: none; align-items: center; justify-content: center;
+            opacity: 0; transition: 0.3s;
+        }
+
+        body.modal-open .modal-overlay { display: flex; opacity: 1; }
+
+        #form-section {
+            background: var(--surface); 
+            width: 520px; 
+            max-width: 95%;
+            padding: 30px;
+            max-height: 85vh;
+            overflow-y: auto;
+            box-shadow: var(--shadow);
+            transform: translateY(20px);
+            transition: 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        body.modal-open #form-section { transform: translateY(0); }
+
+        .form-group { margin-bottom: 20px; display: flex; flex-direction: column; gap: 8px; }
+        .form-group label { font-size: 10px; color: var(--elara-gold); font-weight: 700; text-transform: uppercase; letter-spacing: 1px; }
+        .form-group input, .form-group select {
+            padding: 12px; border: 1px solid var(--elara-beige); background: var(--elara-ivory);
+            outline: none; font-family: 'Poppins'; width: 100%;
+        }
+        .form-group input:focus, .form-group select:focus { border-color: var(--elara-dark); }
+
+        .table-card { background: var(--surface); border: 1px solid var(--border); padding: 2rem; }
+        table { width: 100%; border-collapse: separate; border-spacing: 0 10px; }
+        thead th { padding: 10px 15px; text-align: left; font-size: 10px; text-transform: uppercase; color: var(--muted); letter-spacing: 1px; }
+        tbody tr { background: var(--surface); transition: 0.3s; }
+        tbody tr:hover { background: #FCFBFA; }
+        tbody td { padding: 18px 15px; border-top: 1px solid var(--elara-beige); border-bottom: 1px solid var(--elara-beige); vertical-align: middle; }
+
+        .badge { padding: 4px 10px; font-size: 9px; font-weight: 700; text-transform: uppercase; border-radius: 4px; }
+        .discount-pill { background: #F4F1EE; color: #3D2B24; padding: 4px 8px; font-weight: 600; border-radius: 4px; display: inline-block; }
+
+        .icon-btn { 
+            width: 34px; height: 34px; display: inline-flex; align-items: center; justify-content: center; 
+            border: 1px solid var(--elara-beige); cursor: pointer; background: none; transition: 0.2s; color: var(--muted);
+            border-radius: 4px;
+        }
+        .icon-btn:hover { border-color: var(--elara-dark); color: var(--elara-dark); background: var(--elara-ivory); }
+        .icon-btn.danger:hover { border-color: var(--error); color: var(--error); background: #FEF2F1; }
+        
+        .hidden { display: none !important; }
+
+        .status-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 10px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        .status-active { background: #e8f5e9; color: #2e7d32; }
+        .status-expired { background: #ffebee; color: #c62828; }
+        .status-disabled { background: #f5f5f5; color: #757575; }
+
+        .validity-cell { font-size: 11px; font-weight: 500; color: #5D4037; }
+        
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 24px;
+        }
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: 0.3s;
+            border-radius: 34px;
+        }
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: 0.3s;
+            border-radius: 50%;
+        }
+        input:checked + .slider { background-color: var(--elara-dark); }
+        input:checked + .slider:before { transform: translateX(26px); }
+        
+        .usage-progress {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 11px;
+        }
+        .progress-bar {
+            width: 70px;
+            height: 4px;
+            background: #EDE9E3;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        .progress-fill {
+            height: 100%;
+            background: var(--elara-gold);
+            border-radius: 4px;
+        }
+        .filter-bar {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 25px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .filter-select {
+            padding: 8px 28px 8px 12px;
+            border: 1px solid var(--border);
+            background: var(--surface);
+            font-family: 'Poppins';
+            font-size: 12px;
+            cursor: pointer;
+            border-radius: 4px;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%237A7A7A' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 10px center;
+        }
+        
+        .code-cell { font-weight: 600; font-family: monospace; font-size: 13px; color: var(--elara-dark); letter-spacing: 0.5px; }
+        
+        .alert-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 2000;
+        }
+        
+        .toast-alert {
+            background: white;
+            border-left: 4px solid;
+            padding: 12px 20px;
+            margin-bottom: 10px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            border-radius: 4px;
+            animation: slideIn 0.3s ease;
+        }
+        
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+    <%- include('../partials/adminSidebar') %>
+
+    <div class="modal-overlay" id="modalOverlay">
+        <div id="form-section">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+                <h2 class="serif" id="modal-title" style="font-size: 24px;">Create Coupon</h2>
+                <button class="icon-btn" onclick="closeCouponModal()"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+
+            <form id="couponForm">
+                  <input type="hidden" id="edit-id" name="editId" value="">
+
+                <div class="form-group">
+                    <label>Coupon Code *</label>
+                    <input type="text" name="code" id="coupon-code" placeholder="e.g. ELARA20" required style="text-transform: uppercase;">
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                    <div class="form-group">
+                        <label>Discount Type</label>
+                        <select name="discountType" id="discount-type">
+                            <option value="percentage">Percentage (%)</option>
+                            <option value="fixed">Fixed (₹)</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Discount Value *</label>
+                        <input type="number" name="discountValue" id="discount-val" placeholder="e.g. 20" required>
+                    </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                    <div class="form-group">
+                        <label>Max Discount (₹)</label>
+                        <input type="number" name="maxDiscount" id="max-discount" placeholder="e.g. 500">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Minimum Order (₹)</label>
+                        <input type="number" name="minOrder" id="min-purchase" placeholder="e.g. 1000">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Usage Limit *</label>
+                    <input type="number" name="usageLimit" id="usage-limit" placeholder="e.g. 200" required>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                    <div class="form-group">
+                        <label>Start Date *</label>
+                        <input type="date" name="startDate" id="start-date" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>End Date *</label>
+                        <input type="date" name="endDate" id="end-date" required>
+                    </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 30px;">
+                    <button type="button" class="btn btn-outline" onclick="closeCouponModal()">Cancel</button>
+                    <button type="submit" class="btn btn-gold">Save Coupon</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="page">
+        <header class="header">
+            <div class="header-left"><h1 class="serif">Coupon Management</h1></div>
+            <div class="header-right">
+                <button class="btn btn-gold" onclick="openCouponModal()">
+                    <i class="fa-solid fa-plus"></i> Create Coupon
+                </button>
+            </div>
+        </header>
+
+        <main class="main">
+            <div class="filter-bar">
+                <select id="filter-status" class="filter-select" onchange="filterCoupons()">
+                    <option value="">All Status</option>
+                    <option value="active">Active</option>
+                    <option value="expired">Expired</option>
+                    <option value="disabled">Disabled</option>
+                </select>
+                <select id="filter-type" class="filter-select" onchange="filterCoupons()">
+                    <option value="">All Types</option>
+                    <option value="percentage">Percentage</option>
+                    <option value="fixed">Fixed</option>
+                </select>
+                <input type="text" id="search-input" placeholder="Search by code..." style="padding: 8px 12px; border: 1px solid var(--elara-beige); width: 240px; background: var(--surface);">
+                <span style="font-size: 12px; color: var(--muted); margin-left: auto;" id="filter-count"></span>
+            </div>
+
+            <div class="table-card">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
+                    <h2 class="serif" style="font-size: 18px;">COUPONS</h2>
+                </div>
+                <table style="width:100%">
+                    <thead>
+                        <tr>
+                            <th>Code</th>
+                            <th>Type</th>
+                            <th>Discount</th>
+                            <th>Min Order</th>
+                            <th>Max Discount</th>
+                            <th>Usage</th>
+                            <th>Validity</th>
+                            <th>Status</th>
+                            <th>Active</th>
+                            <th style="text-align: right;">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="coupons-table-body">
+                        <% if(coupons && coupons.length > 0) { %>
+                            <% coupons.forEach(c => { %>
+                                <tr data-coupon='<%- JSON.stringify(c) %>'>
+                                    <td class="code-cell"><%= c.code %></td>
+                                    <td><span class="discount-pill"><%= c.discountType === 'percentage' ? '%' : '₹' %></span></td>
+                                    <td><span class="discount-pill"><%= c.discountType === 'percentage' ? c.discountValue + '%' : '₹' + c.discountValue %></span></td>
+                                    <td><%= c.minOrder > 0 ? '₹' + c.minOrder : '—' %></td>
+                                    <td><%= c.maxDiscount > 0 ? '₹' + c.maxDiscount : '—' %></td>
+                                    <td>
+                                        <div class="usage-progress">
+                                            <span><%= c.usedCount || 0 %> / <%= c.usageLimit %></span>
+                                            <div class="progress-bar">
+                                                <div class="progress-fill" style="width: <%= Math.min(100, ((c.usedCount || 0) / c.usageLimit) * 100) %>%"></div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="validity-cell">
+                                        <%= new Date(c.startDate).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) %> — 
+                                        <%= new Date(c.endDate).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) %>
+                                    </td>
+                                    <td>
+                                        <% 
+                                            const now = new Date();
+                                            const endDate = new Date(c.endDate);
+                                            let statusClass = '';
+                                            let statusLabel = '';
+                                            if (!c.isActive) {
+                                                statusClass = 'status-disabled';
+                                                statusLabel = 'DISABLED';
+                                            } else if (endDate < now) {
+                                                statusClass = 'status-expired';
+                                                statusLabel = 'EXPIRED';
+                                            } else {
+                                                statusClass = 'status-active';
+                                                statusLabel = 'ACTIVE';
+                                            }
+                                        %>
+                                        <span class="status-badge <%= statusClass %>"><%= statusLabel %></span>
+                                    </td>
+                                    <td>
+                                        <label class="switch">
+                                            <input type="checkbox" <%= c.isActive && new Date(c.endDate) >= new Date() ? 'checked' : '' %> <%= new Date(c.endDate) < new Date() ? 'disabled' : '' %> onchange="toggleCouponStatus('<%= c._id %>', this.checked)">
+                                            <span class="slider"></span>
+                                        </label>
+                                    </td>
+                                    <td style="text-align:right;">
+                                        <button class="icon-btn" onclick='openEditCoupon("<%= c._id %>")'><i class="fa-solid fa-pen-to-square"></i></button>
+                                        <button class="icon-btn danger" onclick='deleteCoupon("<%= c._id %>")'><i class="fa-solid fa-trash-can"></i></button>
+                                    </td>
+                                </tr>
+                            <% }) %>
+                        <% } %>
+                    </tbody>
+                </table>
+                <div id="empty-message" style="text-align:center; padding:40px; color:var(--muted); display:<%= coupons && coupons.length > 0 ? 'none' : 'block' %>;">
+                    No coupons found. Create your first coupon!
+                </div>
+            </div>
+            
+            <!-- Pagination -->
+            <% if(totalPages > 1) { %>
+            <div style="display: flex; justify-content: center; gap: 10px; margin-top: 30px;">
+                <% for(let i = 1; i <= totalPages; i++) { %>
+                    <a href="?page=<%= i %>" style="padding: 8px 15px; background: <%= currentPage === i ? 'var(--elara-dark)' : 'var(--surface)' %>; color: <%= currentPage === i ? 'white' : 'var(--text)' %>; text-decoration: none; border: 1px solid var(--border);">
+                        <%= i %>
+                    </a>
+                <% } %>
+            </div>
+            <% } %>
+        </main>
+    </div>
+
+    <script>
+        // Store coupons data from server
+        let coupons = <%- JSON.stringify(coupons || []) %>;
+        let editModeId = null;
+
+        // Helper functions
+        function getCouponStatus(coupon) {
+            const now = new Date();
+            const endDate = new Date(coupon.endDate);
+            if (!coupon.isActive) return 'disabled';
+            if (endDate < now) return 'expired';
+            return 'active';
+        }
+
+        function formatDate(dateStr) {
+            if (!dateStr) return '—';
+            const d = new Date(dateStr);
+            return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+        }
+
+        function renderTable(filteredArr) {
+            const tbody = document.getElementById('coupons-table-body');
+            const emptyDiv = document.getElementById('empty-message');
+            const data = filteredArr || coupons;
+            document.getElementById('filter-count').innerText = `Showing ${data.length} of ${coupons.length} coupons`;
+
+            if (data.length === 0) {
+                tbody.innerHTML = '';
+                emptyDiv.style.display = 'block';
+                return;
+            }
+            emptyDiv.style.display = 'none';
+            tbody.innerHTML = data.map(c => {
+                const status = getCouponStatus(c);
+                let statusClass = '';
+                let statusLabel = '';
+                if (status === 'active') { statusClass = 'status-active'; statusLabel = 'ACTIVE'; }
+                else if (status === 'expired') { statusClass = 'status-expired'; statusLabel = 'EXPIRED'; }
+                else { statusClass = 'status-disabled'; statusLabel = 'DISABLED'; }
+
+                const discountDisplay = c.discountType === 'percentage'
+                        ? `${c.discountValue}%`
+                        : `₹${c.discountValue}`;
+
+                const minDisplay = c.minOrder > 0 ? `₹${c.minOrder}` : '—';
+                const maxDisplay = c.maxDiscount > 0 ? `₹${c.maxDiscount}` : '—';
+
+                const usagePercent = c.usageLimit > 0
+                     ? Math.min(100, Math.round(((c.usedCount || 0) / c.usageLimit) * 100))
+                   : 0;
+                const validityText = `${formatDate(c.startDate)} — ${formatDate(c.endDate)}`;
+                const isExpired = new Date(c.endDate) < new Date();
+                const isToggleDisabled = isExpired;
+                
+                return `<tr>
+                            <td class="code-cell">${c.code}</td>
+                            <td><span class="discount-pill">${c.discountType === 'percentage' ? '%' : '₹'}</span></td>
+                            <td><span class="discount-pill">${discountDisplay}</span></td>
+                            <td>${minDisplay}</td>
+                            <td>${maxDisplay}</td>
+                            <td>
+                                <div class="usage-progress">
+                                    <span>${c.usedCount || 0} / ${c.usageLimit}</span>
+                                    <div class="progress-bar"><div class="progress-fill" style="width: ${usagePercent}%;"></div></div>
+                                </div>
+                            </td>
+                            <td class="validity-cell">${validityText}</td>
+                            <td><span class="status-badge ${statusClass}">${statusLabel}</span></td>
+                            <td>
+                                <label class="switch">
+                                    <input type="checkbox" ${c.isActive && !isExpired ? 'checked' : ''} ${isToggleDisabled ? 'disabled' : ''} onchange="toggleCouponStatus('${c._id}', this.checked)">
+                                    <span class="slider"></span>
+                                </label>
+                            </td>
+                            <td style="text-align:right;">
+                                <button class="icon-btn" onclick='openEditCoupon("${c._id}")'><i class="fa-solid fa-pen-to-square"></i></button>
+                                <button class="icon-btn danger" onclick='deleteCoupon("${c._id}")'><i class="fa-solid fa-trash-can"></i></button>
+                            </td>
+                        </tr>`;
+            }).join('');
+        }
+
+        function filterCoupons() {
+            const searchTerm = document.getElementById('search-input').value.toLowerCase();
+            const statusFilter = document.getElementById('filter-status').value;
+            const typeFilter = document.getElementById('filter-type').value;
+            const filtered = coupons.filter(c => {
+                const matchesSearch = c.code.toLowerCase().includes(searchTerm);
+                const matchesStatus = !statusFilter || getCouponStatus(c) === statusFilter;
+                const matchesType = !typeFilter || c.discountType === typeFilter;
+                return matchesSearch && matchesStatus && matchesType;
+            });
+            renderTable(filtered);
+        }
+async function toggleCouponStatus(id, isChecked) {
+    try {
+        const res = await fetch(`/admin/coupons/toggle/${id}`, {
+            method: "PUT"
+        });
+
+        const result = await res.json();
+
+        if (!result.success) {
+            Swal.fire("Error", result.message, "error");
+            return;
+        }
+
+        Swal.fire({
+            icon: "success",
+            text: "Status updated successfully",
+            timer: 1500,
+            showConfirmButton: false
+        }).then(() => location.reload()); 
+
+    } catch (err) {
+        console.error(err); 
+        Swal.fire("Error", "Something went wrong", "error");
+    }
+}
+
+   async function deleteCoupon(id) {
+    const confirm = await Swal.fire({
+        title: "Are you sure?",
+        text: "This action cannot be undone",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonText: "Yes, delete it"
+    });
+
+    if (!confirm.isConfirmed) return;
+
+    try {
+        const res = await fetch(`/admin/coupons/delete/${id}`, { method: "DELETE" });
+        const result = await res.json();
+
+        if (result.success) {
+            Swal.fire("Deleted!", result.message, "success")
+                .then(() => location.reload());
+        } else {
+            Swal.fire("Error", result.message, "error");
+        }
+    } catch (err) {
+        console.error(err);
+        Swal.fire("Error", "Something went wrong", "error");
+    }
+}
+        function openCouponModal() {
+            document.getElementById('modal-title').innerText = 'Create Coupon';
+            document.getElementById('couponForm').reset();
+            document.getElementById('couponForm').action = '/admin/coupons/create';
+            document.getElementById('edit-id').value = '';
+            document.body.classList.add('modal-open');
+        }
+
+        function openEditCoupon(id) {
+            const coupon = coupons.find(c => c._id === id);
+            if (!coupon) return;
+
+            document.getElementById('modal-title').innerText = 'Edit Coupon';
+            document.getElementById('coupon-code').value = coupon.code;
+            document.getElementById('discount-type').value = coupon.discountType;
+            document.getElementById('discount-val').value = coupon.discountValue;
+            document.getElementById('max-discount').value = coupon.maxDiscount || '';
+            document.getElementById('min-purchase').value = coupon.minOrder || '';
+            document.getElementById('usage-limit').value = coupon.usageLimit;
+            document.getElementById('start-date').value = coupon.startDate ? new Date(coupon.startDate).toISOString().split('T')[0] : '';
+            document.getElementById('end-date').value = coupon.endDate ? new Date(coupon.endDate).toISOString().split('T')[0] : '';
+
+            document.getElementById('couponForm').action = `/admin/coupons/update/${coupon._id}`;
+            document.getElementById("edit-id").value = coupon._id;
+            document.body.classList.add('modal-open');
+        }
+
+        function closeCouponModal() {
+            document.body.classList.remove('modal-open');
+        }
+
+        // Event listeners
+        document.getElementById('modalOverlay').addEventListener('click', function(e) {
+            if (e.target === this) closeCouponModal();
+        });
+        document.getElementById('search-input').addEventListener('input', filterCoupons);
+        
+        // Make functions global
+        window.filterCoupons = filterCoupons;
+        window.openCouponModal = openCouponModal;
+        window.closeCouponModal = closeCouponModal;
+        window.toggleCouponStatus = toggleCouponStatus;
+        window.deleteCoupon = deleteCoupon;
+        window.openEditCoupon = openEditCoupon;
+
+        // Initial render if no server-side rendering
+        if (coupons && coupons.length > 0) {
+            renderTable(coupons);
+        }
+document.getElementById("couponForm").addEventListener("submit", async function(e) {
+    e.preventDefault();
+
+    const form = e.target;
+    const formData = new FormData(form);
+    const data = Object.fromEntries(formData.entries());
+
+    const editId = document.getElementById("edit-id").value;
+
+    const url = editId 
+        ? `/admin/coupons/update/${editId}` 
+        : `/admin/coupons/create`;
+
+    try {
+        const response = await fetch(url, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(data)
+        });
+
+        const result = await response.json();
+
+        if (!result.success) {
+            if (result.errors) {
+                showValidationErrors(result.errors);
+            } else {
+                Swal.fire("Error", result.message, "error");
+            }
+            return;
+        }
+
+        Swal.fire({
+            icon: "success",
+            title: "Success",
+            text: result.message
+        }).then(() => {
+            location.reload(); 
+        });
+
+    } catch (err) {
+        console.error(err);
+        Swal.fire("Error", "Something went wrong", "error");
+    }
+});
+
+function showValidationErrors(errors) {
+    // Clear old errors
+    document.querySelectorAll(".error-text").forEach(el => el.remove());
+
+    errors.forEach(err => {
+        const input = document.querySelector(`[name="${err.field}"]`);
+        if (!input) return;
+
+        input.style.border = "1px solid red";
+
+        const msg = document.createElement("div");
+        msg.className = "error-text";
+        msg.style.color = "red";
+        msg.style.fontSize = "10px";
+        msg.innerText = err.message;
+
+        input.parentElement.appendChild(msg);
+    });
+}
+    </script>
+</body>
+</html>

@@ -1,5 +1,7 @@
 import Order from "../../model/orderSchema.js";
 import Product from "../../model/productSchema.js";
+import { cancelRefundToWallet } from "./walletService.js";
+import Review from "../../model/reviewSchema.js"
 
 
 export const getUserOrders = async (userId, page = 1, limit = 3) => {
@@ -93,7 +95,7 @@ export const requestReturn = async (orderId, itemId, reason) => {
     }
   );
 };
-export const cancelOrderService = async (orderId, itemId) => {
+export const cancelOrderService = async (orderId, itemId,reason) => {
 
   const order = await Order.findById(orderId);
 
@@ -128,7 +130,28 @@ export const cancelOrderService = async (orderId, itemId) => {
 
     await product.save();
   }
- item.itemStatus = "cancelled";
+item.itemStatus = "cancelled";
+
+item.cancelRequest = {
+  requested: true,
+  reason: reason,
+  cancelledAt: new Date()
+};
+
+let refundDone = false;
+let refundAmount = 0;
+
+
+
+ if(order.paymentMethod !== "cod" && !item.isRefunded){
+  const refundAmount = item.price*item.quantity;
+
+  await cancelRefundToWallet(order.user,refundAmount,order._id);
+
+  item.isRefunded = true;
+  refundDone = true;
+
+ }
 
 
 const cancelledCount = order.items.filter(
@@ -138,8 +161,8 @@ const cancelledCount = order.items.filter(
 
 if (cancelledCount === order.items.length) {
   order.orderStatus = "cancelled";
-} else if (cancelledCount > 0) {
-  order.orderStatus = "cancelled"; 
+} else  {
+  order.orderStatus = "partially_cancelled"; 
 }
 
 await order.save();
@@ -154,8 +177,31 @@ await order.save();
 
   await order.save();
 
-  return true;
+  return {
+    refundDone,
+    refundAmount
+  }
 };
+
+export const addReviewService = async(userId,productId,rating,comment)=>{
+  if(!productId||!rating||!comment){
+    return{success:false,message:"All fields required"};
+  }
+
+  const existing = await Review.findOne({userId,productId});
+
+  if(existing){
+      return{success:false,message:"Already reviewed"};
+  }
+
+  const review = await Review.create({
+    userId,
+    productId,
+    rating,
+    comment
+  })
+  return {success:true,review};
+}
 
 export const getInvoiceData = async (orderId) => {
   const order = await Order.findById(orderId)

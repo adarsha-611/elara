@@ -6,7 +6,7 @@ const getCategoryPage = async (req, res) => {
   try {
     const { search, page } = req.query;
 
-    const limit = 2;
+    const limit = 6;
     const paginationPage = parseInt(page) || 1;
     const skip = (paginationPage - 1) * limit;
 

@@ -6,6 +6,7 @@ import shopController from "../controller/user/shopController.js";
 import wishlistController from "../controller/user/wishlistController.js"
 import cartController from "../controller/user/cartController.js";
 import checkoutController from "../controller/user/checkoutController.js";
+import paymentController from "../controller/user/paymentController.js";
 
 //Home
 
@@ -26,6 +27,7 @@ router.post('/cart/add', isLoggedIn, cartController.addCartItem);
 router.post('/cart/remove/:productId/:variantId', isLoggedIn, cartController.removeCartItem);
 router.post('/cart/qtyupdate', isLoggedIn, cartController.updateQuantity);
 router.post('/cart/validate-checkout',cartController.validationCheckout);
+router.get("/cart/count",cartController.getCartCount);
 
 //checkOut
 router.get('/checkout', isLoggedIn, checkoutController.getCheckOutPage);
@@ -33,11 +35,16 @@ router.post('/checkout/address/add', isLoggedIn, checkoutController.checkaddAddr
 router.post('/checkout/address/edit', isLoggedIn, checkoutController.checkeditAddress);
 router.post('/checkout/address/delete/:addressId', isLoggedIn, checkoutController.checkdeleteAddress);
 router.post('/checkout/address/default/:addressId', isLoggedIn, checkoutController.checksetDefaultAddress);
+router.post('/checkout/apply-coupon',isLoggedIn,checkoutController.applyCoupon)
 
 router.get('/order-success/:orderId', isLoggedIn, checkoutController.orderSuccess);
 router.post('/checkout/place-order', isLoggedIn, checkoutController.placeOrder);
 
-
+//PaymentRouter
+router.post("/create-order",isLoggedIn,paymentController.createOrder);
+router.post("/verify-payment",isLoggedIn,paymentController.verifyPaymentController);
+router.post("/retry-payment/:orderId", paymentController.retryPayment);
+router.get("/payment-failed/:orderId", paymentController.paymentFailedPage);
 
 //Wishlist
 router.get('/wishlist', isLoggedIn, wishlistController.getWishlist);

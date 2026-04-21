@@ -6,7 +6,10 @@ import { upload } from "../../middlewares/upload.js";
 import orderPageController from "../../controller/admin/orderPageController.js";
 import userManagementController from "../../controller/admin/userManagementController.js";
 import adminAuth from "../../middlewares/adminAuthMiddleware.js";
-
+import offerController from "../../controller/admin/offerController.js";
+import couponController from "../../controller/admin/couponController.js";
+import dashboardController from "../../controller/admin/dashboardController.js";
+import salesReportController from "../../controller/admin/salesReportController.js";
 const router = express.Router();
 
 router.get("/", (req, res) => res.redirect("/admin/login"));
@@ -51,4 +54,25 @@ router.post('/return/accept/:orderId/:itemId',adminAuth,orderPageController.acce
 router.post('/return/reject/:orderId/:itemId',adminAuth,orderPageController.rejectReturn);
 router.get('/return/details/:orderId/:itemId',adminAuth,orderPageController.getReturnDetails);
 
+//OfferManagement
+router.get('/offers',adminAuth,offerController.getOfferPage);
+router.post('/offers/create',adminAuth,offerController.addOffer);
+router.post('/offers/update/:id',offerController.updateOffer);
+router.post('/offer/update-status/:id',offerController.toggleStatus);
+
+//CouponManagement
+router.get("/coupons",adminAuth,couponController.getCouponPage);
+router.post("/coupons/create",adminAuth,couponController.addCoupon);
+router.post("/coupons/update/:id", adminAuth, couponController.updateCoupon);
+router.put("/coupons/toggle/:id",adminAuth, couponController.toggleCouponStatus);
+router.delete("/coupons/delete/:id", adminAuth, couponController.deleteCoupon);
+
+
+//dashboard
+router.get("/dashboard",adminAuth,dashboardController.getDashboardPage)
+
+//salesReport
+router.get("/sales-report",adminAuth,salesReportController.getSalesReport)
+router.get("/sales-report/pdf",salesReportController.downloadSalesReportPDF);
+router.get("/sales-report/excel",salesReportController.downloadSalesReportExcel);
 export default router;

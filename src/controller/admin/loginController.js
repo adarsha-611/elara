@@ -4,7 +4,7 @@ import { compareString } from "../../utils/bcrypt.js";
 const getLogin = (req, res) => {
    
     if (req.session.adminId) {
-        return res.redirect("/admin/users");
+        return res.redirect("/admin/dashboard");
     }
 res.render("admin/login");};
 
@@ -25,7 +25,7 @@ const postLogin = async (req, res) => {
         }
 
         req.session.adminId = user._id;
-        return res.redirect("/admin/users");
+        return res.redirect("/admin/dashboard");
     } catch (error) {
         console.error(error);
         req.flash("error", "Server Error");

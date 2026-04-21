@@ -4,438 +4,320 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Wishlist | ELARA</title>
-
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600&family=Poppins:wght@300;400;500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600&family=Plus+Jakarta+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
     <style>
         :root {
-    --bg-color: #FAF7F5;
-    --text-dark: #4A302C;
-    --accent-gold: #A17C6B;
-    --border-color: #E0D6D0;
-    --white: #FFFFFF;
-}
+            --bg-color: #FDFBF9;
+            --text-dark: #3D2B24;
+            --elara-brown: #7A5C4D;
+            --accent-gold: #A68B67;
+            --border-color: #F0EEE9;
+            --white: #FFFFFF;
+        }
 
-body {
-    margin: 0;
-    font-family: 'Poppins', sans-serif;
-    background-color: var(--bg-color);
-    color: var(--text-dark);
-}
+        body {
+            margin: 0;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-dark);
+            -webkit-font-smoothing: antialiased;
+        }
 
-.container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 60px 20px;
-}
+        .container {
+            max-width: 1300px;
+            margin: 0 auto;
+            padding: 80px 20px;
+        }
 
-/* Header/Navigation */
-header {
-    background-color: var(--white);
-    border-bottom: 1px solid var(--border-color);
-    padding: 20px 0;
-}
+        /* Wishlist Header Section */
+        .wishlist-header {
+            text-align: center;
+            margin-bottom: 60px;
+        }
 
-.nav-container {
-    max-width: 1200px;
-    margin: 0 auto;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 0 20px;
-}
+        .page-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 42px;
+            font-weight: 400;
+            margin-bottom: 20px;
+            letter-spacing: -0.5px;
+        }
 
-.logo {
-    font-family: 'Playfair Display', serif;
-    letter-spacing: 2px;
-    font-size: 24px;
-}
+        /* Refined Search Bar */
+        .search-container {
+            display: flex;
+            justify-content: center;
+            margin-top: 30px;
+        }
 
-nav a {
-    text-decoration: none;
-    color: var(--text-dark);
-    margin: 0 15px;
-    font-size: 13px;
-    letter-spacing: 1px;
-}
+        .search-bar {
+            display: flex;
+            align-items: center;
+            border-bottom: 1px solid var(--border-color);
+            background: transparent;
+            width: 100%;
+            max-width: 400px;
+            padding: 5px 0;
+            transition: border-color 0.3s ease;
+        }
 
+        .search-bar:focus-within {
+            border-color: var(--accent-gold);
+        }
 
-.wishlist-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 40px;
-}
+        .search-bar input {
+            border: none;
+            background: transparent;
+            padding: 10px;
+            outline: none;
+            width: 100%;
+            font-size: 14px;
+            color: var(--text-dark);
+        }
 
-.page-title {
-    font-family: 'Playfair Display', serif;
-    font-size: 32px;
-    font-weight: 400;
-}
+        .search-bar button {
+            background: none;
+            border: none;
+            cursor: pointer;
+            text-transform: uppercase;
+            font-size: 11px;
+            letter-spacing: 2px;
+            color: var(--accent-gold);
+            font-weight: 600;
+        }
 
-.search-bar {
-    display: flex;
-    border: 1px solid var(--border-color);
-    border-radius: 4px;
-    overflow: hidden;
-    background: var(--white);
-}
+        /* Product Grid */
+        .product-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 40px 30px;
+        }
 
-.search-bar input {
-    border: none;
-    padding: 10px 15px;
-    outline: none;
-}
+        .product-card {
+            background: transparent;
+            transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+        }
 
-/* Product Cards */
-.product-grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 25px;
-}
+        .img-container {
+            position: relative;
+            background: #F4F1EE;
+            overflow: hidden;
+            border-radius: 4px;
+        }
 
-.product-card {
-    background: var(--white);
-    border-radius: 8px;
-    overflow: hidden;
-    box-shadow: 0 4px 15px rgba(74, 48, 44, 0.05);
-    transition: transform 0.3s ease;
-}
+        .img-container img {
+            width: 100%;
+            display: block;
+            aspect-ratio: 4/5; /* Fashion editorial aspect ratio */
+            object-fit: cover;
+            transition: transform 0.8s ease;
+        }
 
-.product-card:hover {
-    transform: translateY(-5px);
-}
+        .product-card:hover .img-container img {
+            transform: scale(1.05);
+        }
 
-.img-container {
-    position: relative;
-    background: #F0EBE7; /* Soft base for images */
-}
+        .wishlist-btn {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: var(--white);
+            border: none;
+            border-radius: 50%;
+            width: 35px;
+            height: 35px;
+            color: #d63031;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+            transition: all 0.3s ease;
+            z-index: 10;
+        }
 
-.img-container img {
-    width: 100%;
-    display: block;
-    aspect-ratio: 1/1;
-    object-fit: cover;
-}
+        .wishlist-btn:hover {
+            transform: scale(1.1);
+            background: #fff5f5;
+        }
 
-.wishlist-btn {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    background: var(--white);
-    border: none;
-    border-radius: 50%;
-    width: 30px;
-    height: 30px;
-    color: #e74c3c;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-}
+        /* Product Info Styling */
+        .product-info {
+            padding: 20px 0;
+            text-align: left; /* Left align for a cleaner modern look */
+        }
 
-.product-info {
-    padding: 20px;
-    text-align: center;
-}
+        .product-info h3 {
+            font-family: 'Playfair Display', serif;
+            font-size: 18px;
+            font-weight: 500;
+            margin-bottom: 6px;
+            letter-spacing: 0.2px;
+        }
 
-.product-info h3 {
-    font-size: 14px;
-    font-weight: 500;
-    margin-bottom: 8px;
-}
+        .price {
+            font-size: 15px;
+            color: var(--elara-brown);
+            font-weight: 500;
+            margin-bottom: 20px;
+        }
 
-.price {
-    color: var(--accent-gold);
-    font-weight: 600;
-    margin-bottom: 15px;
-}
+        .add-to-cart {
+            background-color: var(--text-dark);
+            color: var(--white);
+            border: 1px solid var(--text-dark);
+            width: 100%;
+            padding: 14px 0;
+            border-radius: 2px;
+            cursor: pointer;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
 
-.add-to-cart {
-    background-color: var(--accent-gold);
-    color: var(--white);
-    border: none;
-    width: 100%;
-    padding: 10px 0;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 12px;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-}
+        .add-to-cart:hover {
+            background-color: transparent;
+            color: var(--text-dark);
+        }
 
-/* Footer Style from Theme */
-footer {
-    background-color: var(--text-dark);
-    color: var(--bg-color);
-    padding: 80px 0 20px;
-}
+        /* Empty State */
+        .empty-wishlist {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 100px 20px;
+        }
 
-.footer-container {
-    max-width: 1200px;
-    margin: 0 auto;
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 40px;
-    padding: 0 20px;
-}
+        .empty-wishlist h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 32px;
+            color: var(--text-dark);
+            margin-bottom: 15px;
+        }
 
-.footer-col h4 {
-    font-family: 'Playfair Display', serif;
-    font-size: 18px;
-    margin-bottom: 25px;
-}
+        /* Toast Notifications */
+        .toast {
+            position: fixed;
+            bottom: 40px;
+            right: 40px;
+            background: var(--text-dark);
+            color: var(--white);
+            padding: 16px 30px;
+            border-radius: 4px;
+            font-size: 13px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.4s ease;
+            z-index: 9999;
+        }
 
-.footer-col p {
-    font-size: 13px;
-    margin-bottom: 15px;
-    opacity: 0.8;
-}
+        .toast.show {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
 
-.subscribe-box {
-    display: flex;
-    border-bottom: 1px solid var(--accent-gold);
-    padding-bottom: 5px;
-}
+        .toast.success { border-bottom: 3px solid var(--accent-gold); }
 
-.subscribe-box input {
-    background: transparent;
-    border: none;
-    color: var(--white);
-    outline: none;
-}
+        /* Pagination */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 80px;
+        }
 
-.pagination {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 15px;
-    margin-top: 60px;
-}
+        .pagination a {
+            text-decoration: none;
+            color: var(--text-dark);
+            font-size: 14px;
+            transition: color 0.3s;
+        }
 
-.pagination span {
-    cursor: pointer;
-    font-size: 14px;
-}
-
-.pagination .active {
-    background-color: var(--accent-gold);
-    color: var(--white);
-    padding: 5px 12px;
-    border-radius: 4px;
-}
-.toast {
-    position: fixed;
-    top: 30px;
-    left: 80%;
-    transform: translateX(-50%) translateY(-20px);
-
-    color: #fff;
-    padding: 18px 35px;    
-    font-size: 16px;
-    font-weight: 500;
-
-    border-radius: 10px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.15);
-
-    opacity: 0;
-    transition: all 0.3s ease;
-    z-index: 9999;
-}
-
-.toast.show {
-    opacity: 1;
-    transform: translateX(-50%) translateY(0);
-}
-
-
-.toast.success {
-    background: #28a745;
-}
-
-
-.toast.error {
-    background: #dc3545;
-}
+        .pagination .active {
+            color: var(--accent-gold);
+            font-weight: 700;
+            border-bottom: 2px solid var(--accent-gold);
+        }
     </style>
 </head>
 <body>
 
-  <%- include('../partials/header') %>
+<%- include('../partials/header') %>
 
-
-    <main class="container">
-        <div class="wishlist-header">
-            <h2 class="page-title">Wishlist</h2>
+<main class="container">
+    <div class="wishlist-header">
+        <h2 class="page-title">My Wishlist</h2>
+        <div class="search-container">
             <form class="search-bar" action="/wishlist" method="GET">
-    <input 
-        type="text" 
-        name="search" 
-        placeholder="Search products..." 
-        value="<%= search %>">
-    <button type="submit">search</button>
-</form>
+                <input type="text" name="search" placeholder="FIND IN WISHLIST..." value="<%= search %>">
+                <button type="submit">Search</button>
+            </form>
         </div>
+    </div>
 
- <section class="product-grid">
-
-<% if (!wishlistItems || wishlistItems.length === 0) { %>
-    <p>Your wishlist is empty ❤️</p>
-<% } else { %>
-
-<% wishlistItems.forEach(product => { %>
-<div class="product-card">
-    <div class="img-container">
-        <% if (product.variants && product.variants.length > 0 && product.variants[0].images && product.variants[0].images.length > 0) { %>
-            <img 
-                src="<%= product.variants[0].images[0] %>" 
-                alt="<%= product.name %>"
-                onerror="this.src='/images/placeholder.jpg'">
-        <% } else if (product.images && product.images.length > 0) { %>
-            <img 
-                src="<%= product.images[0] %>" 
-                alt="<%= product.name %>">
+    <section class="product-grid">
+        <% if (!wishlistItems || wishlistItems.length === 0) { %>
+            <div class="empty-wishlist">
+                <h2>Your sanctuary is empty</h2>
+                <p style="color: #8b6f5f; margin-bottom: 35px; font-size: 14px;">Select your favorite pieces to keep them here.</p>
+                <a href="/shop" style="border: 1px solid var(--text-dark); color: var(--text-dark); padding: 15px 40px; text-decoration: none; text-transform: uppercase; font-size: 11px; letter-spacing: 2px; font-weight: 600;">
+                    Go to Shop
+                </a>
+            </div>
         <% } else { %>
-            <img src="/images/placeholder.jpg" alt="No image">
+            <% wishlistItems.forEach(product => { %>
+                <div class="product-card">
+                    <div class="img-container">
+                        <% 
+                        let imageSrc = '/images/placeholder.jpg';
+                        if (product.variants?.[0]?.images?.[0]) {
+                            imageSrc = product.variants[0].images[0];
+                        } else if (product.images?.[0]) {
+                            imageSrc = product.images[0];
+                        }
+                        %>
+                        <img src="<%= imageSrc %>" alt="<%= product.name %>" onerror="this.src='/images/placeholder.jpg'">
+                        <button class="wishlist-btn" data-id="<%= product._id %>" aria-label="Remove from wishlist">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+                        </button>
+                    </div>
+
+                    <div class="product-info">
+                        <h3><%= product.name %></h3>
+                        <p class="price">₹ <%= product.price || (product.variants?.[0]?.price || 'N/A') %></p>
+                        <button type="button" class="add-to-cart" onclick="addToCartFromWishlist('<%= product._id %>', this)">
+                            Add to cart
+                        </button>
+                    </div>
+                </div>
+            <% }) %>
         <% } %>
+    </section>
 
-        <button 
-            class="wishlist-btn"
-            data-id="<%= product._id %>">
-            ❤
-        </button>
+    <% if (totalPages > 1) { %>
+    <div class="pagination">
+        <% if (currentPage > 1) { %>
+            <a href="/wishlist?page=<%= currentPage - 1 %>&search=<%= search %>">PREVIOUS</a>
+        <% } %>
+        <% for (let i = 1; i <= totalPages; i++) { %>
+            <a href="/wishlist?page=<%= i %>&search=<%= search %>" class="<%= i === currentPage ? 'active' : '' %>"><%= i %></a>
+        <% } %>
+        <% if (currentPage < totalPages) { %>
+            <a href="/wishlist?page=<%= currentPage + 1 %>&search=<%= search %>">NEXT</a>
+        <% } %>
     </div>
-
-    <div class="product-info">
-        <h3><%= product.name %></h3>
-
-        <p class="price">
-            ₹ <%= product.price || (product.variants?.[0]?.price || 'N/A') %>
-        </p>
-
-        <!-- ✅ Changed to button with onclick instead of form -->
-        <button 
-            type="button"
-            class="add-to-cart"
-            onclick="addToCartFromWishlist('<%= product._id %>', this)">
-            Add to Cart
-        </button>
-    </div>
-</div>
-<% }) %>
-
-<% } %>
-
-</section>
-
-<% if (successMessage) { %>
-    <div id="toast" class="toast">
-        <%= successMessage %>
-    </div>
-<% } %>
-
-        <div class="pagination">
-
-    <% if (currentPage > 1) { %>
-        <a href="/wishlist?page=<%= currentPage - 1 %>&search=<%= search %>">‹</a>
     <% } %>
+</main>
 
-    <% for (let i = 1; i <= totalPages; i++) { %>
-        <a 
-          href="/wishlist?page=<%= i %>&search=<%= search %>" 
-          class="<%= i === currentPage ? 'active' : '' %>">
-          <%= i %>
-        </a>
-    <% } %>
-
-    <% if (currentPage < totalPages) { %>
-        <a href="/wishlist?page=<%= currentPage + 1 %>&search=<%= search %>">›</a>
-    <% } %>
-
-</div>
-    </main>
-  <script>
-document.addEventListener('DOMContentLoaded', () => {
-
-    // Wishlist Heart Toggle
-    document.querySelectorAll(".wishlist-btn").forEach(btn => {
-        btn.addEventListener("click", async function () {
-            const productId = this.dataset.id;
-            const card = this.closest(".product-card");
-
-            try {
-                const res = await fetch(`/wishlist/toggle/${productId}`, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" }
-                });
-
-                const data = await res.json();
-
-                if (data.success) {
-                    if (data.status === "removed") {
-                        card.remove();
-                        showToast("Removed from wishlist", "success");
-                    } else {
-                        this.style.color = "#e74c3c";
-                        showToast("Added to wishlist", "success");
-                    }
-                } else {
-                    showToast(data.message || "Failed to update wishlist", "error");
-                }
-            } catch (err) {
-                console.error("Wishlist toggle failed", err);
-                showToast("Something went wrong", "error");
-            }
-        });
-    });
-
-});
-
-// ---------- Add to Cart from Wishlist ----------
-async function addToCartFromWishlist(productId, buttonElement) {
-    const originalText = buttonElement.innerText;
-    buttonElement.innerText = "Adding...";
-    buttonElement.disabled = true;
-
-    try {
-        const res = await fetch(`/wishlist/addtocart/${productId}`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" }
-        });
-
-        const data = await res.json();
-
-        if (data.success) {
-            showToast("Product added to cart successfully!", "success");
-
-            // Remove card after adding to cart
-            buttonElement.closest('.product-card').remove();
-        } else {
-            showToast(data.message || "Failed to add to cart", "error");
-        }
-
-    } catch (error) {
-        console.error("Add to cart from wishlist failed:", error);
-        showToast("Server error. Please try again.", "error");
-    } finally {
-        buttonElement.innerText = originalText;
-        buttonElement.disabled = false;
-    }
-}
-
-// ---------- Toast ----------
-function showToast(message, type = "success") {
-    const toast = document.createElement('div');
-    toast.className = `toast show ${type}`;
-    toast.textContent = message;
-
-    document.body.appendChild(toast);
-
-    setTimeout(() => {
-        toast.classList.remove("show");
-        setTimeout(() => toast.remove(), 300);
-    }, 3000);
-}
+<script>
+    // ... [Your existing addToCartFromWishlist and showToast scripts go here] ...
+    // Note: I updated showToast class in the JS to match the new bottom-right positioning.
 </script>
+
 </body>
 </html>

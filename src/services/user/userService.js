@@ -18,23 +18,51 @@ export async function findUserDataByEmail(email) {
 }
 
 export async function createUser(userData) {
-        try {
-            const user = new User(userData);
-            return await user.save();
+  try {
+    const { fullName, referralCodeUsed } = userData;
 
-        } catch (error) {
+    
+    const referralCode = await generateReferralCode(fullName);
 
-            if (error.code === 11000) {
-                const field = Object.keys(error.keyValue)[0];
-                throw new Error(`${field} already exists`);
-            }
+    let referredUser = null;
 
-            
-            throw error;
-        }
+   
+    if (referralCodeUsed) {
+      referredUser = await findUserByreferralCode(referralCodeUsed);
     }
 
-    export async function getUserById(userId){
+    
+    const user = new User({
+      ...userData,
+      referralCode,
+      referredBy: referredUser ? referredUser._id : null
+    });
+
+    const savedUser = await user.save();
+
+    
+    if (referredUser) {
+      referredUser.walletBalance += 300;
+      savedUser.walletBalance += 300;
+
+      await referredUser.save();
+      await savedUser.save();
+    }
+
+    return savedUser;
+
+  } catch (error) {
+
+    if (error.code === 11000) {
+      const field = Object.keys(error.keyValue)[0];
+      throw new Error(`${field} already exists`);
+    }
+
+    throw error;
+  }
+}
+
+export async function getUserById(userId){
 
        try {
         const objectId = new mongoose.Types.ObjectId(userId);
@@ -49,3 +77,17 @@ export async function createUser(userData) {
           console.log(error)
        }
     }
+
+export const generateReferralCode = async(name)=>{
+    let code;
+    let exists = true;
+
+    while(exists){
+        const random = Math.floor(1000 + Math.random() * 9000);
+        code = name.slice(0,4).toUpperCase() + random;
+
+        const user = await User.findOne({referralCode:code});
+        if(!user) exists = false;
+    }
+    return code;
+}

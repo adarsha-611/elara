@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>ELARA — My Wallet</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'elara-dark': '#3D2B24',
+                        'elara-gold': '#A68B67',
+                        'elara-soft': '#FAF9F7',
+                        'elara-border': '#EDE9E3'
+                    }
+                }
+            }
+        }
+    </script>
+
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+
+    <style>
+        body { font-family: 'Poppins', sans-serif; background: #FAF9F7; }
+        .serif { font-family: 'Playfair Display', serif; }
+
+        .profile-container { max-width: 1400px; margin: 0 auto; padding: 3rem 1.5rem; }
+        .profile-main { display: flex; flex-direction: column; gap: 2.5rem; }
+
+        @media (min-width: 768px) {
+            .profile-main { flex-direction: row; align-items: flex-start; }
+        }
+
+        .sidebar-container { width: 100%; flex-shrink: 0; }
+        @media (min-width: 768px) { .sidebar-container { width: 280px; } }
+
+        .content-area { flex: 1; min-width: 0; }
+
+        /* Main Content Grid: Wallet & Transactions now take 100% of this area */
+        .main-layout { display: flex; flex-direction: column; gap: 2rem; width: 100%; }
+
+        /* Premium Wallet Card */
+        .wallet-card {
+            background: #3D2B24;
+            color: white;
+            padding: 4rem; 
+            border-radius: 24px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 20px 50px rgba(61, 43, 36, 0.15);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .wallet-card::after {
+            content: "";
+            position: absolute;
+            top: -50%;
+            right: -10%;
+            width: 500px;
+            height: 500px;
+            background: radial-gradient(circle, rgba(166,139,103,0.12) 0%, transparent 70%);
+        }
+
+        .balance-amount { font-size: 64px; font-weight: 500; letter-spacing: -2px; line-height: 1; }
+
+        .btn-gold {
+            background: #A68B67;
+            color: white;
+            padding: 14px 32px;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 14px;
+            letter-spacing: 1px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 10;
+            box-shadow: 0 4px 15px rgba(166, 139, 103, 0.3);
+        }
+        .btn-gold:hover { background: #b89c78; transform: translateY(-3px); box-shadow: 0 8px 25px rgba(166, 139, 103, 0.4); }
+
+        /* Transaction Section */
+        .card {
+            background: white;
+            border: 1px solid #EDE9E3;
+            border-radius: 20px;
+            padding: 2.5rem;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.02);
+        }
+
+        .transaction-row { transition: all 0.2s; border-bottom: 1px solid #F8F6F3; }
+        .transaction-row:hover { background-color: #FAF9F7; transform: scale(1.002); }
+
+        /* Empty state styling */
+        .empty-state { text-align: center; padding: 60px 20px; }
+        .empty-state i { font-size: 64px; color: #EDE9E3; margin-bottom: 20px; }
+        .empty-state p { color: #999; font-size: 14px; }
+
+        table { width: 100%; border-collapse: separate; border-spacing: 0; }
+        th { 
+            text-align: left; 
+            padding: 1rem 0; 
+            font-size: 11px; 
+            letter-spacing: 1.5px; 
+            text-transform: uppercase; 
+            color: #A68B67; 
+            border-bottom: 2px solid #F4F1EE;
+        }
+        td { padding: 24px 0; }
+
+        /* Modal Styles */
+        #addMoneyModal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 1000;
+            background: rgba(61, 43, 36, 0.8);
+            backdrop-filter: blur(8px);
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+
+        .modal-content {
+            background: white;
+            width: 100%;
+            max-width: 480px;
+            border-radius: 28px;
+            padding: 3rem;
+            position: relative;
+            animation: modalSlide 0.4s ease-out;
+        }
+
+        @keyframes modalSlide {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .quick-amount-btn {
+            border: 1px solid #EDE9E3;
+            padding: 12px;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s;
+            color: #3D2B24;
+            cursor: pointer;
+            background: white;
+        }
+        .quick-amount-btn:hover { border-color: #A68B67; color: #A68B67; background: #FAF9F7; }
+
+        .tx-icon { width: 44px; height: 44px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; }
+        .credit { background: #F0F9F1; color: #166534; }
+        .debit  { background: #FFF5F5; color: #991B1B; }
+
+        input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+
+        /* No results styling */
+        .no-results {
+            text-align: center;
+            padding: 60px 20px;
+            color: #999;
+        }
+        .no-results i {
+            font-size: 48px;
+            color: #EDE9E3;
+            margin-bottom: 15px;
+        }
+    </style>
+</head>
+<body>
+
+    <%- include('../partials/header') %>
+
+    <div class="profile-container">
+        <div class="profile-main">
+            
+            <div class="sidebar-container">
+                <%- include('../partials/profileSidebar', { user, path: '/profile/wallet' }) %>
+            </div>
+
+            <div class="content-area">
+                <div class="main-layout">
+                    
+                    <div class="flex justify-between items-end mb-2">
+                        <div>
+                            <h1 class="serif text-4xl text-elara-dark">Wallet & Credits</h1>
+                            <p class="text-elara-gold text-xs tracking-widest uppercase font-bold mt-2">Personal Secure Account</p>
+                        </div>
+                        <div class="text-xs text-gray-400 font-medium">Verified Account: ELR-4829</div>
+                    </div>
+
+                    <div class="wallet-card">
+                        <div class="space-y-4">
+                            <p class="text-[11px] tracking-[4px] text-elara-gold font-bold uppercase opacity-80">Current Balance</p>
+                            <h2 class="serif balance-amount">
+                                <span class="text-elara-gold opacity-50 mr-2 text-4xl">₹</span><%= wallet.balance.toLocaleString('en-IN', {minimumFractionDigits: 2}) %>
+                            </h2>
+                            <div class="flex items-center gap-3 text-sm text-white/50">
+                                <span class="flex items-center gap-1"><i class="fa-solid fa-circle-check text-green-500"></i> Active</span>
+                                <span class="w-1 h-1 rounded-full bg-white/20"></span>
+                                <span>Last Transaction: <%= wallet.transactions && wallet.transactions.length > 0 ? new Date(wallet.transactions[0].createdAt).toLocaleDateString('en-IN') : 'No transactions' %></span>
+                            </div>
+                        </div>
+                        <button onclick="toggleModal(true)" class="btn-gold">
+                            <i class="fa-solid fa-plus-circle mr-2"></i> ADD FUNDS
+                        </button>
+                    </div>
+
+                    <div class="card">
+                        <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-10 gap-6">
+                            <h3 class="serif text-2xl text-elara-dark">Transaction History</h3>
+                            
+                            <div class="flex flex-wrap items-center gap-4 w-full md:w-auto">
+                                <div class="relative flex-1 md:flex-none">
+                                    <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-gray-300"></i>
+                                    <input type="text" id="searchInput" placeholder="Search by reason, amount, or date..." 
+                                        class="pl-11 pr-4 py-3 bg-elara-soft border border-elara-border rounded-xl text-sm w-full md:w-80 outline-none focus:border-elara-gold transition-all">
+                                </div>
+                                <select id="typeFilter" class="bg-elara-soft border border-elara-border px-4 py-3 rounded-xl text-sm outline-none text-elara-dark font-medium cursor-pointer">
+                                    <option value="all">All Activities</option>
+                                    <option value="credit">Credited Only</option>
+                                    <option value="debit">Debited Only</option>
+                                </select>
+                                <button onclick="clearFilters()" id="clearFiltersBtn" class="text-elara-gold text-sm font-medium hover:underline hidden">
+                                    <i class="fa-solid fa-times-circle"></i> Clear
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="overflow-x-auto">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Type</th>
+                                        <th>Reason / Description</th>
+                                        <th class="text-right">Amount</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="transactionBody">
+                                    <% if (wallet.transactions && wallet.transactions.length > 0) { %>
+                                        <% wallet.transactions.forEach((tx, index) => { %>
+                                        <tr class="transaction-row" data-type="<%= tx.type %>" data-reason="<%= (tx.reason || 'Wallet Transaction').toLowerCase() %>" data-amount="<%= tx.amount %>" data-date="<%= new Date(tx.createdAt).toLocaleDateString('en-GB') %>">
+                                            <!-- Date -->
+                                            <td class="text-gray-500 font-medium date-cell">
+                                                <%= new Date(tx.createdAt).toLocaleDateString('en-GB', { 
+                                                    day: '2-digit', 
+                                                    month: 'short', 
+                                                    year: 'numeric' 
+                                                }) %>
+                                            </td>
+
+                                            <!-- Type -->
+                                            <td>
+                                                <span class="inline-flex items-center px-5 py-2 rounded-2xl text-sm font-semibold
+                                                    <%= (tx.type === 'credit' || tx.type === 'refund') 
+                                                        ? 'bg-green-100 text-green-700' 
+                                                        : 'bg-red-100 text-red-700' %>">
+                                                    <i class="fa-solid <%= (tx.type === 'credit' || tx.type === 'refund') ? 'fa-arrow-up' : 'fa-arrow-down' %> mr-2 text-xs"></i>
+                                                    <%= (tx.type === 'credit' || tx.type === 'refund') ? 'Credited' : 'Debited' %>
+                                                </span>
+                                            </td>
+
+                                            <!-- Reason -->
+                                            <td>
+                                                <p class="font-medium text-elara-dark reason-cell"><%= tx.reason || 'Wallet Transaction' %></p>
+                                                <% if (tx.orderId) { %>
+                                                    <p class="text-xs text-gray-400 mt-1">Order: <%= tx.orderId %></p>
+                                                <% } %>
+                                            </td>
+
+                                            <!-- Amount -->
+                                            <td class="text-right text-lg font-bold amount-cell <%= 
+                                                (tx.type === 'credit' || tx.type === 'refund') 
+                                                    ? 'text-green-600' 
+                                                    : 'text-red-600' 
+                                            %>">
+                                                <%= (tx.type === 'credit' || tx.type === 'refund') ? '+' : '-' %> 
+                                                ₹<%= Number(tx.amount).toLocaleString('en-IN') %>
+                                            </td>
+                                        </tr>
+                                        <% }) %>
+                                    <% } else { %>
+                                        <tr class="empty-row">
+                                            <td colspan="4" class="empty-state">
+                                                <i class="fa-regular fa-credit-card"></i>
+                                                <p class="text-gray-400 font-medium">Your transaction history is empty.</p>
+                                                <p class="text-xs text-gray-300 mt-2">Add funds to your wallet to get started</p>
+                                            </td>
+                                        </tr>
+                                    <% } %>
+                                </tbody>
+                            </table>
+                            <div id="noResultsMessage" style="display: none;" class="no-results">
+                                <i class="fa-regular fa-folder-open"></i>
+                                <p>No transactions match your search criteria</p>
+                                <button onclick="clearFilters()" class="text-elara-gold text-sm mt-3 hover:underline">Clear filters</button>
+                            </div>
+                        </div>
+                        
+                        <!-- Transaction count info -->
+                        <div class="mt-6 pt-4 border-t border-elara-border flex justify-between items-center text-xs text-gray-400">
+                            <span id="transactionCount">Showing <span id="visibleCount">0</span> of <span id="totalCount">0</span> transactions</span>
+                            <span class="flex items-center gap-2">
+                                <i class="fa-regular fa-clock"></i> 
+                                Latest transactions first
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="addMoneyModal">
+        <div class="modal-content">
+            <button onclick="toggleModal(false)" class="absolute top-8 right-8 text-gray-300 hover:text-elara-dark transition-colors">
+                <i class="fa-solid fa-xmark text-2xl"></i>
+            </button>
+            
+            <h3 class="serif text-3xl text-elara-dark mb-2">Replenish Wallet</h3>
+            <p class="text-sm text-gray-400 mb-10">Add funds to your ELARA wallet for instant, one-click purchases.</p>
+
+            <form onsubmit="return false;" class="space-y-8">
+                <div>
+                    <label class="text-[10px] font-bold text-elara-gold tracking-[2px] uppercase mb-3 block">Designated Amount (INR)</label>
+                    <div class="relative">
+                        <span class="absolute left-5 top-1/2 -translate-y-1/2 text-xl font-light text-gray-400">₹</span>
+                        <input type="number" id="amount" placeholder="5,000" min="100" 
+                            class="w-full pl-10 pr-6 py-5 bg-elara-soft border-2 border-elara-border rounded-2xl outline-none focus:border-elara-gold transition-all text-2xl serif">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-4 gap-3">
+                    <button type="button" onclick="setQuickAmount(500)" class="quick-amount-btn">₹500</button>
+                    <button type="button" onclick="setQuickAmount(1000)" class="quick-amount-btn">₹1,000</button>
+                    <button type="button" onclick="setQuickAmount(5000)" class="quick-amount-btn font-bold text-elara-gold border-elara-gold">₹5,000</button>
+                    <button type="button" onclick="setQuickAmount(10000)" class="quick-amount-btn">₹10,000</button>
+                </div>
+
+                <button type="button" onclick="addMoney()" class="w-full bg-elara-dark text-white py-5 rounded-2xl font-bold text-sm tracking-widest hover:bg-elara-gold transition-all shadow-xl shadow-elara-dark/10">
+                    <i class="fa-solid fa-shield-hart mr-2"></i>
+                    AUTHORIZE PAYMENT
+                </button>
+                
+                <p class="text-center text-[10px] text-gray-400 uppercase tracking-widest flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-lock text-elara-gold"></i> SSL Secure Encryption
+                </p>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // DOM Elements
+        const searchInput = document.getElementById('searchInput');
+        const typeFilter = document.getElementById('typeFilter');
+        const transactionBody = document.getElementById('transactionBody');
+        const noResultsMessage = document.getElementById('noResultsMessage');
+        const clearFiltersBtn = document.getElementById('clearFiltersBtn');
+        const visibleCountSpan = document.getElementById('visibleCount');
+        const totalCountSpan = document.getElementById('totalCount');
+
+        // Store all transaction rows for filtering
+        let allTransactionRows = [];
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            // Get all transaction rows (excluding empty state row)
+            const rows = document.querySelectorAll('.transaction-row');
+            allTransactionRows = Array.from(rows);
+            
+            // Update total count
+            if (totalCountSpan) {
+                totalCountSpan.textContent = allTransactionRows.length;
+            }
+            
+            // Initial filter
+            filterTransactions();
+            
+            // Add event listeners
+            if (searchInput) {
+                searchInput.addEventListener('input', debounce(filterTransactions, 300));
+            }
+            
+            if (typeFilter) {
+                typeFilter.addEventListener('change', filterTransactions);
+            }
+        });
+
+        // Debounce function for search input
+        function debounce(func, delay) {
+            let timeout;
+            return function() {
+                const context = this;
+                const args = arguments;
+                clearTimeout(timeout);
+                timeout = setTimeout(() => func.apply(context, args), delay);
+            };
+        }
+
+        // Main filter function
+        function filterTransactions() {
+            const searchTerm = searchInput ? searchInput.value.toLowerCase().trim() : '';
+            const typeValue = typeFilter ? typeFilter.value : 'all';
+            
+            let visibleCount = 0;
+            
+            // Check if there are any transactions
+            if (allTransactionRows.length === 0) {
+                if (noResultsMessage) noResultsMessage.style.display = 'block';
+                if (clearFiltersBtn) clearFiltersBtn.classList.add('hidden');
+                if (visibleCountSpan) visibleCountSpan.textContent = '0';
+                return;
+            }
+            
+            // Filter each row
+            allTransactionRows.forEach(row => {
+                let matchesType = true;
+                let matchesSearch = true;
+                
+                // Type filter
+                if (typeValue !== 'all') {
+                    const rowType = row.getAttribute('data-type');
+                    matchesType = (rowType === typeValue);
+                }
+                
+                // Search filter (checks reason, amount, and date)
+                if (searchTerm !== '') {
+                    const reason = (row.getAttribute('data-reason') || '').toLowerCase();
+                    const amount = row.getAttribute('data-amount') || '';
+                    const date = row.getAttribute('data-date') || '';
+                    
+                    // Also check the displayed amount text
+                    const amountCell = row.querySelector('.amount-cell');
+                    const amountText = amountCell ? amountCell.textContent.toLowerCase() : '';
+                    
+                    matchesSearch = reason.includes(searchTerm) || 
+                                   amount.includes(searchTerm) ||
+                                   amountText.includes(searchTerm) ||
+                                   date.includes(searchTerm);
+                }
+                
+                // Show/hide row
+                if (matchesType && matchesSearch) {
+                    row.style.display = '';
+                    visibleCount++;
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+            
+            // Update visible count
+            if (visibleCountSpan) {
+                visibleCountSpan.textContent = visibleCount;
+            }
+            
+            // Show/hide no results message
+            if (noResultsMessage) {
+                if (visibleCount === 0) {
+                    noResultsMessage.style.display = 'block';
+                } else {
+                    noResultsMessage.style.display = 'none';
+                }
+            }
+            
+            // Show/hide clear filters button
+            if (clearFiltersBtn) {
+                const hasActiveFilters = (typeValue !== 'all') || (searchTerm !== '');
+                if (hasActiveFilters && visibleCount === 0) {
+                    clearFiltersBtn.classList.remove('hidden');
+                } else if (hasActiveFilters && visibleCount > 0) {
+                    clearFiltersBtn.classList.remove('hidden');
+                } else {
+                    clearFiltersBtn.classList.add('hidden');
+                }
+            }
+            
+            // Handle empty state display
+            const emptyRow = document.querySelector('.empty-row');
+            if (emptyRow) {
+                if (visibleCount === 0 && allTransactionRows.length === 0) {
+                    emptyRow.style.display = '';
+                } else {
+                    emptyRow.style.display = 'none';
+                }
+            }
+        }
+
+        // Clear all filters
+        function clearFilters() {
+            if (searchInput) {
+                searchInput.value = '';
+            }
+            if (typeFilter) {
+                typeFilter.value = 'all';
+            }
+            filterTransactions();
+            
+            // Optional: Show a toast notification
+            showToast('Filters cleared', 'success');
+        }
+
+        // Simple toast notification
+        function showToast(message, type = 'info') {
+            const toast = document.createElement('div');
+            toast.className = 'fixed bottom-4 right-4 px-6 py-3 rounded-lg shadow-lg text-white text-sm z-50 transition-all duration-300';
+            toast.style.backgroundColor = type === 'success' ? '#166534' : '#3D2B24';
+            toast.innerHTML = `<i class="fa-solid ${type === 'success' ? 'fa-check-circle' : 'fa-info-circle'} mr-2"></i>${message}`;
+            document.body.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        // Modal functions
+        function toggleModal(show) {
+            const modal = document.getElementById('addMoneyModal');
+            modal.style.display = show ? 'flex' : 'none';
+            document.body.style.overflow = show ? 'hidden' : 'auto';
+            
+            // Reset amount input when closing
+            if (!show) {
+                const amountInput = document.getElementById('amount');
+                if (amountInput) amountInput.value = '';
+            }
+        }
+
+        function setQuickAmount(amt) {
+            const amountInput = document.getElementById('amount');
+            if (amountInput) {
+                amountInput.value = amt;
+                amountInput.focus();
+            }
+        }
+
+        // Add money with Razorpay
+        async function addMoney() {
+            const amountInput = document.getElementById("amount");
+            if (!amountInput || !amountInput.value || parseInt(amountInput.value) < 100) {
+                showToast("Minimum amount is ₹100", "error");
+                return;
+            }
+            
+            const amount = parseInt(amountInput.value);
+            
+            // Show loading state
+            const addBtn = event.target;
+            const originalText = addBtn.innerHTML;
+            addBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i> PROCESSING...';
+            addBtn.disabled = true;
+            
+            try {
+                const res = await fetch("/profile/wallet/create-order", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ amount })
+                });
+                
+                const data = await res.json();
+                if (!data.success) {
+                    showToast(data.message || "Order creation failed", "error");
+                    addBtn.innerHTML = originalText;
+                    addBtn.disabled = false;
+                    return;
+                }
+                
+                const options = {
+                    key: "<%= process.env.RAZORPAY_KEY_ID %>",
+                    amount: data.order.amount,
+                    currency: "INR",
+                    name: "ELARA Luxury Jewelry",
+                    description: `Add ₹${amount.toLocaleString('en-IN')} to wallet`,
+                    order_id: data.order.id,
+                    handler: async function (response) {
+                        try {
+                            const verifyRes = await fetch("/profile/wallet/verify", {
+                                method: "POST",
+                                headers: { "Content-Type": "application/json" },
+                                body: JSON.stringify({
+                                    razorpay_order_id: response.razorpay_order_id,
+                                    razorpay_payment_id: response.razorpay_payment_id,
+                                    razorpay_signature: response.razorpay_signature,
+                                    amount: amount
+                                })
+                            });
+                            const verifyData = await verifyRes.json();
+                            if (verifyData.success) {
+                                showToast(`₹${amount.toLocaleString('en-IN')} added successfully!`, "success");
+                                setTimeout(() => window.location.reload(), 1500);
+                            } else {
+                                showToast(verifyData.message || "Verification failed", "error");
+                            }
+                        } catch (err) {
+                            showToast("Payment verification failed", "error");
+                        }
+                        toggleModal(false);
+                        addBtn.innerHTML = originalText;
+                        addBtn.disabled = false;
+                    },
+                    theme: { color: "#3D2B24" },
+                    modal: {
+                        ondismiss: function() {
+                            addBtn.innerHTML = originalText;
+                            addBtn.disabled = false;
+                        }
+                    }
+                };
+                const razorpay = new Razorpay(options);
+                razorpay.open();
+                
+            } catch (err) {
+                console.error("Add money error:", err);
+                showToast("Something went wrong. Please try again.", "error");
+                addBtn.innerHTML = originalText;
+                addBtn.disabled = false;
+            }
+        }
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('addMoneyModal');
+            if (event.target === modal) {
+                toggleModal(false);
+            }
+        }
+        
+        // Enter key to trigger search
+        if (searchInput) {
+            searchInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    filterTransactions();
+                }
+            });
+        }
+    </script>
+</body>
+</html>

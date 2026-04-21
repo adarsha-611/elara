@@ -1,7 +1,8 @@
 import Order from '../../model/orderSchema.js';
-    import User from '../../model/userSchema.js';
-    import Product from "../../model/productSchema.js";
-    import mongoose from "mongoose";
+import User from '../../model/userSchema.js';
+import Product from "../../model/productSchema.js";
+import mongoose from "mongoose";
+import { returnRefundToWallet } from '../user/walletService.js';
 
 export const getOrderlist = async({
         page = 1,
@@ -165,6 +166,14 @@ export const acceptReturnReq = async (orderId, itemId) => {
     throw new Error("Return already processed");
   }
 
+  const refundAmount = item.price * item.quantity;
+
+  let refundDone = false;
+  if (!item.isRefunded) {
+    await returnRefundToWallet(order.user, refundAmount, order._id);
+    item.isRefunded = true;
+    refundDone = true;
+  }
 
   item.returnRequest.status = "accepted";
   item.returnRequest.processedAt = new Date();

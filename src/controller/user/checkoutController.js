@@ -3,12 +3,20 @@ import Cart from "../../model/cartSchema.js";
 import Product from "../../model/productSchema.js";
 import Mongoose from "mongoose";
 import User from '../../model/userSchema.js';
+import Coupon from "../../model/couponSchema.js"
 import { validateAddress } from "../../utils/validators/joi_address.js";
-import { getCheckoutData,placeOrderService } from "../../services/user/checkoutService.js";
+import { getCheckoutData,placeOrderService,applyCouponService } from "../../services/user/checkoutService.js";
 import { addUserAddress,editUserAddress,deleteUserAddress,setDefaultAddressService} from "../../services/user/addressService.js";
 
  const getCheckOutPage = async (req, res) => {
   try {
+    const now = new Date();
+
+    const availableCoupons = await Coupon.find({
+      isActive:true,
+      startDate:{$lte:now},
+      endDate:{$gte:now}
+    })
     const userId = req.session.userId;
 
     const data = await getCheckoutData(userId);
@@ -18,7 +26,9 @@ import { addUserAddress,editUserAddress,deleteUserAddress,setDefaultAddressServi
       successMessages: req.flash("success"),
       errorMessages: req.flash("error"),
       stockIssue: false,
-      stockMessage: ""
+      stockMessage: "",
+      availableCoupons,
+      razorpayKey: process.env.RAZORPAY_KEY_ID  
     });
 
   } catch (err) {
@@ -134,11 +144,13 @@ const orderSuccess = async (req, res) => {
          return res.redirect("/shop"); } 
   };
 
-
- const placeOrder = async (req, res) => {
+const placeOrder = async (req, res) => {
   try {
     const userId = req.session.userId;
-    const { addressId, paymentMethod } = req.body;
+   let { addressId, paymentMethod } = req.body;
+      if (paymentMethod === "razorpay") {
+          paymentMethod = "online";
+    }
 
     const order = await placeOrderService(userId, addressId, paymentMethod);
 
@@ -146,8 +158,18 @@ const orderSuccess = async (req, res) => {
     return res.redirect(`/order-success/${order._id}`);
 
   } catch (err) {
-
+    console.log("Place Order Error:", err.message);
     const data = await getCheckoutData(req.session.userId);
+
+   
+    const now = new Date();
+    const availableCoupons = await Coupon.find({
+      isActive: true,
+      startDate: { $lte: now },
+      endDate: { $gte: now }
+    });
+    const razorpayKey = process.env.RAZORPAY_KEY_ID;
+
 
     if (err.message.toLowerCase().includes("stock")) {
       return res.render("user/checkout", {
@@ -155,7 +177,9 @@ const orderSuccess = async (req, res) => {
         stockIssue: true,
         stockMessage: err.message,
         successMessages: [],
-        errorMessages: []
+        errorMessages: [],
+        availableCoupons,
+        razorpayKey
       });
     }
 
@@ -164,10 +188,28 @@ const orderSuccess = async (req, res) => {
       stockIssue: false,
       stockMessage: "",
       successMessages: [],
-      errorMessages: [err.message]
+      errorMessages: [err.message],
+      availableCoupons,
+      razorpayKey   
     });
   }
 };
+
+const applyCoupon = async(req,res)=>{
+  try {
+    const {code} = req.body;
+    const userId = req.session.userId;
+         console.log('=== Apply Coupon Request ===');
+        console.log('Received code:', code);
+console.log("Session:", req.session);
+    const result = await applyCouponService(code,userId,req.session);
+    return res.json(result)
+  } catch (error) {
+    console.log(error);
+    res.json({success:false,message:"Something went wrong"});
+  }
+
+}
 export default {
   getCheckOutPage,
   checkaddAddress,
@@ -175,5 +217,6 @@ export default {
   checkdeleteAddress,
   checksetDefaultAddress,
   orderSuccess,
-  placeOrder
+  placeOrder,
+  applyCoupon
 }

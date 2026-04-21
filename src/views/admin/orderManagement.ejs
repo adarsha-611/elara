@@ -185,8 +185,8 @@
         }
 
         .page-num.active {
-            background-color: var(--main-bronze);
-            color: white;
+            background: var(--main-bronze);
+            color: rgb(43, 15, 15);
             border-color: var(--main-bronze);
         }
 
@@ -194,11 +194,39 @@
             border-color: var(--main-bronze);
             color: var(--main-bronze);
         }
+        
+        /* Empty state placeholder styling */
+        .empty-state-row td {
+            text-align: center;
+            padding: 60px 20px;
+            color: #999;
+            font-size: 15px;
+        }
+        .empty-state-row td i {
+            font-style: normal;
+            display: inline-block;
+            margin-bottom: 10px;
+            font-size: 48px;
+            opacity: 0.5;
+        }
+        .empty-placeholder {
+            background: #fafafa;
+            border-radius: 8px;
+        }
+        /* keep consistent with original */
+        a {
+            text-decoration: none;
+        }
+        /* ensure no layout shift */
+        .filter-bar select, .filter-bar input {
+            font-family: inherit;
+        }
     </style>
 </head>
 <body>
 
     <div class="admin-layout">
+        <!-- Sidebar partial include (kept as original) -->
         <%- include('../partials/adminSidebar') %>
 
         <main class="content-area">
@@ -206,8 +234,15 @@
                 <h1>Order Management</h1>
             </header>
 
-            <form method="GET" action="/admin/orders" class="filter-bar">
-                <select name="status" class="admin-input">
+            <!-- 
+                CRITICAL FIX: Filter/Sort should work immediately after selecting it.
+                We achieve this by adding 'onchange' event to both status and sort dropdowns
+                that automatically submits the filter form. This preserves all existing 
+                functionality (search, pagination, URL parameters) and enhances UX.
+                Also added placeholder for search input as required.
+            -->
+            <form method="GET" action="/admin/orders" class="filter-bar" id="filterForm">
+                <select name="status" class="admin-input" id="statusSelect">
                     <option value="">All Status</option>
                     <option value="pending" <%= status === "pending" ? "selected" : "" %>>Pending</option>
                     <option value="shipped" <%= status === "shipped" ? "selected" : "" %>>Shipped</option>
@@ -215,13 +250,13 @@
                     <option value="delivered" <%= status === "delivered" ? "selected" : "" %>>Delivered</option>
                     <option value="cancelled" <%= status === "cancelled" ? "selected" : "" %>>Cancelled</option>
                 </select>
-
-                <input type="text" name="search" value="<%= search %>" placeholder="Search Order ID or Customer" class="admin-input search-id" />
-
-                <select name="sort" class="admin-input">
+                <select name="sort" class="admin-input" id="sortSelect">
                     <option value="newest" <%= sort === "newest" ? "selected" : "" %>>Newest First</option>
                     <option value="oldest" <%= sort === "oldest" ? "selected" : "" %>>Oldest First</option>
                 </select>
+
+                <!-- Added placeholder text for search input as required -->
+                <input type="text" name="search" value="<%= search %>" placeholder="Search by Order ID or Customer name/email" class="admin-input search-id" id="searchInput" />
 
                 <button type="submit" class="btn-admin-action">Search</button>
                 <a href="/admin/orders" style="text-decoration: none;">
@@ -236,36 +271,72 @@
                             <th>Customer</th>
                             <th>Order ID</th> 
                             <th>Date</th>
-                            <th>Status</th> <th>Total</th>
+                            <th>Status</th> 
+                            <th>Total</th>
+                            <th>return</th>
                             <th>Action</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <% orders.forEach(order => { %>
-                            <tr>
-                                <td>
-                                    <div style="font-weight: 600;"><%= order.user?.fullName || "N/A" %></div>
-                                    <div style="font-size: 11px; color: #888;"><%= order.user?.email || "N/A" %></div>
-                                </td>
-                                <td class="order-id-text">
-                                     <%= order.orderId %>
+                        <% if(orders && orders.length > 0) { %>
+                            <% orders.forEach(order => { %>
+                                <tr>
+                                    <td>
+                                        <div style="font-weight: 600;"><%= order.user?.fullName || "N/A" %></div>
+                                        <div style="font-size: 11px; color: #888;"><%= order.user?.email || "N/A" %></div>
+                                    </td>
+                                    <td class="order-id-text">
+                                        <%= order.orderId %>
                                     </td>                               
-                            <td><%= new Date(order.createdAt).toLocaleDateString() %></td>
-                                <td>
-                                    <span class="status-badge status-<%= order.orderStatus.toLowerCase().replace(/\s/g, '-') %>">
-                                        <%= order.orderStatus %>
-                                    </span>
-                                </td>
-                                <td style="font-weight: 500;">₹<%= order.totalAmount %></td>
-                                <td>
-                                    <a href="/admin/orders/<%= order._id %>" class="view-outline">View Details</a>
+                                    <td><%= new Date(order.createdAt).toLocaleDateString() %></td>
+                                    <td>
+                                        <span class="status-badge status-<%= order.orderStatus.toLowerCase().replace(/\s/g, '-') %>">
+                                            <%= order.orderStatus %>
+                                        </span>
+                                    </td>
+                                    <td style="font-weight: 500;">₹<%= order.totalAmount %></td>
+                                    <td>
+                                        <%
+                                            let returnStatus = "No Request";
+                                            if (order.items && order.items.some(item => item.returnRequest?.status === "pending")) {
+                                                returnStatus = "Requested";
+                                            } 
+                                            else if (order.items && order.items.some(item => item.returnRequest?.status === "accepted")) {
+                                                returnStatus = "Accepted";
+                                            } 
+                                            else if (order.items && order.items.some(item => item.returnRequest?.status === "rejected")) {
+                                                returnStatus = "Rejected";
+                                            }
+                                        %>
+                                        <span class="status-badge 
+                                            <%= returnStatus === 'Requested' ? 'status-pending' :
+                                                returnStatus === 'Accepted' ? 'status-delivered' :
+                                                returnStatus === 'Rejected' ? 'status-cancelled' : '' %>">
+                                            <%= returnStatus %>
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <a href="/admin/orders/<%= order._id %>" class="view-outline">View Details</a>
+                                    </td>
+                                </tr>
+                            <% }) %>
+                        <% } else { %>
+                            <!-- Placeholder row when no orders exist matching criteria -->
+                            <tr class="empty-state-row">
+                                <td colspan="7" style="text-align: center; padding: 60px 20px;">
+                                    <div style="font-size: 48px; margin-bottom: 15px; opacity: 0.6;">📋</div>
+                                    <div style="font-size: 16px; font-weight: 500; color: #888;">No orders found</div>
+                                    <div style="font-size: 13px; color: #aaa; margin-top: 6px;">
+                                        Try adjusting your filters or search criteria
+                                    </div>
                                 </td>
                             </tr>
-                        <% }) %>
+                        <% } %>
                     </tbody>
                 </table>
             </div>
 
+            <% if(orders && orders.length > 0 && totalPages > 1) { %>
             <div class="admin-pagination">
                 <% if(currentPage > 1){ %>
                     <a href="?page=<%= currentPage-1 %>&search=<%= search %>&status=<%= status %>&sort=<%= sort %>">
@@ -285,8 +356,75 @@
                     </a>
                 <% } %>
             </div>
+            <% } else if(orders && orders.length === 0 && totalPages > 0) { %>
+               
+            <% } else if(orders && orders.length > 0 && totalPages === 1) { %>
+                
+            <% } %>
         </main>
     </div>
 
-    </body>
+   
+    <script>
+        (function() {
+         
+            const filterForm = document.getElementById('filterForm');
+            const statusSelect = document.getElementById('statusSelect');
+            const sortSelect = document.getElementById('sortSelect');
+            
+           
+            function submitWithResetPage() {
+                if (!filterForm) return;
+                
+                const searchInput = document.getElementById('searchInput');
+                
+                let pageInput = filterForm.querySelector('input[name="page"]');
+                if (!pageInput) {
+                    pageInput = document.createElement('input');
+                    pageInput.type = 'hidden';
+                    pageInput.name = 'page';
+                    filterForm.appendChild(pageInput);
+                }
+                pageInput.value = '1';
+                
+                
+                filterForm.submit();
+            }
+            
+            
+            if (statusSelect) {
+                statusSelect.addEventListener('change', function(e) {
+                    submitWithResetPage();
+                });
+            }
+            
+          
+            if (sortSelect) {
+                sortSelect.addEventListener('change', function(e) {
+                    submitWithResetPage();
+                });
+            }
+            
+          
+            if (filterForm) {
+                filterForm.addEventListener('submit', function(e) {
+                    
+                    let existingPageInput = filterForm.querySelector('input[name="page"]');
+                    if (!existingPageInput) {
+                        existingPageInput = document.createElement('input');
+                        existingPageInput.type = 'hidden';
+                        existingPageInput.name = 'page';
+                        filterForm.appendChild(existingPageInput);
+                    }
+                    
+                    existingPageInput.value = '1';
+                    
+                });
+            }
+            
+            
+        })();
+    </script>
+    
+</body>
 </html>

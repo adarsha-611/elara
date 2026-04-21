@@ -35,18 +35,21 @@ const userSchema = new mongoose.Schema(
       default: false
     },
 
-    referralCode: {
-      type: String,
-      unique: true,
-      sparse: true   
-    },
+   referralCode: {
+    type: String,
+    unique: true
+},
+referredBy: {
+  type: mongoose.Schema.Types.ObjectId,
+  ref: "User",
+  default: null
+},
+walletBalance: {
+  type: Number,
+  default: 0
+},
 
-    referredBy: {
-      type: String,
-      default: null
-    },
-
-    profileImage: {
+ profileImage: {
       type: String,
       default: null
     },

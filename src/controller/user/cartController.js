@@ -53,13 +53,16 @@ import { addToCart,removeFromCart, syncCartProducts, updateCartQty, validateChec
       try {
         const userId = req.session.userId;
         const {productId,variantId,qty} = req.body;
-        await addToCart(userId,productId,qty,variantId);
+        let cart =  await addToCart(userId,productId,qty,variantId);
 
         res.json({
           success:true,
-          message:"Product add to Cart"
+          message:"Product add to Cart",
+          cartCount: cart ? cart.items.length : 0
         });
       } catch (error) {
+        console.log(error);
+        
         res.json({
           success:false,
           message:error.message
@@ -81,6 +84,22 @@ const removeCartItem = async(req,res)=>{
   }
 }
 
+ const getCartCount = async (req, res) => {
+  try {
+    if (!req.session.userId) {
+      return res.json({ count: 0 });
+    }
+
+    const cart = await Cart.findOne({ userId: req.session.userId });
+
+    res.json({
+      count: cart ? cart.items.length : 0
+    });
+
+  } catch (error) {
+    res.json({ count: 0 });
+  }
+};
 
 const updateQuantity = async(req,res)=>{
   try {
@@ -119,6 +138,7 @@ const validationCheckout = async(req,res)=>{
 export default {
     getCartPage,
     addCartItem,
+    getCartCount,
     removeCartItem,
     updateQuantity,
     validationCheckout,

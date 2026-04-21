@@ -1,5 +1,5 @@
-import { getAllProducts, getProductById, getRelatedProducts } from "../../services/user/shopProductService.js";
-
+import { getAllProducts,getProductById,getRelatedProducts,getBestOfferForProduct } from "../../services/user/shopProductService.js";
+import Review from "../../model/reviewSchema.js"
 import Category from "../../model/categorySchema.js";
 
 const getShopPage = async (req, res) => {
@@ -51,10 +51,17 @@ const getProductDetailPage = async (req, res) => {
       product.category,
       product._id
     );
+    const reviews = await Review.find({productId:id})
+        .populate("userId","name")
+        .sort({createdAt:-1});
+
+    const offerData = await getBestOfferForProduct(product)
 
     return res.render("user/productDetail", {
       product,
-      relatedProducts
+      reviews,
+      relatedProducts,
+      offerData
     });
 
   } catch (error) {
@@ -76,6 +83,13 @@ const checkProductStatus = async(req,res)=>{
     return res.json({available:false});
   }
 }
+
+
+
+
+
+
+
 
 export default {
   getShopPage,

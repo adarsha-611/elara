@@ -35,9 +35,12 @@ const orderItemSchema = new mongoose.Schema({
     type: Number,
     required: true,
   },
+  isRefunded: {
+  type: Boolean,
+  default: false
+},
 
-
-  itemStatus: {
+itemStatus: {
     type: String,
     enum: [
       "pending",
@@ -50,6 +53,18 @@ const orderItemSchema = new mongoose.Schema({
     ],
     default: "pending",
   },
+
+  cancelRequest: {
+  requested: {
+    type: Boolean,
+    default: false
+  },
+  reason: {
+    type: String,
+    trim: true
+  },
+  cancelledAt: Date
+},
 
   returnRequest: {
     requested: {
@@ -87,6 +102,15 @@ const orderSchema = new mongoose.Schema({
     required: true,
     min: 0,
   },
+  discount: {
+  type: Number,
+  default: 0
+},
+
+couponDiscount: {
+  type: Number,
+  default: 0
+},
 
   shippingAddress: {
     fullName: { type: String, required: true },
@@ -99,7 +123,7 @@ const orderSchema = new mongoose.Schema({
 
   paymentMethod: {
     type: String,
-    enum: ["cod", "online"],
+    enum: ["cod", "online","wallet"],
     required: true,
   },
 

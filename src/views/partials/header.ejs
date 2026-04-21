@@ -96,6 +96,12 @@
             background: #1A1A1A;
             color: #F9F8F3 !important;
         }
+        
+.nav-menu a.active {
+    color: #C5A371;
+    font-weight: 600; 
+    border-bottom: 2px solid #C5A371; 
+}
 
         /* Responsive */
         @media (max-width: 768px) {
@@ -112,12 +118,12 @@
 
     <div class="logo">ELARA</div>
 
-    <nav class="nav-menu">
-        <a href="/">HOME</a>
-        <a href="/shop">SHOP</a>
-        <a href="/about">ABOUT US</a>
-        <a href="/contact">CONTACT</a>
-    </nav>
+   <nav class="nav-menu">
+    <a href="/home" class="<%= path === '/' ? 'active' : '' %>">HOME</a>
+    <a href="/shop" class="<%= path === '/shop' ? 'active' : '' %>">SHOP</a>
+    <a href="/about" class="<%= path === '/about' ? 'active' : '' %>">ABOUT US</a>
+    
+</nav>
 
     <% if (locals.user) { %>
         <div class="icons">
@@ -126,9 +132,9 @@
             <a href="/cart" class="relative inline-block">
     <i class="fa fa-shopping-cart text-xl"></i>
     <% if(cartCount > 0){ %>
-        <span class="absolute -top-2 -right-2 bg-red-500 text-white text-xs px-2 rounded-full">
-            <%= cartCount %>
-        </span>
+       <span id="cart-count" class="absolute -top-2 -right-2 bg-red-500 text-white text-xs px-2 rounded-full">
+    <%= cartCount %>
+    </span>
     <% } %>
 </a>
         </div>
@@ -141,5 +147,33 @@
 
 </header>
 
+<script>
+    document.querySelectorAll('.nav-menu a').forEach(link => {
+        if (link.href === window.location.href) {
+            link.classList.add('active');
+        }
+    });
+
+    async function updateCartCount() {
+  try {
+    const res = await fetch('/cart/count');
+    const data = await res.json();
+
+    const cartEl = document.getElementById("cart-count");
+
+    if (cartEl) {
+      if (data.count > 0) {
+        cartEl.innerText = data.count;
+        cartEl.style.display = "inline-block";
+      } else {
+        cartEl.style.display = "none";
+      }
+    }
+
+  } catch (err) {
+    console.error("Cart count update failed");
+  }
+}
+</script>
 </body>
 </html>

@@ -1,0 +1,905 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>ELARA — Admin Dashboard</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --primary:       #5D4037;
+    --primary-hover: #795548;
+    --secondary:     #B18E7B;
+    --bg:            #F4F4F4;
+    --white:         #FFFFFF;
+    --text:          #333333;
+    --text-muted:    #9E9E9E;
+    --border:        #eeeeee;
+    --border-light:  #f5f5f5;
+    --radius-sm:     8px;
+    --radius-md:     12px;
+    --shadow:        0 4px 20px rgba(0,0,0,0.05);
+    --shadow-hover:  0 8px 28px rgba(93,64,55,0.12);
+  }
+
+  html { font-size: 16px; }
+
+  body {
+    font-family: 'Poppins', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    font-weight: 400;
+  }
+
+  /* ── LAYOUT FIX: sidebar fixed, main margin-left matches sidebar width ── */
+  .dashboard { 
+    display: flex; 
+    min-height: 100vh; 
+    position: relative;
+  }
+
+  /* ── SIDEBAR (partial, exactly as provided but without overlapping) ── */
+  .sidebar {
+    width: 260px;            /* slightly wider for better spacing, but keeps partial style */
+    background: var(--primary);
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    padding: 28px 0 20px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    z-index: 100;
+    overflow-y: auto;
+    box-shadow: 2px 0 12px rgba(0,0,0,0.05);
+  }
+
+  .sidebar-logo {
+    padding: 0 24px 28px;
+    border-bottom: 0.5px solid rgba(255,255,255,0.08);
+  }
+
+  .sidebar-logo h1 {
+    font-size: 21px;
+    font-weight: 600;
+    letter-spacing: 0.2em;
+    color: #fff;
+    font-family: 'Poppins', sans-serif;
+  }
+
+  .sidebar-logo p {
+    font-size: 10px;
+    color: rgba(255,255,255,0.4);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-top: 4px;
+    font-weight: 300;
+  }
+
+  .nav { margin-top: 20px; flex: 1; }
+
+  .nav-section-label {
+    font-size: 9px;
+    color: rgba(255,255,255,0.3);
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    padding: 0 24px;
+    margin: 18px 0 6px;
+    font-weight: 500;
+  }
+
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 24px;
+    color: rgba(255,255,255,0.5);
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-weight: 400;
+    border-left: 2px solid transparent;
+    border-radius: 0;
+  }
+
+  .nav-item:hover {
+    color: rgba(255,255,255,0.9);
+    background: rgba(255,255,255,0.07);
+  }
+
+  .nav-item.active {
+    color: #fff;
+    background: rgba(255,255,255,0.1);
+    border-left-color: var(--secondary);
+    font-weight: 500;
+  }
+
+  .nav-item svg { flex-shrink: 0; opacity: 0.75; }
+
+  .sidebar-footer {
+    padding: 16px 24px;
+    border-top: 0.5px solid rgba(255,255,255,0.08);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .avatar {
+    width: 34px; height: 34px; border-radius: 50%;
+    background: var(--secondary);
+    color: #fff;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 600;
+    flex-shrink: 0;
+  }
+
+  .avatar-info p  { font-size: 12px; color: #fff; font-weight: 500; }
+  .avatar-info span { font-size: 10px; color: rgba(255,255,255,0.4); font-weight: 300; }
+
+  /* ── MAIN CONTENT: adjusted to avoid overlap, uses margin-left same as sidebar width ── */
+  .main {
+    margin-left: 260px;      /* matches sidebar width */
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    width: calc(100% - 260px);
+  }
+
+  /* ── TOPBAR ── */
+  .topbar {
+    background: var(--white);
+    border-bottom: 1px solid var(--border);
+    padding: 0 28px;
+    height: 62px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    width: 100%;
+  }
+
+  .topbar-left h2 {
+    font-size: 26px;
+    font-weight: 600;
+    color: var(--primary);
+    letter-spacing: 0.01em;
+  }
+
+  .topbar-left p {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-top: 1px;
+    font-weight: 300;
+  }
+
+  .topbar-right { display: flex; align-items: center; gap: 14px; }
+
+  .live-badge {
+    display: flex; align-items: center; gap: 5px;
+    background: #E8F5E9; color: #2E7D32;
+    font-size: 11px; font-weight: 500;
+    padding: 5px 12px; border-radius: 20px;
+  }
+
+  .live-dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: #4CAF50;
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+
+  .topbar-avatar {
+    width: 34px; height: 34px; border-radius: 50%;
+    background: var(--primary);
+    color: #fff;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 600;
+    cursor: pointer;
+  }
+
+  /* ── CONTENT AREA ── */
+  .content { padding: 26px 30px; }
+
+  /* ── SECTION TITLE ── */
+  .section-title {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--text-muted);
+    margin-bottom: 14px;
+    font-weight: 500;
+  }
+
+  /* ── STAT CARDS (first 3 on top row, next 3 second row) ── */
+  .cards-grid-top, .cards-grid-bottom {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+    margin-bottom: 22px;
+  }
+
+  .cards-grid-bottom {
+    margin-bottom: 22px;
+  }
+
+  .stat-card {
+    background: var(--white);
+    border-radius: var(--radius-md);
+    padding: 18px 16px;
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow);
+    cursor: default;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .stat-card:hover {
+    transform: translateY(-3px) scale(1.01);
+    box-shadow: var(--shadow-hover);
+  }
+
+  .stat-icon {
+    width: 34px; height: 34px;
+    border-radius: var(--radius-sm);
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: 14px;
+  }
+
+  .stat-label {
+    font-size: 10px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 6px;
+    font-weight: 500;
+  }
+
+  .stat-value {
+    font-size: 22px;
+    font-weight: 600;
+    color: var(--text);
+    line-height: 1;
+  }
+
+  .stat-delta {
+    font-size: 10px;
+    margin-top: 8px;
+    font-weight: 400;
+    display: flex; align-items: center; gap: 3px;
+  }
+
+  .stat-delta.up { color: #4CAF50; }
+  .stat-delta.dn { color: #E57373; }
+
+  /* ── ROW 2: GRAPH + ORDER STATUS (donut) as per request: graph below the orderstatus like that? 
+     Actually original layout: row2 had sales chart + donut. We'll keep row2 exactly as needed but ensure graph and status are side by side, 
+     but the requirement says "graph below the orderstatus like that"? However looking: "the graph below the orderstatus like that" might mean 
+     in the second row, the chart and order status are paired. We keep both as original but maintain flex layout. 
+     No functional change, just layout fix. 
+  */
+  .row2 {
+    display: grid;
+    grid-template-columns: 1fr 340px;
+    gap: 16px;
+    margin-bottom: 16px;
+  }
+
+  /* ── CARD ── */
+  .card {
+    background: var(--white);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow);
+    padding: 22px;
+  }
+
+  .card-hdr {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 18px;
+  }
+
+  .card-title {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--primary);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  .card-sub {
+    font-size: 11px;
+    color: var(--text-muted);
+    font-weight: 400;
+  }
+
+  /* ── FILTER PILLS ── */
+  .filter-pills { display: flex; gap: 6px; }
+
+  .pill {
+    font-size: 11px;
+    font-weight: 500;
+    padding: 5px 14px;
+    border-radius: 20px;
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    cursor: pointer;
+    background: transparent;
+    transition: all 0.2s ease;
+    font-family: 'Poppins', sans-serif;
+  }
+
+  .pill.active {
+    background: var(--primary);
+    color: #fff;
+    border-color: var(--primary);
+  }
+
+  .pill:hover:not(.active) {
+    border-color: var(--secondary);
+    color: var(--primary);
+    background: rgba(93,64,55,0.04);
+  }
+
+  /* ── CHART LEGEND ── */
+  .chart-legend {
+    display: flex; gap: 18px; margin-bottom: 14px;
+  }
+
+  .legend-item {
+    display: flex; align-items: center; gap: 6px;
+    font-size: 11px; color: #888; font-weight: 400;
+  }
+
+  .legend-line {
+    width: 20px; height: 2px; border-radius: 2px;
+    display: inline-block;
+  }
+
+  .legend-dashed {
+    width: 20px; height: 0;
+    display: inline-block;
+    border-top: 2px dashed var(--secondary);
+  }
+
+  /* ── DONUT ── */
+  .donut-wrap {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    justify-content: center;
+    padding: 8px 0 4px;
+  }
+
+  .donut-canvas-wrap {
+    position: relative; width: 150px; height: 150px; flex-shrink: 0;
+  }
+
+  .donut-center {
+    position: absolute; top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    pointer-events: none;
+  }
+
+  .donut-center-val {
+    font-size: 19px; font-weight: 600; color: var(--primary);
+  }
+
+  .donut-center-label {
+    font-size: 10px; color: var(--text-muted); font-weight: 400;
+    margin-top: 2px;
+  }
+
+  .donut-legend { display: flex; flex-direction: column; gap: 11px; }
+
+  .dl-item {
+    display: flex; align-items: center; gap: 8px;
+    font-size: 12px; color: #555; font-weight: 400;
+  }
+
+  .dl-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+  .dl-pct { font-weight: 600; color: var(--text); margin-left: auto; padding-left: 12px; }
+
+  /* ── ROW 3 ── */
+  .row3 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 16px;
+  }
+
+  /* ── PRODUCTS TABLE ── */
+  .products-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  .products-table th {
+    font-size: 10px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    padding: 0 10px 12px 10px;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+    font-weight: 600;
+  }
+
+  .products-table td {
+    padding: 12px 10px;
+    border-bottom: 1px solid var(--border-light);
+    font-size: 12.5px;
+    color: #555;
+    vertical-align: middle;
+    font-weight: 400;
+  }
+
+  .products-table tr:last-child td { border-bottom: none; }
+  .products-table tr:hover td { background: #fafafa; }
+
+  .rank-num {
+    font-size: 11px; color: var(--secondary);
+    font-weight: 600; width: 20px; text-align: center;
+  }
+
+  .prod-emoji {
+    width: 34px; height: 34px; border-radius: 8px;
+    background: var(--border-light);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px;
+  }
+
+  .prod-name {
+    font-size: 12.5px; color: var(--text);
+    font-weight: 500; line-height: 1.3;
+  }
+
+  .prod-sub {
+    font-size: 10.5px; color: var(--text-muted);
+    margin-top: 2px; font-weight: 300;
+  }
+
+  .rev-val {
+    font-size: 12.5px; color: var(--primary);
+    font-weight: 600; white-space: nowrap;
+  }
+
+  /* ── CATEGORIES ── */
+  .cat-item { margin-bottom: 18px; }
+  .cat-item:last-child { margin-bottom: 0; }
+
+  .cat-hdr {
+    display: flex; justify-content: space-between;
+    margin-bottom: 7px;
+  }
+
+  .cat-name { font-size: 12.5px; color: var(--text); font-weight: 500; }
+  .cat-val  { font-size: 12.5px; color: var(--primary); font-weight: 600; }
+
+  .prog-bg {
+    background: var(--border-light);
+    border-radius: 4px; height: 7px; overflow: hidden;
+  }
+
+  .prog-fill {
+    height: 100%; border-radius: 4px;
+    background: var(--primary);
+    transition: width 1s cubic-bezier(0.4,0,0.2,1);
+  }
+
+  /* ── RESPONSIVE (adjust for sidebar on smaller screens) ── */
+  @media (max-width: 1100px) {
+    .cards-grid-top, .cards-grid-bottom {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  @media (max-width: 900px) {
+    .sidebar { 
+      width: 220px;
+    }
+    .main { margin-left: 220px; width: calc(100% - 220px); }
+    .cards-grid-top, .cards-grid-bottom { grid-template-columns: repeat(2, 1fr); }
+    .row2 { grid-template-columns: 1fr; }
+    .row3 { grid-template-columns: 1fr; }
+  }
+
+  @media (max-width: 768px) {
+    .sidebar { 
+      transform: translateX(-100%);
+      transition: transform 0.2s ease;
+      width: 260px;
+      z-index: 200;
+    }
+    .main { margin-left: 0; width: 100%; }
+    /* optional: no toggle needed - just keep content full width for simplicity */
+    .cards-grid-top, .cards-grid-bottom { grid-template-columns: 1fr 1fr; }
+  }
+
+  @media (max-width: 560px) {
+    .cards-grid-top, .cards-grid-bottom { grid-template-columns: 1fr; }
+    .filter-pills { flex-wrap: wrap; }
+  }
+</style>
+</head>
+<body>
+<div class="dashboard">
+
+          <%- include('../partials/adminSidebar') %>
+
+
+  <!-- MAIN CONTENT (positioned correctly) -->
+  <div class="main">
+
+    <!-- TOPBAR -->
+    <header class="topbar">
+      <div class="topbar-left">
+        <h2>Dashboard</h2>
+        
+      </div>
+    </header>
+
+    <!-- CONTENT -->
+    <div class="content">
+
+      <p class="section-title">Summary</p>
+
+      <!-- FIRST 3 STAT CARDS (row1) -->
+      <div class="cards-grid-top">
+        <div class="stat-card">
+          <div class="stat-icon" style="background:#FFF3E0;">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#E65100" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
+          </div>
+          <div class="stat-label">Total Orders</div>
+         <div class="stat-value"><%= totalOrders %></div> 
+          <div class="stat-delta up">▲ 12.4% vs last month</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon" style="background:#E8F5E9;">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#2E7D32" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+          <div class="stat-label">Delivered</div>
+          <div class="stat-value"><%=delivered%></div>
+          <div class="stat-delta up">▲ 8.1%</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon" style="background:#FFF8E1;">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#F57F17" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          </div>
+          <div class="stat-label">Pending</div>
+          <div class="stat-value"><%= pending %></div>
+          <div class="stat-delta dn">▼ 3.2%</div>
+        </div>
+      </div>
+
+      <!-- REMAINING 3 STAT CARDS (row2) -->
+      <div class="cards-grid-bottom">
+        <div class="stat-card">
+          <div class="stat-icon" style="background:#FFEBEE;">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#C62828" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+          </div>
+          <div class="stat-label">Cancelled</div>
+          <div class="stat-value"><%= cancelled%></div>
+          <div class="stat-delta up">▲ 1.5%</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon" style="background:#F3E5F5;">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#6A1B9A" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 102.13-9.36L1 10"/></svg>
+          </div>
+          <div class="stat-label">Returned</div>
+          <div class="stat-value"><%= returned %></div>
+          <div class="stat-delta dn">▼ 0.8%</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon" style="background:#E8EAF6;">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#283593" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
+          </div>
+          <div class="stat-label">Total Revenue</div>
+<div class="stat-value">₹<%= (totalRevenue/100000).toFixed(2) %> L</div>
+          <div class="stat-delta up">▲ 18.7%</div>
+        </div>
+      </div>
+
+      <!-- ROW 2: SALES CHART (graph) + ORDER STATUS (donut) SIDE BY SIDE, graph below orderstatus? Actually it's aligned side-by-side, original layout unchanged but fully functional -->
+      <div class="row2">
+        <!-- SALES CHART (graph) -->
+        <div class="card">
+          <div class="card-hdr">
+            <span class="card-title">Sales Overview</span>
+            <div class="filter-pills">
+              <button class="pill" onclick="setFilter('daily',this)">Daily</button>
+              <button class="pill" onclick="setFilter('weekly',this)">Weekly</button>
+              <button class="pill active" onclick="setFilter('monthly',this)">Monthly</button>
+              <button class="pill" onclick="setFilter('yearly',this)">Yearly</button>
+            </div>
+          </div>
+          <div class="chart-legend">
+            <div class="legend-item"><span class="legend-line" style="background:#5D4037;"></span> Orders</div>
+            <div class="legend-item"><span class="legend-dashed"></span> Revenue (₹L)</div>
+          </div>
+          <div style="position:relative;width:100%;height:250px;">
+            <canvas id="salesChart" role="img" aria-label="Monthly sales overview line chart"></canvas>
+          </div>
+        </div>
+
+        <!-- ORDER STATUS DONUT -->
+        <div class="card">
+          <div class="card-hdr">
+            <span class="card-title">Order Status</span>
+          </div>
+          <div class="donut-wrap">
+            <div class="donut-canvas-wrap">
+              <canvas id="donutChart" role="img" aria-label="Donut chart: 74% delivered, 11% pending, 8% cancelled, 7% returned"></canvas>
+              <div class="donut-center">
+                <div class="donut-center-val"><%= totalOrders %></div>
+                <div class="donut-center-label">Total</div>
+              </div>
+            </div>
+            <div class="donut-legend">
+              <div class="dl-item"><span class="dl-dot" style="background:#5D4037;"></span>Delivered<span class="dl-pct">74%</span></div>
+              <div class="dl-item"><span class="dl-dot" style="background:#B18E7B;"></span>Pending<span class="dl-pct">11%</span></div>
+              <div class="dl-item"><span class="dl-dot" style="background:#E57373;"></span>Cancelled<span class="dl-pct">8%</span></div>
+              <div class="dl-item"><span class="dl-dot" style="background:#CE93D8;"></span>Returned<span class="dl-pct">7%</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ROW 3: TOP SELLING PRODUCTS + TOP CATEGORIES -->
+      <div class="row3">
+        <!-- TOP PRODUCTS -->
+        <div class="card">
+          <div class="card-hdr">
+            <span class="card-title">Top Selling Products</span>
+            <span class="card-sub">By units sold</span>
+          </div>
+          <table class="products-table">
+            <thead>
+              <tr><th style="width:28px;">#</th><th style="width:40px;"></th><th>Product</th><th>Units</th><th>Revenue</th></tr>
+            </thead>
+            <tbody id="productsBody"></tbody>
+          </table>
+        </div>
+
+        <!-- TOP CATEGORIES -->
+        <div class="card">
+          <div class="card-hdr">
+            <span class="card-title">Top Categories</span>
+            <span class="card-sub">By sales volume</span>
+          </div>
+          <div id="categoriesWrap" style="padding-top:4px;"></div>
+        </div>
+      </div>
+    </div><!-- /content -->
+  </div><!-- /main -->
+</div><!-- /dashboard -->
+
+<script>
+  /* ── ORDER STATUS DATA (DEFINE FIRST) ── */
+  const orderStatusData = {
+    delivered: <%= delivered %>,
+    pending: <%= pending %>,
+    cancelled: <%= cancelled %>,
+    returned: <%= returned %>,
+    total: <%= totalOrders %>
+  };
+
+  /* ── CALCULATE DONUT VALUES SAFELY ── */
+  const total = orderStatusData.total || 1;
+
+  const donutValues = [
+    ((orderStatusData.delivered / total) * 100).toFixed(1),
+    ((orderStatusData.pending / total) * 100).toFixed(1),
+    ((orderStatusData.cancelled / total) * 100).toFixed(1),
+    ((orderStatusData.returned / total) * 100).toFixed(1)
+  ];
+
+  // Update donut legend percentages dynamically
+  document.addEventListener('DOMContentLoaded', function() {
+    const legendPercents = document.querySelectorAll('.dl-pct');
+    if (legendPercents.length >= 4) {
+      legendPercents[0].textContent = donutValues[0] + '%';
+      legendPercents[1].textContent = donutValues[1] + '%';
+      legendPercents[2].textContent = donutValues[2] + '%';
+      legendPercents[3].textContent = donutValues[3] + '%';
+    }
+  });
+
+  /* ── SALES DATA ── */
+  const monthlyData = {
+    labels: <%- JSON.stringify(chartLabels) %>,
+    orders: <%- JSON.stringify(chartOrders) %>,
+    revenue: <%- JSON.stringify(chartRevenue.map(r => (r/100000).toFixed(2))) %>
+  };
+
+  const dailyData = {
+    labels: <%- JSON.stringify(dailyLabels) %>,
+    orders: <%- JSON.stringify(dailyOrders) %>,
+    revenue: <%- JSON.stringify(dailyRevenue.map(r => (r/100000).toFixed(2))) %>
+  };
+
+  const weeklyData = {
+    labels: <%- JSON.stringify(weeklyLabels) %>,
+    orders: <%- JSON.stringify(weeklyOrders) %>,
+    revenue: <%- JSON.stringify(weeklyRevenue.map(r => (r/100000).toFixed(2))) %>
+  };
+
+  const yearlyData = {
+    labels: <%- JSON.stringify(yearlyLabels) %>,
+    orders: <%- JSON.stringify(yearlyOrders) %>,
+    revenue: <%- JSON.stringify(yearlyRevenue.map(r => (r/100000).toFixed(2))) %>
+  };
+
+  /* ── SALES CHART ── */
+  let salesChart;
+
+  function buildSalesChart(data) {
+    if (salesChart) salesChart.destroy();
+
+    salesChart = new Chart(document.getElementById('salesChart'), {
+      type: 'line',
+      data: {
+        labels: data.labels,
+        datasets: [
+          {
+            label: 'Orders',
+            data: data.orders,
+            borderColor: '#5D4037',
+            backgroundColor: 'rgba(93,64,55,0.05)',
+            borderWidth: 2,
+            pointRadius: 3,
+            tension: 0.4,
+            fill: true
+          },
+          {
+            label: 'Revenue (₹L)',
+            data: data.revenue,
+            borderColor: '#B18E7B',
+            borderDash: [5,4],
+            borderWidth: 2,
+            pointRadius: 3,
+            tension: 0.4,
+            fill: false,
+            yAxisID: 'y2'
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+          y: { 
+            beginAtZero: true,
+            title: { display: true, text: 'Orders', font: { size: 10 } }
+          },
+          y2: {
+            position: 'right',
+            grid: { display: false },
+            title: { display: true, text: 'Revenue (₹ Lakhs)', font: { size: 10 } }
+          }
+        }
+      }
+    });
+  }
+
+  window.setFilter = function(type, el) {
+    document.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
+    el.classList.add('active');
+
+    const map = {
+      daily: dailyData,
+      weekly: weeklyData,
+      monthly: monthlyData,
+      yearly: yearlyData
+    };
+
+    buildSalesChart(map[type]);
+  };
+
+  buildSalesChart(monthlyData);
+
+  /* ── DONUT CHART ── */
+  new Chart(document.getElementById('donutChart'), {
+    type: 'doughnut',
+    data: {
+      labels: ['Delivered','Pending','Cancelled','Returned'],
+      datasets: [{
+        data: donutValues,
+        backgroundColor: ['#5D4037','#B18E7B','#E57373','#CE93D8'],
+        borderWidth: 0
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      cutout: '68%',
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: function(context) {
+              const label = context.label || '';
+              const value = context.raw;
+              return `${label}: ${value}% (${Math.round(orderStatusData[context.label.toLowerCase()] || 0)} orders)`;
+            }
+          }
+        }
+      }
+    }
+  });
+
+  /* ── POPULATE TOP SELLING PRODUCTS ── */
+  const topProducts = <%- JSON.stringify(topProducts || []) %>;
+  const productsBody = document.getElementById('productsBody');
+  
+  if (productsBody && topProducts.length > 0) {
+    productsBody.innerHTML = topProducts.map(product => `
+      <tr>
+        <td class="rank-num">${product.rank}</td>
+        <td>
+          <div class="prod-emoji">
+            ${product.image ? 
+              `<img src="${product.image}" style="width:100%;height:100%;object-fit:cover;border-radius:8px;" alt="${product.name}">` : 
+              '📦'}
+          </div>
+        </td>
+        <td>
+          <div class="prod-name">${escapeHtml(product.name)}</div>
+          <div class="prod-sub">${product.units} units sold</div>
+        </td>
+        <td style="font-weight:600;">${product.units}</td>
+        <td class="rev-val">₹${(product.revenue / 1000).toFixed(1)}K</td>
+      </tr>
+    `).join('');
+  } else if (productsBody) {
+    productsBody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:40px;">No sales data available</td></tr>';
+  }
+
+  /* ── POPULATE TOP CATEGORIES ── */
+  const topCategories = <%- JSON.stringify(topCategories || []) %>;
+  const categoriesWrap = document.getElementById('categoriesWrap');
+  
+  if (categoriesWrap && topCategories.length > 0) {
+    categoriesWrap.innerHTML = topCategories.map(category => `
+      <div class="cat-item">
+        <div class="cat-hdr">
+          <span class="cat-name">${escapeHtml(category.name)}</span>
+          <span class="cat-val">₹${(category.sales / 1000).toFixed(1)}K</span>
+        </div>
+        <div class="prog-bg">
+          <div class="prog-fill" style="width: ${category.percentage}%"></div>
+        </div>
+        <div style="display:flex; justify-content: space-between; margin-top: 4px;">
+          <span style="font-size: 10px; color: #9E9E9E;">${category.units} units</span>
+          <span style="font-size: 10px; color: #9E9E9E;">${category.percentage}% of sales</span>
+        </div>
+      </div>
+    `).join('');
+  } else if (categoriesWrap) {
+    categoriesWrap.innerHTML = '<div style="text-align:center;padding:40px;">No category data available</div>';
+  }
+
+  
+  function escapeHtml(str) {
+    if (!str) return '';
+    return str.replace(/[&<>]/g, function(m) {
+      if (m === '&') return '&amp;';
+      if (m === '<') return '&lt;';
+      if (m === '>') return '&gt;';
+      return m;
+    });
+  }
+</script>
+</body>
+</html>

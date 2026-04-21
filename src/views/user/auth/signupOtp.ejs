@@ -135,107 +135,123 @@
         </div>
     </div>
     
-    <script>
-        const otpInputs = document.querySelectorAll('.otp-input');
-        const completeOtpField = document.getElementById('completeOtp');
-        const otpError = document.getElementById('otpError');
-        const otpForm = document.getElementById('otpForm');
-        
-        // Auto-focus Logic
-        otpInputs.forEach((input, index) => {
-            input.addEventListener('input', (e) => {
-                const value = e.target.value;
-                
-                // Clear errors on input
-                otpError.textContent = '';
-                input.classList.remove('error-border');
+<script>
+    const otpInputs = document.querySelectorAll('.otp-input');
+    const completeOtpField = document.getElementById('completeOtp');
+    const otpError = document.getElementById('otpError');
+    const otpForm = document.getElementById('otpForm');
 
-                if (value.length > 1) {
-                    e.target.value = value.slice(0, 1);
-                }
-                
-                if (value.length === 1 && index < otpInputs.length - 1) {
-                    otpInputs[index + 1].focus();
-                }
-                updateCompleteOtp();
-            });
+    // Auto-focus Logic
+    otpInputs.forEach((input, index) => {
+        input.addEventListener('input', (e) => {
+            const value = e.target.value;
             
-            input.addEventListener('keydown', (e) => {
-                if (e.key === 'Backspace' && !e.target.value && index > 0) {
-                    otpInputs[index - 1].focus();
-                }
-            });
-            
-            input.addEventListener('paste', (e) => {
-                e.preventDefault();
-                const pasteData = e.clipboardData.getData('text').slice(0, 6);
-                pasteData.split('').forEach((char, i) => {
-                    if (otpInputs[i] && /^\d$/.test(char)) {
-                        otpInputs[i].value = char;
-                        otpInputs[i].classList.remove('error-border');
-                    }
-                });
-                updateCompleteOtp();
-                otpError.textContent = '';
-            });
-        });
-        
-        function updateCompleteOtp() {
-            completeOtpField.value = Array.from(otpInputs).map(input => input.value).join('');
-        }
+            otpError.textContent = '';
+            input.classList.remove('error-border');
 
-        // --- Client-side Validation ---
-        otpForm.addEventListener('submit', (e) => {
+            if (value.length > 1) {
+                e.target.value = value.slice(0, 1);
+            }
+            
+            if (value.length === 1 && index < otpInputs.length - 1) {
+                otpInputs[index + 1].focus();
+            }
             updateCompleteOtp();
-            if (completeOtpField.value.length < 6) {
-                e.preventDefault();
-                otpError.textContent = 'Please enter the complete 6-digit verification code.';
-                otpInputs.forEach(input => {
-                    if (!input.value) input.classList.add('error-border');
-                });
+        });
+        
+        input.addEventListener('keydown', (e) => {
+            if (e.key === 'Backspace' && !e.target.value && index > 0) {
+                otpInputs[index - 1].focus();
             }
         });
         
-        // --- Timer Logic ---
-        let timeLeft = 45;
-        const timerElement = document.getElementById('timer');
-        const resendBtn = document.getElementById('resendBtn');
-        
-        function updateTimer() {
-            const minutes = Math.floor(timeLeft / 60);
-            const seconds = timeLeft % 60;
-            timerElement.textContent = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
-            
-            if (timeLeft <= 0) {
-                clearInterval(timerInterval);
-                resendBtn.disabled = false;
-                resendBtn.classList.remove('text-gray-400');
-                resendBtn.classList.add('text-[#a78a7f]', 'cursor-pointer');
-            }
-            timeLeft--;
+        input.addEventListener('paste', (e) => {
+            e.preventDefault();
+            const pasteData = e.clipboardData.getData('text').slice(0, 6);
+            pasteData.split('').forEach((char, i) => {
+                if (otpInputs[i] && /^\d$/.test(char)) {
+                    otpInputs[i].value = char;
+                    otpInputs[i].classList.remove('error-border');
+                }
+            });
+            updateCompleteOtp();
+            otpError.textContent = '';
+        });
+    });
+    
+    function updateCompleteOtp() {
+        completeOtpField.value = Array.from(otpInputs).map(input => input.value).join('');
+    }
+
+    // Validation
+    otpForm.addEventListener('submit', (e) => {
+        updateCompleteOtp();
+        if (completeOtpField.value.length < 6) {
+            e.preventDefault();
+            otpError.textContent = 'Please enter the complete 6-digit verification code.';
+            otpInputs.forEach(input => {
+                if (!input.value) input.classList.add('error-border');
+            });
         }
+    });
+    
+    // Timer Logic
+    let timeLeft = 45;
+    const timerElement = document.getElementById('timer');
+    const resendBtn = document.getElementById('resendBtn');
+    let timerInterval;
+
+    function updateTimer() {
+        const minutes = Math.floor(timeLeft / 60);
+        const seconds = timeLeft % 60;
+        timerElement.textContent = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
         
-        const timerInterval = setInterval(updateTimer, 1000);
-        updateTimer();
+        if (timeLeft <= 0) {
+            clearInterval(timerInterval);
+            resendBtn.disabled = false;
+            resendBtn.classList.remove('text-gray-400');
+            resendBtn.classList.add('text-[#a78a7f]', 'cursor-pointer');
+        }
+        timeLeft--;
+    }
+    
+    timerInterval = setInterval(updateTimer, 1000);
+    updateTimer();
 
-        // Resend Logic
-        resendBtn.addEventListener('click', async () => {
-            if (!resendBtn.disabled) {
-                // ... Existing resend logic ...
-                // Note: I kept your logic but removed the alert to keep the UI clean
-                timeLeft = 45;
-                resendBtn.disabled = true;
-                resendBtn.classList.replace('text-[#a78a7f]', 'text-gray-400');
-                otpInputs.forEach(input => {
-                    input.value = '';
-                    input.classList.remove('error-border');
-                });
-                otpError.textContent = '';
-                otpInputs[0].focus();
-            }
-        });
+    // ✅ Resend OTP (FIXED)
+    resendBtn.addEventListener('click', async () => {
+        if (!resendBtn.disabled) {
 
-        window.addEventListener('load', () => otpInputs[0].focus());
-    </script>
+            await fetch("/resend-otp", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    email: "<%= email %>"
+                })
+            });
+
+            // Reset UI (same as your style)
+            timeLeft = 45;
+            resendBtn.disabled = true;
+            resendBtn.classList.remove('text-[#a78a7f]', 'cursor-pointer');
+            resendBtn.classList.add('text-gray-400');
+
+            otpInputs.forEach(input => {
+                input.value = '';
+                input.classList.remove('error-border');
+            });
+
+            otpError.textContent = 'New OTP sent to your email';
+            otpInputs[0].focus();
+
+            clearInterval(timerInterval);
+            timerInterval = setInterval(updateTimer, 1000);
+        }
+    });
+
+    window.addEventListener('load', () => otpInputs[0].focus());
+</script>
 </body>
 </html>

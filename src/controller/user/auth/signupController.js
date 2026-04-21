@@ -33,13 +33,14 @@ const postSignup = async(req,res)=>{
             return res.redirect('/signup');
         }
 
-        if(value.referralCode){
-            const referredUser = await findUserByreferralCode(value.referralCode);
-            if(!referredUser){
-                req.flash('error', 'The referral code you entered is invalid. Please check and try again.');
-                return res.redirect('/signup');
-            }
-        }
+ if (value.referralCodeUsed) {
+    const referredUser = await findUserByreferralCode(value.referralCodeUsed);
+
+  if (!referredUser) {
+    req.flash('error', 'Invalid referral code');
+    return res.redirect('/signup');
+  }
+}
 
         
         req.session.tempUser = value;

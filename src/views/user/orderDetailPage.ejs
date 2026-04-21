@@ -127,6 +127,7 @@
             border-radius: 10px;
             margin-bottom: 15px;
             position: relative;
+            justify-content: space-between;
         }
 
         .order-item img {
@@ -159,7 +160,7 @@
             text-transform: uppercase;
             cursor: pointer;
             transition: 0.2s;
-            position: absolute;
+             position: static;
             right: 20px;
         }
 
@@ -320,7 +321,19 @@
 
             <div class="card">
                 <h3>Items in this order</h3>
+                <div class="mb-4 text-sm text-gray-600">
+                Order ID: <strong><%= order.orderId %></strong>
+                </div>
+                <div class="mb-2 text-sm">
+                Payment Method: <strong><%= order.paymentMethod.toUpperCase() %></strong>
+                </div>
 
+            <div class="mb-4 text-sm">
+            Payment Status: 
+            <strong class="<%= order.paymentStatus === 'paid' ? 'text-green-600' : 'text-red-500' %>">
+                  <%= order.paymentStatus.toUpperCase() %>
+            </strong>
+            </div>
                 <% order.items.forEach(item => { %>
                 <div class="order-item">
                     <% let variant = item.product?.variants?.find(v => v.color === item.variantColor); %>
@@ -330,6 +343,9 @@
                         <span class="item-name"><%= item.product?.name || "Jewelry Item" %></span>
                         <div class="item-info-text">
                             Qty: <%= item.quantity %>, Price: ₹<%= item.total.toLocaleString() %>
+                        </div>
+                        <div class="item-info-text">
+                                Color: <%= item.variantColor %>
                         </div>
                         
                         <%
@@ -362,14 +378,38 @@
                         </span>
                     </div>
 
-                    <% if (['pending','confirmed','shipped','out for delivery'].includes(item.itemStatus)) { %>
-                        <button onclick="cancelItem('<%= order._id %>','<%= item._id %>')" class="btn-cancel-item">CANCEL</button>
-                    <% } else if (item.itemStatus === 'delivered' && (!item.returnRequest || item.returnRequest.status === 'none')) { %>
-                        <button onclick="openReturnModal('<%= order._id %>','<%= item._id %>')" class="btn-return-item">RETURN</button>
-                    <% } %>
-                </div>
-                <% }) %>   
+                 <% if (['pending','confirmed','shipped','out for delivery'].includes(item.itemStatus)) { %>
+
+    <!-- CANCEL BUTTON -->
+    <button onclick="openCancelModal('<%= order._id %>','<%= item._id %>')" class="btn-cancel-item">
+        CANCEL
+    </button>
+
+<% } else if (item.itemStatus === 'delivered') { %>
+
+    <div style="display:flex; flex-direction:column; gap:8px;">
+
+        <!-- REVIEW BUTTON (TOP) -->
+        <button 
+            onclick="openReviewModal('<%= item.product._id %>')" 
+            class="btn-return-item">
+            WRITE REVIEW
+        </button>
+
+        <!-- RETURN BUTTON (ONLY IF NOT REQUESTED) -->
+        <% if (!item.returnRequest || item.returnRequest.status === 'none') { %>
+            <button 
+                onclick="openReturnModal('<%= order._id %>','<%= item._id %>')" 
+                class="btn-return-item">
+                RETURN
+            </button>
+        <% } %>
+
+    </div>
+
+<% } %>
             </div>
+            <% }) %>
 
             <div class="flex justify-center gap-4 mt-8">
                 <a href="/profile/orders/<%= order._id %>/invoice" class="btn-action btn-primary">Download Invoice</a>
@@ -398,12 +438,101 @@
                         <option value="Colour issue">Colour issue</option>
                         <option value="Other">Other</option>
                     </select>
+                    <div id="otherReasonContainer" style="display:none; margin-top:10px;">
+                    <input 
+                     type="text" 
+                     id="otherReasonInput"
+                     placeholder="Enter your reason..."
+                     style="width:100%; padding:12px; border:1px solid #ddd; border-radius:8px;">
+                    </div>
 
                     <button type="submit" class="btn-modal-submit">SUBMIT RETURN REQUEST</button>
                 </form>
             </div>
         </div>
     </div>
+
+    <div id="cancelModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-close-btn" onclick="closeCancelModal()">×</div>
+
+        <div class="modal-header">
+            <h2>Cancel Order</h2>
+        </div>
+
+        <div class="modal-body">
+            <form id="cancelForm">
+                <input type="hidden" id="cancelOrderId">
+                <input type="hidden" id="cancelItemId">
+
+                <label style="font-size: 0.8rem; font-weight: 700;">Reason for Cancellation</label>
+
+                <select id="cancelReason" class="return-select" required>
+                    <option value="">Choose a reason</option>
+                    <option value="Ordered by mistake">Ordered by mistake</option>
+                    <option value="Found better price">Found better price</option>
+                    <option value="Delivery delay">Delivery delay</option>
+                    <option value="Changed my mind">Changed my mind</option>
+                    <option value="Other">Other</option>
+                </select>
+
+                <!-- OTHER INPUT -->
+                <div id="cancelOtherBox" style="display:none; margin-top:10px;">
+                    <input 
+                        type="text" 
+                        id="cancelOtherInput"
+                        placeholder="Enter your reason..."
+                        style="width:100%; padding:12px; border:1px solid #ddd; border-radius:8px;">
+                </div>
+
+                <button type="submit" class="btn-modal-submit">
+                    SUBMIT CANCEL REQUEST
+                </button>
+            </form>
+        </div>
+      
+
+    </div>
+</div>
+
+<div id="reviewModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-close-btn" onclick="closeReviewModal()">×</div>
+
+        <div class="modal-header">
+            <h2>Write a Review</h2>
+        </div>
+
+        <div class="modal-body">
+            <form id="reviewForm">
+                <input type="hidden" id="reviewProductId">
+
+                <!-- Rating -->
+                <label style="font-size: 0.8rem; font-weight: 700;">Rating</label>
+                <select id="reviewRating" class="return-select" required>
+                    <option value="">Select Rating</option>
+                    <option value="5">⭐⭐⭐⭐⭐ (5)</option>
+                    <option value="4">⭐⭐⭐⭐ (4)</option>
+                    <option value="3">⭐⭐⭐ (3)</option>
+                    <option value="2">⭐⭐ (2)</option>
+                    <option value="1">⭐ (1)</option>
+                </select>
+
+                <!-- Comment -->
+                <label style="font-size: 0.8rem; font-weight: 700; margin-top:10px;">Review</label>
+                <textarea 
+                    id="reviewComment"
+                    placeholder="Write your experience..."
+                    style="width:100%; padding:12px; border:1px solid #ddd; border-radius:8px; margin-top:10px;"
+                    required></textarea>
+
+                <button type="submit" class="btn-modal-submit">
+                    SUBMIT REVIEW
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
 
     <%- include('../partials/footer') %>
 
@@ -428,8 +557,18 @@
             e.preventDefault();
             const orderId = document.getElementById('returnOrderId').value;
             const itemId = document.getElementById('returnItemId').value;
-            const reason = document.getElementById('returnReason').value;
+            let reason = document.getElementById('returnReason').value;
 
+            if (reason === "Other") {
+         const customReason = document.getElementById('otherReasonInput').value.trim();
+
+         if (!customReason) {
+                 Swal.fire("Error", "Please enter your reason", "error");
+             return;
+         }
+
+            reason = customReason;
+        }
             fetch(`/profile/orders/${orderId}/return/${itemId}`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -442,6 +581,80 @@
                 }
             });
         });
+    document.getElementById("returnReason").addEventListener("change", function () {
+    const otherBox = document.getElementById("otherReasonContainer");
+
+    if (this.value === "Other") {
+        otherBox.style.display = "block";
+    } else {
+        otherBox.style.display = "none";
+    }
+});
+function openReviewModal(productId) {
+    document.getElementById('reviewProductId').value = productId;
+    document.getElementById('reviewModal').style.display = 'flex';
+}
+
+function closeReviewModal() {
+    document.getElementById('reviewModal').style.display = 'none';
+}
+function openCancelModal(orderId, itemId) {
+    document.getElementById('cancelOrderId').value = orderId;
+    document.getElementById('cancelItemId').value = itemId;
+    document.getElementById('cancelModal').style.display = 'flex';
+}
+
+function closeCancelModal() {
+    document.getElementById('cancelModal').style.display = 'none';
+}
+
+document.getElementById("cancelReason").addEventListener("change", function () {
+    const box = document.getElementById("cancelOtherBox");
+
+    if (this.value === "Other") {
+        box.style.display = "block";
+        document.getElementById("cancelOtherInput").focus();
+    } else {
+        box.style.display = "none";
+    }
+});
+document.getElementById("cancelForm").addEventListener("submit", function(e){
+    e.preventDefault();
+
+    const orderId = document.getElementById("cancelOrderId").value;
+    const itemId = document.getElementById("cancelItemId").value;
+
+    let reason = document.getElementById("cancelReason").value;
+
+    if (reason === "Other") {
+        const custom = document.getElementById("cancelOtherInput").value.trim();
+
+        if (!custom) {
+            Swal.fire("Error", "Please enter reason", "error");
+            return;
+        }
+
+        reason = custom;
+    }
+
+    fetch(`/profile/orders/${orderId}/cancel/${itemId}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ reason })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if(data.success){
+            Swal.fire("Cancelled", "Item cancelled successfully", "success")
+            .then(()=>location.reload());
+        } else {
+            Swal.fire("Error", data.message, "error");
+        }
+    })
+    .catch(() => {
+        Swal.fire("Error", "Something went wrong", "error");
+    });
+});
 
       function cancelItem(orderId, itemId) {
     Swal.fire({
@@ -470,6 +683,36 @@
         }
     });
 }
+document.getElementById("reviewForm").addEventListener("submit", function(e){
+    e.preventDefault();
+
+    const productId = document.getElementById("reviewProductId").value;
+    const rating = document.getElementById("reviewRating").value;
+    const comment = document.getElementById("reviewComment").value.trim();
+
+    if (!rating || !comment) {
+        Swal.fire("Error", "Please fill all fields", "error");
+        return;
+    }
+
+    fetch(`/review/add`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ productId, rating, comment })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if(data.success){
+            Swal.fire("Success", "Review submitted", "success")
+            .then(()=>location.reload());
+        } else {
+            Swal.fire("Error", data.message, "error");
+        }
+    })
+    .catch(() => {
+        Swal.fire("Error", "Something went wrong", "error");
+    });
+});
     </script>
 </body>
 </html>

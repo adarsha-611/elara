@@ -66,6 +66,10 @@ app.use((req, res, next) => {
   res.locals.error = req.flash('error');
   next();
 });
+app.use((req, res, next) => {
+    res.locals.path = req.path;
+    next();
+});
 
 app.use(cartCount);
 app.use("/", authRouter);

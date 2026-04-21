@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Connect with ELARA</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Plus+Jakarta+Sans:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --elara-dark: #3D2B24;
+            --elara-gold: #A68B67;
+            --elara-beige: #F4F1EE;
+            --elara-ivory: #FDFBF9;
+            --elara-border: #E8E2DA;
+        }
+
+        body {
+            background-color: var(--elara-ivory);
+            color: var(--elara-dark);
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+
+        .font-display { font-family: 'Playfair Display', serif; }
+
+        .contact-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            min-height: 80vh;
+        }
+
+        /* Form Styling */
+        .form-group {
+            position: relative;
+            margin-bottom: 40px;
+        }
+
+        .form-group input, 
+        .form-group textarea {
+            width: 100%;
+            padding: 12px 0;
+            background: transparent;
+            border: none;
+            border-bottom: 1px solid var(--elara-border);
+            outline: none;
+            font-size: 14px;
+            transition: border-color 0.4s;
+        }
+
+        .form-group label {
+            position: absolute;
+            top: 12px;
+            left: 0;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--elara-gold);
+            pointer-events: none;
+            transition: all 0.3s ease;
+        }
+
+        /* Float Label Logic */
+        .form-group input:focus ~ label,
+        .form-group input:not(:placeholder-shown) ~ label,
+        .form-group textarea:focus ~ label,
+        .form-group textarea:not(:placeholder-shown) ~ label {
+            top: -20px;
+            font-size: 10px;
+            opacity: 0.7;
+        }
+
+        .form-group input:focus, 
+        .form-group textarea:focus {
+            border-color: var(--elara-gold);
+        }
+
+        .submit-btn {
+            background: var(--elara-dark);
+            color: white;
+            width: 100%;
+            padding: 20px;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            font-size: 11px;
+            font-weight: 600;
+            transition: all 0.4s;
+            cursor: pointer;
+        }
+
+        .submit-btn:hover {
+            background: var(--elara-gold);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(166, 139, 103, 0.15);
+        }
+
+        .info-card {
+            background: var(--elara-beige);
+            padding: 80px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        @media (max-width: 1024px) {
+            .contact-grid { grid-template-columns: 1fr; }
+            .info-card { order: 2; padding: 40px; }
+            .form-side { order: 1; padding: 40px; }
+        }
+    </style>
+</head>
+<body>
+
+    <%- include('partials/header') %>
+
+    <main class="max-w-7xl mx-auto px-6 py-20">
+        <div class="text-center mb-20">
+            <h1 class="font-display text-5xl mb-4 italic">Client Concierge</h1>
+            <p class="uppercase tracking-[0.3em] text-[10px] text-elara-gold font-bold">Personalized Assistance & Inquiries</p>
+        </div>
+
+        <div class="contact-grid bg-white shadow-sm border border-elara-border">
+            
+            <div class="form-side p-12 lg:p-20">
+                <h2 class="font-display text-2xl mb-12">Send a Message</h2>
+                
+                <form action="/contact" method="POST">
+                    <div class="form-group">
+                        <input type="text" name="name" id="name" placeholder=" " required>
+                        <label for="name">Full Name</label>
+                    </div>
+
+                    <div class="form-group">
+                        <input type="email" name="email" id="email" placeholder=" " required>
+                        <label for="email">Email Address</label>
+                    </div>
+
+                    <div class="form-group">
+                        <input type="text" name="subject" id="subject" placeholder=" ">
+                        <label for="subject">Inquiry Type (e.g. Bespoke, Order, Care)</label>
+                    </div>
+
+                    <div class="form-group">
+                        <textarea name="message" id="message" rows="4" placeholder=" " required></textarea>
+                        <label for="message">How may we assist you?</label>
+                    </div>
+
+                    <button type="submit" class="submit-btn">Send Inquiry</button>
+                </form>
+            </div>
+
+            <div class="info-card">
+                <div class="mb-16">
+                    <h3 class="font-display text-xl mb-6">Atelier Hours</h3>
+                    <p class="text-sm opacity-70 mb-2">Monday — Friday</p>
+                    <p class="text-sm font-bold mb-6">09:00 AM — 06:00 PM IST</p>
+                    <p class="text-sm opacity-70 mb-2">Saturday</p>
+                    <p class="text-sm font-bold">10:00 AM — 02:00 PM IST</p>
+                </div>
+
+                <div class="mb-16">
+                    <h3 class="font-display text-xl mb-6">Direct Channels</h3>
+                    <div class="space-y-4">
+                        <p class="text-sm">
+                            <span class="block text-[10px] uppercase tracking-widest text-elara-gold mb-1">Email</span>
+                            concierge@elaraearrings.com
+                        </p>
+                        <p class="text-sm">
+                            <span class="block text-[10px] uppercase tracking-widest text-elara-gold mb-1">WhatsApp Concierge</span>
+                            +91 98765 43210
+                        </p>
+                    </div>
+                </div>
+
+                <div>
+                    <h3 class="font-display text-xl mb-6">Socials</h3>
+                    <div class="flex gap-6 text-sm">
+                        <a href="#" class="hover:text-elara-gold transition-colors">Instagram</a>
+                        <a href="#" class="hover:text-elara-gold transition-colors">Pinterest</a>
+                        <a href="#" class="hover:text-elara-gold transition-colors">LinkedIn</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <%- include('partials/footer') %>
+
+</body>
+</html>

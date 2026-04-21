@@ -1,6 +1,7 @@
-import mongoose from "mongoose";
+import mongoose, { disconnect } from "mongoose";
 import Product from "../../model/productSchema.js";
 import Category from "../../model/categorySchema.js";
+import Offer from "../../model/offerSchema.js"
 
 export async function getAllProducts(filters = {}) {
   try {
@@ -89,5 +90,54 @@ export async function getRelatedProducts(category, currentProductId) {
   } catch (error) {
     console.log("Related product error", error);
     throw error;
+  }
+}
+
+export const getBestOfferForProduct = async(product)=>{
+  try {
+    const now = new Date();
+
+    const offers = await Offer.find({
+      isActive:true,
+      startDate:{$lte:now},
+      endDate:{$gte:now},
+      $or:[
+        {offerType:"product",productId:product._id},
+        {offerType:"category",categoryId:product.category}
+      ]
+    });
+
+    if(!offers.length)return null;
+    let bestOffer = null;
+    let maxDiscount =0;
+
+
+    const basePrice = product.variants[0].price;
+
+    for(let offer of offers){
+      let discount =0;
+
+      if(offer.discountType === "percentage"){
+        discount = (basePrice*offer.discountValue)/100;
+      }else{
+        discount = offer.discountValue;
+      }
+
+      if(discount>maxDiscount){
+        maxDiscount = discount;
+        bestOffer = offer;
+      }
+    }
+
+    if(!bestOffer)return null;
+
+    return {
+      offer:bestOffer,
+      discount:maxDiscount,
+      finalPrice:basePrice - maxDiscount
+    };
+  } catch (error) {
+    console.log(error);
+    res.status(500).send("Server Error");
   }
 }
