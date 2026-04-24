@@ -52,8 +52,8 @@ import { addToCart,removeFromCart, syncCartProducts, updateCartQty, validateChec
   const addCartItem = async(req,res)=>{
       try {
         const userId = req.session.userId;
-        const {productId,variantId,qty} = req.body;
-        let cart =  await addToCart(userId,productId,qty,variantId);
+        const {productId,variantId,quantity} = req.body;
+        let cart =  await addToCart(userId,productId,quantity,variantId);
 
         res.json({
           success:true,

@@ -1,9 +1,22 @@
 import { getAllProducts,getProductById,getRelatedProducts,getBestOfferForProduct } from "../../services/user/shopProductService.js";
 import Review from "../../model/reviewSchema.js"
 import Category from "../../model/categorySchema.js";
+import Wishlist from "../../model/wishlistSchema.js"
 
 const getShopPage = async (req, res) => {
   try {
+    const userId = req.session.userId;
+    let wishlistProductIds = [];
+    if(userId){
+      const wishlist = await Wishlist.findOne({userId});
+
+      if(wishlist && wishlist.products){
+        wishlistProductIds = wishlist.products.map(
+          item=> item.productId.toString()
+        );
+      }
+    }
+  
     const page = parseInt(req.query.page)||1;
     const limit =9;
     const skip = (page-1)*limit;
@@ -27,7 +40,8 @@ const getShopPage = async (req, res) => {
       filters,
       categories,
       currentPage:page,
-      totalPages
+      totalPages,
+      wishlistProductIds
     });
 
   } catch (error) {
@@ -55,13 +69,26 @@ const getProductDetailPage = async (req, res) => {
         .populate("userId","name")
         .sort({createdAt:-1});
 
+    const userId = req.session.userId;
+        let isWishlisted = false;
+
+        if(userId){
+          const wishlist = await Wishlist.findOne({userId});
+
+          if (wishlist && Array.isArray(wishlist.products)) {
+        isWishlisted = wishlist.products.some(item =>
+          item.productId.toString() === id.toString()
+       );
+      }
+        }
     const offerData = await getBestOfferForProduct(product)
 
     return res.render("user/productDetail", {
       product,
       reviews,
       relatedProducts,
-      offerData
+      offerData,
+      isWishlisted
     });
 
   } catch (error) {

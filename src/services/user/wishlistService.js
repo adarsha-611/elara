@@ -1,103 +1,93 @@
+
 import mongoose from "mongoose";
 import Wishlist from "../../model/wishlistSchema.js";
 import Product from "../../model/productSchema.js";
 import { addToCart } from "./cartService.js";
 
-export const toggleWishlist = async (userId, productId) => {
-    try {
-        const product = await Product.findById(productId);
-        if (!product) {
-            return { success: false, message: "Product not found" };
+export const toggleWishlist = async (userId, productId, variantId) => {
+    // Validate inputs
+    if (!mongoose.Types.ObjectId.isValid(productId)) {
+        throw new Error("Invalid product ID");
+    }
+
+    const product = await Product.findById(productId);
+    if (!product) {
+        throw new Error("Product not found");
+    }
+
+    // variantId is optional but should be valid ObjectId if provided
+    let validVariantId = null;
+    if (variantId) {
+        if (!mongoose.Types.ObjectId.isValid(variantId)) {
+            throw new Error("Invalid variant ID");
         }
+        validVariantId = variantId;
+    }
 
-        let wishlist = await Wishlist.findOne({ userId });
+    let wishlist = await Wishlist.findOne({ userId });
 
-        if (!wishlist) {
-            wishlist = new Wishlist({
-                userId,
-                products: [{ productId }]
-            });
-            await wishlist.save();
-            return { 
-                success: true, 
-                status: "added", 
-                message: "Added to wishlist" 
-            };
-        }
+    if (!wishlist) {
+        wishlist = new Wishlist({
+            userId,
+            products: [{ 
+                productId: productId, 
+                variantId: validVariantId 
+            }]
+        });
+        await wishlist.save();
+        return { success: true, status: "added", message: "Added to wishlist" };
+    }
 
-        if (!Array.isArray(wishlist.products)) {
-            wishlist.products = [];
-        }
+    // Find if this exact (product + variant) combination exists
+    const index = wishlist.products.findIndex(item => 
+        item.productId.toString() === productId.toString() &&
+        String(item.variantId) === String(validVariantId)   // handles null/undefined safely
+    );
 
-        const existingIndex = wishlist.products.findIndex(item => 
-            item && item.productId && item.productId.toString() === productId.toString()
-        );
-
-        if (existingIndex !== -1) {
-         
-            wishlist.products.splice(existingIndex, 1);
-            await wishlist.save();
-            return { 
-                success: true, 
-                status: "removed", 
-                message: "Removed from wishlist" 
-            };
-        } else {
-          
-            wishlist.products.push({ productId });
-            await wishlist.save();
-            return { 
-                success: true, 
-                status: "added", 
-                message: "Added to wishlist" 
-            };
-        }
-    } catch (error) {
-        console.error("Toggle Wishlist Error:", error);
-        return { 
-            success: false, 
-            message: "Server error while updating wishlist" 
-        };
+    if (index !== -1) {
+        // Remove from wishlist
+        wishlist.products.splice(index, 1);
+        await wishlist.save();
+        return { success: true, status: "removed", message: "Removed from wishlist" };
+    } else {
+        // Add to wishlist
+        wishlist.products.push({ 
+            productId: productId, 
+            variantId: validVariantId 
+        });
+        await wishlist.save();
+        return { success: true, status: "added", message: "Added to wishlist" };
     }
 };
 
-export const moveToCartFromWishlist = async (userId, productId) => {
-    try {
-        const product = await Product.findById(productId);
-        if (!product) {
-            throw new Error("Product not found");
-        }
+export const moveToCartFromWishlist = async (userId, productId, variantId) => {
 
-        if (!product.variants || product.variants.length === 0) {
-            throw new Error("No variants available for this product");
-        }
+//     console.log("SERVICE:", {
+//     productId,
+//     variantId,
+//     variants: product.variants.map(v => v._id.toString())
+// });
+    const product = await Product.findById(productId);
+    if (!product) throw new Error("Product not found");
 
-        
-        let selectedVariant = product.variants.find(v => v && v.stock > 0);
-        
-        if (!selectedVariant) {
-            selectedVariant = product.variants[0];   
-        }
+    const variant = product.variants.id(variantId);
+    if (!variant) throw new Error("Variant not found");
 
-        if (!selectedVariant || !selectedVariant._id) {
-            throw new Error("Invalid variant");
-        }
-
-
-       await addToCart(userId, productId, 1, selectedVariant._id);;
-
-        const wishlist = await Wishlist.findOne({ userId });
-        if (wishlist && Array.isArray(wishlist.products)) {
-            wishlist.products = wishlist.products.filter(item => 
-                item && item.productId && item.productId.toString() !== productId.toString()
-            );
-            await wishlist.save();
-        }
-
-        return { success: true, message: "Product moved to cart successfully" };
-
-    } catch (error) {
-        console.error("Move to Cart From Wishlist Error:", error.message);
-        throw error;
+    if (variant.stock <= 0) {
+        throw new Error("Out of stock"); 
     }
+
+    await addToCart(userId, productId, 1, variantId);
+
+    const wishlist = await Wishlist.findOne({ userId });
+
+    if (wishlist) {
+        wishlist.products = wishlist.products.filter(item =>
+            !(item.productId.toString() === productId &&
+              item.variantId && item.variantId.toString() === variantId)
+        );
+        await wishlist.save();
+    }
+
+    return { success: true };
 };

@@ -1,6 +1,8 @@
 
 export function isLoggedIn(req, res, next) {
 
+   
+
     res.set("Cache-Control", "no-store");
 
     if (req.session.userId) {
@@ -10,7 +12,6 @@ export function isLoggedIn(req, res, next) {
 
     return res.redirect("/login");
 }
-
 
 
 export function redirectIfAuthenticated(req, res, next) {

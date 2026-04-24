@@ -349,8 +349,14 @@
                                 <a href="/productDetail/<%= product._id %>">
                                     <img src="<%= displayVariant && displayVariant.images.length > 0 ? displayVariant.images[0] : '/images/default.png' %>" alt="<%= product.name %>">
                                 </a>
-                                <i class="fa-regular fa-heart wishlist-icon" data-product-id="<%= product._id %>"></i>
-                            </div>
+        <i class="wishlist-icon 
+   <%= wishlistProductIds.includes(product._id.toString()) ? 'fa-solid' : 'fa-regular' %> 
+   fa-heart"
+   data-product-id="<%= product._id %>"
+   data-variant-id="<%= displayVariant?._id %>"   
+   style="<%= wishlistProductIds.includes(product._id.toString()) ? 'color:#e74c3c' : '' %>">
+</i>                          
+         </div>
 
                             <div class="product-info">
                                 <h4><a href="/productDetail/<%= product._id %>"><%= product.name %></a></h4>
@@ -451,10 +457,12 @@
             element.addEventListener('click', async function(e) {
                 e.preventDefault();
                 const productId = this.dataset.productId;
+                const variantId = this.dataset.variantId; 
                 try {
                     const response = await fetch(`/wishlist/toggle/${productId}`, {
                         method: 'POST',
-                        headers: { 'Content-Type': 'application/json' }
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ variantId }) 
                     });
                     const data = await response.json();
                     if (data.success) {

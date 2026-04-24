@@ -46,13 +46,15 @@ export const addToCart = async(userId,productId,qty,variantId)=>{
   }
 
   const variant = product.variants.id(variantId);
+
+console.log(" Variant stock:", variant.stock, "Type:", typeof variant.stock);
   if(!variant){
     throw new Error("Variant not found");
   }
 
-  if(variant.stock ===0){
-    throw new Error("Out Of Stock");
-  }
+  if (!variant.stock || variant.stock <= 0) {
+  throw new Error("Product is out of stock");
+}
 
   if(variant.stock < qty){
     throw new Error(`Only ${variant.stock} items available`);

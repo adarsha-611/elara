@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Wishlist | ELARA</title>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600&family=Plus+Jakarta+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
     <style>
         :root {
             --bg-color: #FDFBF9;
@@ -144,7 +145,7 @@
         /* Product Info Styling */
         .product-info {
             padding: 20px 0;
-            text-align: left; /* Left align for a cleaner modern look */
+            text-align: left; 
         }
 
         .product-info h3 {
@@ -196,7 +197,6 @@
             margin-bottom: 15px;
         }
 
-        /* Toast Notifications */
         .toast {
             position: fixed;
             bottom: 40px;
@@ -260,38 +260,54 @@
         </div>
     </div>
 
-    <section class="product-grid">
-        <% if (!wishlistItems || wishlistItems.length === 0) { %>
+<section class="product-grid" id="wishlistGrid">
+            <% if (!wishlistItems || wishlistItems.length === 0) { %>
             <div class="empty-wishlist">
-                <h2>Your sanctuary is empty</h2>
+                <h2>Your Wishlist is empty</h2>
                 <p style="color: #8b6f5f; margin-bottom: 35px; font-size: 14px;">Select your favorite pieces to keep them here.</p>
                 <a href="/shop" style="border: 1px solid var(--text-dark); color: var(--text-dark); padding: 15px 40px; text-decoration: none; text-transform: uppercase; font-size: 11px; letter-spacing: 2px; font-weight: 600;">
                     Go to Shop
                 </a>
             </div>
         <% } else { %>
-            <% wishlistItems.forEach(product => { %>
-                <div class="product-card">
-                    <div class="img-container">
-                        <% 
-                        let imageSrc = '/images/placeholder.jpg';
-                        if (product.variants?.[0]?.images?.[0]) {
-                            imageSrc = product.variants[0].images[0];
-                        } else if (product.images?.[0]) {
-                            imageSrc = product.images[0];
-                        }
-                        %>
-                        <img src="<%= imageSrc %>" alt="<%= product.name %>" onerror="this.src='/images/placeholder.jpg'">
-                        <button class="wishlist-btn" data-id="<%= product._id %>" aria-label="Remove from wishlist">
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+<% wishlistItems.forEach(item => { 
+    const product = item.product;
+    if (!product) return;
+%>             <div class="product-card">
+    <a href="/productDetail/<%= product._id %>">
+        <div class="img-container">
+    <%
+let imageSrc = '/images/placeholder.jpg';
+
+if (item.variantData && item.variantData.images?.length > 0) {
+    imageSrc = item.variantData.images[0];
+} else if (product?.variants?.[0]?.images?.length > 0) {
+    imageSrc = product.variants[0].images[0];
+}
+%>
+                        <img src="<%= imageSrc %>" alt="<%= product?.name || 'Product' %>" onerror="this.src='/images/placeholder.jpg'">
+<button 
+  class="wishlist-btn" 
+  data-id="<%= product._id %>" 
+  data-variant="<%= item.variantId || '' %>"
+>                            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
                         </button>
                     </div>
 
                     <div class="product-info">
                         <h3><%= product.name %></h3>
-                        <p class="price">₹ <%= product.price || (product.variants?.[0]?.price || 'N/A') %></p>
-                        <button type="button" class="add-to-cart" onclick="addToCartFromWishlist('<%= product._id %>', this)">
-                            Add to cart
+<p class="price">
+₹ <%= 
+    item.variantData?.price || 
+    product?.variants?.[0]?.price || 
+    'N/A' 
+%></p>                        
+<button 
+    type="button" 
+    class="add-to-cart"
+    data-variant="<%= item.variantId %>"
+    onclick="addToCartFromWishlist('<%= product._id %>', '<%= item.variantId %>', this)"
+>                            Add to cart
                         </button>
                     </div>
                 </div>
@@ -313,10 +329,130 @@
     </div>
     <% } %>
 </main>
+    <%- include('../partials/footer') %>
 
 <script>
-    // ... [Your existing addToCartFromWishlist and showToast scripts go here] ...
-    // Note: I updated showToast class in the JS to match the new bottom-right positioning.
+document.addEventListener("DOMContentLoaded", () => {
+
+    console.log("JS loaded");
+
+  document.querySelectorAll(".wishlist-btn").forEach(btn => {
+    btn.addEventListener("click", async function (e) {
+        e.stopPropagation();
+
+        const productId = this.dataset.id;
+        const card = this.closest(".product-card");
+
+        // 👇 get variantId from button
+const variantId = this.dataset.variant || null;
+ console.log("CLICK:", {
+        productId,
+        variantId
+    });
+        try {
+    const res = await fetch(`/wishlist/toggle/${productId}`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ variantId })
+    });
+
+    const data = await res.json();
+
+    if (data.success) {
+
+        if (data.status === "added") {
+            showToast("Added to wishlist");
+            btn.classList.add("active");
+        } 
+        else if (data.status === "removed") {
+            showToast("Removed from wishlist");
+            btn.classList.remove("active");
+            card.remove();
+        }
+
+        const remaining = document.querySelectorAll(".product-card");
+        if (remaining.length === 0) {
+            showEmptyWishlist();
+        }
+
+    } else {
+        showToast(data.message || "Error", "error");
+    }
+
+} catch (err) {
+    console.error(err);
+    showToast("Server error", "error");
+}
+    });
+});
+
+});
+
+async function addToCartFromWishlist(productId, variantId, btn) {
+    console.log("ADD TO CART:", {
+    productId,
+    variantId
+});
+    const res = await fetch(`/wishlist/addtocart/${productId}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ variantId })   
+    });
+
+    const data = await res.json();
+
+    if (data.success) {
+        showToast("Added to cart");
+        btn.closest(".product-card").remove();
+    } else {
+        showToast(data.message, "error");
+    }
+}
+function showEmptyWishlist() {
+    const grid = document.getElementById("wishlistGrid");
+
+    grid.innerHTML = `
+        <div class="empty-wishlist">
+            <h2>Your Wishlist is empty</h2>
+            <p style="color: #8b6f5f; margin-bottom: 35px; font-size: 14px;">
+                Select your favorite pieces to keep them here.
+            </p>
+            <a href="/shop" style="
+                border: 1px solid #3D2B24;
+                color: #3D2B24;
+                padding: 15px 40px;
+                text-decoration: none;
+                text-transform: uppercase;
+                font-size: 11px;
+                letter-spacing: 2px;
+                font-weight: 600;">
+                Go to Shop
+            </a>
+        </div>
+    `;
+}
+
+function showToast(message, type = "success") {
+    const toast = document.createElement("div");
+    toast.textContent = message;
+
+    Object.assign(toast.style, {
+        position: "fixed",
+        top: "40px",
+        right: "40px",
+        background: "#3D2B24",
+        color: "#fff",
+        padding: "12px 20px",
+        borderRadius: "5px",
+        zIndex: "9999"
+    });
+
+    document.body.appendChild(toast);
+
+    setTimeout(() => toast.remove(), 2500);
+}
 </script>
 
 </body>

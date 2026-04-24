@@ -499,16 +499,17 @@
             <div class="action-buttons">
             <button 
     class="btn-primary" 
-    onclick="addToCart('<%= product._id %>', getSelectedVariant())">
+   onclick="addToCart('<%= product._id %>', getSelectedVariant(), 1)"">
     Add to Cart
 </button>
 
 <button 
     type="button"
-    class="btn-wishlist" 
+    class="btn-wishlist <%= isWishlisted ? 'active' : '' %>"
     data-product-id="<%= product._id %>">
-    ♡
-</button>            </div>
+    <span class="heart-icon"><%= isWishlisted ? '♥' : '♡' %></span>
+</button>         
+</div>
         </div>
     </section>
 
@@ -637,36 +638,22 @@ function getSelectedVariant() {
 }
 
 // ---------- ADD TO CART FUNCTION ----------
-async function addToCart(productId, variantId = null) {
-  try {
+async function addToCartFromWishlist(productId, variantId, btn) {
 
-    const qtyInput = document.querySelector(".qty-input");
-    const qty = qtyInput ? parseInt(qtyInput.value) : 1;
-
-    const res = await fetch("/cart/add", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        productId,
-        qty,
-        variantId
-      })
+    const res = await fetch(`/wishlist/addtocart/${productId}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ variantId })  
     });
 
     const data = await res.json();
 
     if (data.success) {
-      showToast("Product added to cart 🛒");
+        showToast("Added to cart");
+        btn.closest(".product-card").remove();
     } else {
-      showToast(data.message || "Failed to add product", "error");
+        showToast(data.message, "error");
     }
-
-  } catch (error) {
-    console.error(error);
-    showToast("Server Error", "error");
-  }
 }
 
 </script>
@@ -677,6 +664,27 @@ const colorSelect = document.getElementById("colorSelect");
 const priceEl = document.getElementById("price");
 const stockStatus = document.getElementById("stock-status");
 
+async function addToCart(productId, variantId, quantity = 1) {
+    try {
+        const res = await fetch("/cart/add", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ productId, variantId, quantity }) // ✅ FIX
+        });
+
+        const data = await res.json();
+
+        if (data.success) {
+            showToast("Added to cart");
+        } else {
+            showToast(data.message || "Failed", "error");
+        }
+
+    } catch (err) {
+        console.error(err);
+        showToast("Error", "error");
+    }
+}
 // ---------- Function to change subimage ----------
 function changeImage(src, thumb) {
     currentImg.src = src;
@@ -766,53 +774,46 @@ setInterval(checkProductAvailability, 5000);
 </script>
 <script>
 document.addEventListener('DOMContentLoaded', () => {
+document.querySelectorAll('.btn-wishlist').forEach(btn => {
+    btn.addEventListener('click', async function(e) {
+        e.preventDefault();
 
-    document.querySelectorAll('.btn-wishlist').forEach(btn => {
-        btn.addEventListener('click', async function(e) {
-            e.preventDefault();
-            e.stopImmediatePropagation();
+        const productId = this.dataset.productId;
 
-            const productId = this.dataset.productId;
-            if (!productId) {
-                showToast("Product ID missing", "error");
-                return;
-            }
+        // ✅ ALWAYS get current selected variant
+        const variantId = getSelectedVariant();
 
-            console.log("🔄 Toggling wishlist for:", productId);
+        console.log("Wishlist:", { productId, variantId });
 
-            try {
-                const response = await fetch(`/wishlist/toggle/${productId}`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' }
-                });
+        try {
+            const response = await fetch(`/wishlist/toggle/${productId}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ variantId })   // ✅ FIX
+            });
 
-                console.log("Status:", response.status);
+            const data = await response.json();
 
-                const data = await response.json();   // This line was failing before
-                console.log("Server returned:", data);
-
-                if (data.success) {
-                    if (data.status === "added") {
-                        this.classList.add('active');
-                        this.style.color = '#e74c3c';
-                        this.innerHTML = '♥';
-                        showToast("Added to wishlist ❤️");
-                    } else if (data.status === "removed") {
-                        this.classList.remove('active');
-                        this.style.color = '';
-                        this.innerHTML = '♡';
-                        showToast("Removed from wishlist");
-                    }
+            if (data.success) {
+                if (data.status === "added") {
+                    this.classList.add('active');
+                    this.querySelector(".heart-icon").innerHTML = '♥';
+                    showToast("Added to wishlist");
                 } else {
-                    showToast(data.message || "Failed to update wishlist", "error");
+                    this.classList.remove('active');
+                    this.querySelector(".heart-icon").innerHTML = '♡';
+                    showToast("Removed from wishlist");
                 }
-
-            } catch (err) {
-                console.error("Full Error:", err);
-                showToast("Failed to update wishlist - Check console", "error");
+            } else {
+                showToast(data.message || "Error", "error");
             }
-        });
+
+        } catch (err) {
+            console.error(err);
+            showToast("Server error", "error");
+        }
     });
+});
 });
 </script>
 
