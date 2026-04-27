@@ -13,6 +13,10 @@ const cartItemSchema = new mongoose.Schema({
   quantity:{
     type:Number,
     default:1,
+  },
+   offerPrice:{          
+    type: Number,
+    default: null
   }
 });
 

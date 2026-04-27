@@ -50,24 +50,23 @@ const checkaddAddress = async (req, res) => {
       isDefault: req.body.isDefault === "on" || req.body.isDefault === true
     };
 
-    
     const { error, value } = validateAddress(addressData);
 
     if (error) {
-      const message = error.details.map(err => err.message).join(", ");
-      req.flash("error", message);
-      return res.redirect("/checkout");
+      const errors = error.details.map(err => ({
+        field: err.path[0],
+        message: err.message
+      }));
+
+      return res.json({ success: false, errors });
     }
 
-   
     await addUserAddress(req.session.userId, value);
 
-    req.flash("success", "Address added");
-    res.redirect("/checkout");
+    return res.json({ success: true });
 
   } catch (err) {
-    req.flash("error", err.message);
-    res.redirect("/checkout");
+    return res.json({ success: false, message: err.message });
   }
 };
 
@@ -76,9 +75,12 @@ const checkeditAddress = async (req, res) => {
     const { error, value } = validateAddress(req.body);
 
     if (error) {
-      const message = error.details.map(err => err.message).join(", ");
-      req.flash("error", message);
-      return res.redirect("/checkout");
+      const errors = error.details.map(err => ({
+        field: err.path[0],
+        message: err.message
+      }));
+
+      return res.json({ success: false, errors });
     }
 
     await editUserAddress(
@@ -87,12 +89,10 @@ const checkeditAddress = async (req, res) => {
       value
     );
 
-    req.flash("success", "Address updated");
-    res.redirect("/checkout");
+    return res.json({ success: true });
 
   } catch (err) {
-    req.flash("error", err.message);
-    res.redirect("/checkout");
+    return res.json({ success: false, message: err.message });
   }
 };
 

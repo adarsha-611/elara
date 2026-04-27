@@ -921,7 +921,7 @@
 
         async function openEditModal(addressId) {
             try {
-                const response = await fetch(`/profile/address/get/${addressId}`);
+                const response = await fetch(`/checkout/address/get/${addressId}`);
                 const data = await response.json();
                 if (data.success) {
                     currentFormMode = 'edit';
@@ -966,7 +966,7 @@
             if (result.isConfirmed) {
                 Swal.fire({ title: 'Deleting...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
                 try {
-                    const response = await fetch(`/profile/address/delete/${addressId}`, {
+                    const response = await fetch(`/checkout/address/delete/${addressId}`, {
                         method: 'GET',
                         headers: { 'X-Requested-With': 'XMLHttpRequest' }
                     });
@@ -1002,7 +1002,7 @@
             submitBtn.disabled = true;
             
             try {
-                const url = currentFormMode === 'add' ? '/profile/address/add' : '/profile/address/edit';
+const url = currentFormMode === 'add' ? '/checkout/address/add' : '/checkout/address/edit';
                 const response = await fetch(url, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
@@ -1230,6 +1230,8 @@ rzp.open();
                 Swal.fire("Error", "Something went wrong while initiating payment", "error");
             }
         }
+
+        
     </script>
 </body>
 </html>

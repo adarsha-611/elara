@@ -96,7 +96,7 @@ const cancelOrder = async (req, res) => {
     const { orderId, itemId } = req.params;
     const { reason } = req.body;
 
-    await cancelOrderService(orderId, itemId, reason);
+   const result = await cancelOrderService(orderId, itemId, reason);
 
     return res.status(200).json({
       success: true,
@@ -112,6 +112,39 @@ const cancelOrder = async (req, res) => {
     });
   }
 };
+
+
+const cancelAllItems = async (req, res) => {
+  try {
+    const { orderId } = req.params;
+    const { reason } = req.body;
+    const order = await Order.findById(orderId);
+    if (!order) return res.status(404).json({ success: false, message: "Order not found" });
+
+    const cancellableItems = order.items.filter(
+      i => !["cancelled", "delivered"].includes(i.itemStatus)
+    );
+
+    if (!cancellableItems.length)
+      return res.status(400).json({ success: false, message: "No items to cancel" });
+
+    let totalRefund = 0;
+    for (const item of cancellableItems) {
+      const result = await cancelOrderService(orderId, item._id.toString(), reason);
+      if (result.refundDone) totalRefund += result.refundAmount;
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: totalRefund > 0
+        ? `All items cancelled & ₹${totalRefund} refunded to wallet`
+        : "All items cancelled successfully"
+    });
+  } catch (err) {
+    return res.status(500).json({ success: false, message: err.message });
+  }
+};
+
 
 const addReviewController = async(req,res)=>{
     try {
@@ -553,6 +586,7 @@ export default{
     returnOrder,
     cancelOrder,
     downloadInvoice,
-    addReviewController
+    addReviewController,
+    cancelAllItems
     
 }

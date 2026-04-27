@@ -1,26 +1,32 @@
+import Order from "../../model/orderSchema.js";
 import { placeOrderService } from "../../services/user/checkoutService.js";
-import { createRazorpayOrder,verifyPayment } from "../../services/user/paymentService.js";
+import { createRazorpayOrder, verifyPayment } from "../../services/user/paymentService.js";
 
 const createOrder = async (req, res) => {
   try {
-    const { amount } = req.body;
+    const { amount, addressId } = req.body;
+    const userId = req.session.userId;
+
+    const order = await placeOrderService(userId, addressId, "online", "pending");
 
     const razorpayOrder = await createRazorpayOrder(amount);
 
-    res.json({
+    return res.json({
       success: true,
-      razorpayOrder
+      razorpayOrder,
+      orderId: order._id  
     });
 
   } catch (error) {
     console.error("RAZORPAY ERROR:", error);
-
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
-      message: "Razorpay order creation failed"
+      message: error.message || "Razorpay order creation failed"
     });
   }
 };
+
+// paymentController.js
 
 const verifyPaymentController = async (req, res) => {
   try {
@@ -28,11 +34,8 @@ const verifyPaymentController = async (req, res) => {
       razorpay_order_id,
       razorpay_payment_id,
       razorpay_signature,
-      addressId,
-      paymentMethod
+      orderId           // ← the MongoDB _id from createOrder response
     } = req.body;
-
-    const userId = req.session.userId;
 
     const isValid = verifyPayment({
       order_id: razorpay_order_id,
@@ -41,17 +44,27 @@ const verifyPaymentController = async (req, res) => {
     });
 
     if (!isValid) {
+      // Mark the existing order as failed
+      await Order.findByIdAndUpdate(orderId, {
+        paymentStatus: "failed",
+        paymentId: razorpay_payment_id || null
+      });
+
       return res.status(400).json({
         success: false,
-        message: "Payment verification failed"
+        message: "Payment verification failed",
+        orderId  // send back so frontend can redirect
       });
     }
 
-    const order = await placeOrderService(
-      userId,
-      addressId,
-      "online",
-      "paid"
+    // Update the existing order to paid — don't create a new one
+    const order = await Order.findByIdAndUpdate(
+      orderId,
+      {
+        paymentStatus: "paid",
+        paymentId: razorpay_payment_id
+      },
+      { new: true }
     );
 
     return res.json({
@@ -61,7 +74,6 @@ const verifyPaymentController = async (req, res) => {
 
   } catch (error) {
     console.error("VERIFY ERROR:", error);
-
     return res.status(500).json({
       success: false,
       message: "Payment verification failed"
@@ -73,8 +85,13 @@ const paymentFailedPage = async (req, res) => {
   try {
     const { orderId } = req.params;
 
+    const order = await Order.findById(orderId); // ← fetch order from DB
+
+    if (!order) return res.redirect("/shop");
+
     return res.render("user/paymentFail", {
-      orderId
+      orderId: order._id,
+      order          // ← pass order to EJS
     });
 
   } catch (error) {
@@ -112,6 +129,7 @@ const retryPayment = async (req, res) => {
     });
   }
 };
+
 export default{
     createOrder,
     verifyPaymentController,

@@ -20,6 +20,7 @@ router.get('/about',homeController.getAboutPage);
 router.get('/shop',shopController.getShopPage)
 router.get('/productDetail/:id', shopController.getProductDetailPage)
 router.get("/product-status/:id",shopController.checkProductStatus);
+router.get("/variant-offer/:productId/:variantId",shopController.getVariantOffer)
 
 //Cart
 router.get('/cart', isLoggedIn, cartController.getCartPage);
@@ -45,6 +46,7 @@ router.post("/create-order",isLoggedIn,paymentController.createOrder);
 router.post("/verify-payment",isLoggedIn,paymentController.verifyPaymentController);
 router.post("/retry-payment/:orderId", paymentController.retryPayment);
 router.get("/payment-failed/:orderId", paymentController.paymentFailedPage);
+
 
 //Wishlist
 router.get('/wishlist', isLoggedIn, wishlistController.getWishlist);

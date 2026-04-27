@@ -386,41 +386,59 @@
     <div class="divider" role="separator"></div>
 
     <!-- Order Details -->
-    <div class="order-box" aria-label="Order summary">
-      <div class="order-box-title">Order Summary</div>
+    <!-- Order Details — replace the entire order-box div -->
+<div class="order-box" aria-label="Order summary">
+  <div class="order-box-title">Order Summary</div>
 
-      <div class="order-row">
-        <span class="order-label">Order ID</span>
-        <span class="order-value">#ELR-20847</span>
-      </div>
-      <div class="order-divider"></div>
+  <div class="order-row">
+    <span class="order-label">Order ID</span>
+    <span class="order-value">#<%= order.orderId %></span>
+  </div>
+  <div class="order-divider"></div>
 
-      <div class="order-row">
-        <span class="order-label">Item</span>
-        <span class="order-value">Sapphire Pendant — Gold</span>
-      </div>
-      <div class="order-divider"></div>
+  <div class="order-row">
+    <span class="order-label">Items</span>
+    <span class="order-value">
+      <%= order.items.map(i => i.productName).join(', ') %>
+    </span>
+  </div>
+  <div class="order-divider"></div>
 
-      <div class="order-row">
-        <span class="order-label">Amount</span>
-        <span class="order-value amount">₹ 24,500.00</span>
-      </div>
-      <div class="order-divider"></div>
+  <div class="order-row">
+    <span class="order-label">Amount</span>
+    <span class="order-value amount">₹ <%= order.totalAmount.toLocaleString('en-IN') %></span>
+  </div>
+  <div class="order-divider"></div>
 
-      <div class="order-row">
-        <span class="order-label">Status</span>
-        <span class="status-badge">
-          <span class="status-dot" aria-hidden="true"></span>
-          Not charged
-        </span>
-      </div>
-    </div>
+  <div class="order-row">
+    <span class="order-label">Date</span>
+    <span class="order-value">
+      <%= new Date(order.createdAt).toLocaleDateString('en-IN', { year:'numeric', month:'long', day:'numeric' }) %>
+    </span>
+  </div>
+  <div class="order-divider"></div>
+
+  <div class="order-row">
+    <span class="order-label">Status</span>
+    <span class="status-badge">
+      <span class="status-dot" aria-hidden="true"></span>
+      Not charged
+    </span>
+  </div>
+</div>
+
+<!-- Buttons — fix the Back to Cart link -->
+<div class="btn-group">
+  <button class="btn btn-primary" id="retryBtn" onclick="handleRetry()">
+    Try Again
+  </button>
+  <button class="btn btn-secondary" onclick="window.location.href='/profile/orders/<%= order._id %>'">
+    View My Orders
+  </button>
+</div>
 
     <!-- Action Buttons -->
     <div class="btn-group">
-      <button class="btn btn-primary" id="retryBtn" onclick="handleRetry()">
-        Try Again
-      </button>
       <button class="btn btn-secondary" onclick="window.location.href='#cart'">
         Back to Cart
       </button>
@@ -441,24 +459,77 @@
 
   <!-- Footer -->
   <p class="footer-brand">Elara Jewellery &mdash; Est. 2009</p>
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<script>
+  const orderId = "<%= orderId %>";
+  const razorpayKey = "<%= process.env.RAZORPAY_KEY_ID %>";  
 
-  <script>
-    function handleRetry() {
-      const btn = document.getElementById('retryBtn');
-      const original = btn.textContent;
-      btn.textContent = 'Retrying…';
-      btn.disabled = true;
-      btn.style.opacity = '0.75';
-      btn.style.cursor = 'not-allowed';
+  async function handleRetry() {
+    const btn = document.getElementById('retryBtn');
+    btn.textContent = 'Please wait…';
+    btn.disabled = true;
+    btn.style.opacity = '0.75';
 
-      setTimeout(() => {
-        btn.textContent = original;
+    try {
+      const res = await fetch(`/retry-payment/${orderId}`, { method: "POST" });
+      const data = await res.json();
+
+      if (!data.success) {
+        alert(data.message || "Retry failed");
+        btn.textContent = 'Try Again';
         btn.disabled = false;
         btn.style.opacity = '1';
-        btn.style.cursor = 'pointer';
-      }, 2000);
+        return;
+      }
+
+      const options = {
+        key: razorpayKey,
+        amount: data.razorpayOrder.amount,
+        currency: "INR",
+        order_id: data.razorpayOrder.id,
+        name: "ELARA Luxury Jewelry",
+        description: "Retry Payment",
+        handler: async function (response) {
+          const verifyRes = await fetch("/verify-payment", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              razorpay_order_id: response.razorpay_order_id,
+              razorpay_payment_id: response.razorpay_payment_id,
+              razorpay_signature: response.razorpay_signature,
+              orderId: data.orderId
+            })
+          });
+
+          const verifyData = await verifyRes.json();
+
+          if (verifyData.success) {
+            window.location.href = `/order-success/${data.orderId}`;
+          } else {
+            window.location.href = `/payment-failed/${data.orderId}`;
+          }
+        },
+        theme: { color: "#a3866a" }
+      };
+
+      const rzp = new Razorpay(options);
+
+      rzp.on("payment.failed", function () {
+        window.location.href = `/payment-failed/${data.orderId}`;
+      });
+
+      rzp.open();
+
+    } catch (err) {
+      console.error(err);
+      alert("Something went wrong. Please try again.");
+    } finally {
+      btn.textContent = 'Try Again';
+      btn.disabled = false;
+      btn.style.opacity = '1';
     }
-  </script>
+  }
+</script>
 
 </body>
 </html>

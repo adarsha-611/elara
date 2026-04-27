@@ -356,6 +356,13 @@ nav a {
         <%= successMessage %>
     </div>
 <% } %>
+
+<% if (offerChangedMessage) { %>
+  <div id="offerToast" class="toast-success" style="background-color: #dc2626;">
+     <%= offerChangedMessage %>
+  </div>
+<% } %>
+
 <div id="cartToast" class="toast-success"></div>
     <main class="container">
         <h2 class="page-title">Shopping Cart</h2>
@@ -599,6 +606,15 @@ if (toast) {
   }, 3000);
 }
 
+
+const offerToast = document.getElementById("offerToast");
+if (offerToast) {
+  offerToast.classList.add("show");
+  setTimeout(() => {
+    offerToast.classList.remove("show");
+  }, 5000);
+}
+
 /* ---------------- INITIAL LOAD ---------------- */
 
 updateSubtotal();
@@ -637,6 +653,8 @@ function confirmRemove(productId,variantId){
     }
   })
 }
+
+
 </script>
 
 </body>

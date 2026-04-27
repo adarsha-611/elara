@@ -18,48 +18,39 @@ export async function findUserDataByEmail(email) {
 }
 
 export async function createUser(userData) {
-  try {
-    const { fullName, referralCodeUsed } = userData;
+    try {
+        const { fullName, referralCodeUsed } = userData;
 
-    
-    const referralCode = await generateReferralCode(fullName);
+        const referralCode = await generateReferralCode(fullName);
 
-    let referredUser = null;
+        let referredUser = null;
+        if (referralCodeUsed) {
+            referredUser = await findUserByreferralCode(referralCodeUsed);
+        }
 
-   
-    if (referralCodeUsed) {
-      referredUser = await findUserByreferralCode(referralCodeUsed);
+        const user = new User({
+            ...userData,
+            referralCode,
+            referredBy: referredUser ? referredUser._id : null,
+            walletBalance: referredUser ? 100 : 0
+        });
+
+        const savedUser = await user.save();
+
+        if (referredUser) {
+            referredUser.walletBalance += 200;
+            await referredUser.save();
+        }
+
+        return savedUser;
+
+    } catch (error) {
+        if (error.code === 11000) {
+            const field = Object.keys(error.keyValue)[0];
+            throw new Error(`${field} already exists`);
+        }
+        throw error;
     }
-
-    
-    const user = new User({
-      ...userData,
-      referralCode,
-      referredBy: referredUser ? referredUser._id : null
-    });
-
-    const savedUser = await user.save();
-
-    
-    if (referredUser) {
-      referredUser.walletBalance += 300;
-      savedUser.walletBalance += 300;
-
-      await referredUser.save();
-      await savedUser.save();
-    }
-
-    return savedUser;
-
-  } catch (error) {
-
-    if (error.code === 11000) {
-      const field = Object.keys(error.keyValue)[0];
-      throw new Error(`${field} already exists`);
-    }
-
-    throw error;
-  }
 }
 
 export async function getUserById(userId){

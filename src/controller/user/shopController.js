@@ -7,19 +7,20 @@ const getShopPage = async (req, res) => {
   try {
     const userId = req.session.userId;
     let wishlistProductIds = [];
-    if(userId){
-      const wishlist = await Wishlist.findOne({userId});
 
-      if(wishlist && wishlist.products){
+    if (userId) {
+      const wishlist = await Wishlist.findOne({ userId });
+
+      if (wishlist && wishlist.products) {
         wishlistProductIds = wishlist.products.map(
-          item=> item.productId.toString()
+          item => item.productId.toString()
         );
       }
     }
-  
-    const page = parseInt(req.query.page)||1;
-    const limit =9;
-    const skip = (page-1)*limit;
+
+    const page = parseInt(req.query.page) || 1;
+    const limit = 9;
+    const skip = (page - 1) * limit;
 
     const filters = {
       search: req.query.search || "",
@@ -29,17 +30,29 @@ const getShopPage = async (req, res) => {
     };
 
     const products = await getAllProducts(filters);
+
+    const productsWithOffers = await Promise.all(
+      products.map(async (product) => {
+        const offerData = await getBestOfferForProduct(product);
+
+        return {
+          ...product.toObject(),
+          offerData
+        };
+      })
+    );
+
     const categories = await Category.find({ isActive: true });
 
-    const totalProducts = products.length;
-    const totalPages = Math.ceil(totalProducts/limit);
-    const paginatedProducts = products.slice(skip,skip+limit);
+    const totalProducts = productsWithOffers.length;
+    const totalPages = Math.ceil(totalProducts / limit);
+    const paginatedProducts = productsWithOffers.slice(skip, skip + limit);
 
     return res.render("user/shop", {
-      products:paginatedProducts,
+      products: paginatedProducts,
       filters,
       categories,
-      currentPage:page,
+      currentPage: page,
       totalPages,
       wishlistProductIds
     });
@@ -81,7 +94,9 @@ const getProductDetailPage = async (req, res) => {
        );
       }
         }
-    const offerData = await getBestOfferForProduct(product)
+    
+    // Pass the first variant price to get initial offer
+    const offerData = await getBestOfferForProduct(product, product.variants[0].price);
 
     return res.render("user/productDetail", {
       product,
@@ -111,15 +126,66 @@ const checkProductStatus = async(req,res)=>{
   }
 }
 
-
-
-
-
-
-
-
+// NEW API endpoint to get offer for specific variant
+const getVariantOffer = async (req, res) => {
+  try {
+    console.log("\n=== GET VARIANT OFFER CALLED ===");
+    console.log("Request params:", req.params);
+    
+    const { productId, variantId } = req.params;
+    console.log("Product ID:", productId);
+    console.log("Variant ID:", variantId);
+    
+    const product = await getProductById(productId);
+    
+    if (!product) {
+      console.log("❌ Product not found!");
+      return res.status(404).json({ success: false, message: "Product not found" });
+    }
+    
+    console.log("✅ Product found:", product.name);
+    console.log("Product category:", product.category);
+    console.log("Total variants:", product.variants.length);
+    
+    const variant = product.variants.id(variantId);
+    
+    if (!variant) {
+      console.log("❌ Variant not found!");
+      console.log("Available variant IDs:", product.variants.map(v => v._id.toString()));
+      return res.status(404).json({ success: false, message: "Variant not found" });
+    }
+    
+    console.log("✅ Variant found:", variant.color);
+    console.log("Variant price:", variant.price);
+    
+    console.log("\n--- Fetching offers from database ---");
+    const offerData = await getBestOfferForProduct(product, variant.price);
+    
+    console.log("\n--- Offer result ---");
+    console.log("Offer data:", JSON.stringify(offerData, null, 2));
+    
+    const response = {
+      success: true,
+      offerData,
+      variantPrice: variant.price,
+      variantStock: variant.stock,
+      variantImages: variant.images
+    };
+    
+    console.log("\n--- Sending response ---");
+    console.log("Response:", JSON.stringify(response, null, 2));
+    
+    return res.json(response);
+    
+  } catch (error) {
+    console.log("❌ Get Variant Offer Error:", error);
+    console.log("Error stack:", error.stack);
+    return res.status(500).json({ success: false, message: "Server Error", error: error.message });
+  }
+};
 export default {
   getShopPage,
   getProductDetailPage,
-  checkProductStatus
+  checkProductStatus,
+  getVariantOffer
 };

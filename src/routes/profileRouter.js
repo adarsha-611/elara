@@ -35,7 +35,8 @@ router.get('/profile/orders/:id',orderController.getOrderdetailPage);
 router.post('/profile/orders/:orderId/return/:itemId', orderController.returnOrder);
 router.post("/profile/orders/:orderId/cancel/:itemId",orderController.cancelOrder);
 router.get('/profile/orders/:id/invoice', orderController.downloadInvoice);
-router.post('/review/add',orderController.addReviewController)
+router.post('/review/add',orderController.addReviewController);
+router.post('//orders/:orderId/cancel-all',orderController.cancelAllItems);
 
 //Wallet
 router.get("/profile/wallet",isLoggedIn,walletController.getWalletPage);

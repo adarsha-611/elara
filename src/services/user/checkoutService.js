@@ -4,6 +4,7 @@ import Order from "../../model/orderSchema.js";
 import Coupon from "../../model/couponSchema.js";
 import Wallet from "../../model/walletSchema.js";
 import { deductWalletBalance } from "./walletService.js";
+import { getBestOfferForProduct } from "./shopProductService.js"; 
 
 
 const generateOrderId = () => {
@@ -11,12 +12,14 @@ const generateOrderId = () => {
   return `ORD-${Date.now()}-${random}`;
 };
 
+// add this import
+
 export const getCheckoutData = async (userId) => {
   const user = await User.findById(userId);
 
   const cart = await Cart.findOne({ userId }).populate({
     path: "items.productId",
-    select: "name variants isDeleted isBlocked isActive"
+    select: "name variants category isDeleted isBlocked isActive"
   });
 
   if (!cart || cart.items.length === 0) {
@@ -35,20 +38,22 @@ export const getCheckoutData = async (userId) => {
 
     if (!variant) continue;
 
-    const price = variant.price;
+    const offerData = await getBestOfferForProduct(product, variant.price);
+    const price = offerData ? Math.round(offerData.finalPrice) : variant.price;
 
     const image = variant.images?.[0] || "/images/placeholder.png";
-
     const itemTotal = price * item.quantity;
     subtotal += itemTotal;
 
     cartItems.push({
       name: product.name,
-      image: image,
-      price: price,
+      image,
+      price,
+      originalPrice: variant.price,  
+      offerData,                       
       quantity: item.quantity,
-      itemTotal: itemTotal
-});
+      itemTotal
+    });
   }
 
   return {
@@ -57,7 +62,6 @@ export const getCheckoutData = async (userId) => {
     subtotal
   };
 };
-
 
 export const placeOrderService = async (userId, addressId, paymentMethod,paymentStatus) => {
   const user = await User.findById(userId);
@@ -155,14 +159,12 @@ export const applyCouponService = async(code,userId,session)=>{
     return {success:false,message:"Coupon expired"};
   }
 
-  // ✅ FIX 1: correct field name
   const cart = await Cart.findOne({ userId }).populate("items.productId");
 
   if(!cart || cart.items.length === 0){
     return {success:false,message:"Cart not found"};
   }
 
-  // ✅ FIX 2: calculate total manually
   let totalAmount = 0;
 
   for (const item of cart.items) {

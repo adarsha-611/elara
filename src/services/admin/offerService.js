@@ -22,6 +22,30 @@ export const getOfferPageData = async(page=1,limit=5)=>{
 }
 
 export const addOfferService = async(data)=>{
+    console.log("ADD OFFER SERVICE CALLED");
+console.log("DATA:", data);
+console.log("Discount:", data.discountValue);
+    if(data.offerType === "product" && data.discountType === "fixed"){
+        const product = await Product.findById(data.productId);
+        console.log("SERVICE HIT", data);
+        
+        console.log("PRODUCT:", product);
+console.log("VARIANT PRICE:", product?.variants?.[0]?.price);
+        if(!product){
+            throw new Error("Product not found");
+        }
+
+        const basePrice = product.variants?.[0]?.price;
+
+if(!basePrice){
+    throw new Error("Product price not found");
+}
+
+if(data.discountValue >= basePrice){
+        console.log("VALIDATION TRIGGERED ❌");
+    throw new Error("Offer amount cannot be greater than or equal to product price");
+}
+    }
     const offer = new Offer({
         name:data.name,
         offerType:data.offerType,
@@ -41,6 +65,24 @@ export const updateOfferService = async(id,data)=>{
     const offer = await Offer.findById(id);
     if(!offer){
         throw new Error("Offer not found");
+    }
+
+    if(data.offerType === "product" && data.discountType === "fixed"){
+        const product = await Product.findById(data.productId);
+
+        if(!product){
+            throw new Error("Product not found");
+        }
+
+        const basePrice = product.variants?.[0]?.price;
+
+        if(!basePrice){
+            throw new Error("Product price not found");
+        }
+
+        if(data.discountValue >= basePrice){
+            throw new Error("Offer amount cannot be greater than or equal to product price");
+        }
     }
     
     offer.name = data.name;

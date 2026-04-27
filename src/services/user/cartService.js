@@ -1,99 +1,106 @@
 import cartSchema from "../../model/cartSchema.js";
 import Cart from "../../model/cartSchema.js";
 import Product from "../../model/productSchema.js";
+import { getBestOfferForProduct } from "./shopProductService.js";
 
-
-export const syncCartProducts = async(userId)=>{
+export const syncCartProducts = async(userId) => {
   const cart = await Cart.findOne({userId});
-  if(!cart|| cart.items.length === 0){
-    return {stockChangedMessage:null};
+  if(!cart || cart.items.length === 0){
+    return { stockChangedMessage: null, offerChangedMessage: null };
   }
+
   let stockChangedMessage = null;
+  let offerChangedMessage = null;
 
   for(const item of cart.items){
     const product = await Product.findById(item.productId);
-
-    if(!product){
-      continue;
-    }
+    if(!product) continue;
 
     const variant = product.variants.id(item.variantId);
-    if(!variant){
-      continue;
-    }
+    if(!variant) continue;
 
+    // Stock check (existing logic)
     if(item.quantity > variant.stock){
-      const oldQty = item.quantity;
-      item.quantity = Math.max(1,variant.stock);
+      item.quantity = Math.max(1, variant.stock);
+      stockChangedMessage = `Quantity reduced to ${item.quantity} due to stock changes.`;
+    }
 
-      stockChangedMessage = `Quantity reduce to ${item.quantity},`;
+    // Offer check — compare stored offer price vs current offer
+    const offerData = await getBestOfferForProduct(product, variant.price);
+    const currentFinalPrice = offerData ? offerData.finalPrice : variant.price;
+
+    // If item has a saved offerPrice and it no longer matches current
+    if(item.offerPrice !== undefined && item.offerPrice !== null){
+      if(!offerData || Math.round(currentFinalPrice) !== Math.round(item.offerPrice)){
+        offerChangedMessage = `An offer on "${product.name}" has changed or expired. Price has been updated.`;
+        item.offerPrice = offerData ? Math.round(offerData.finalPrice) : null;
+      }
     }
   }
 
-  if(stockChangedMessage){
-    await cart.save();
-  }
-  return {stockChangedMessage};
-}
+  await cart.save();
+  return { stockChangedMessage, offerChangedMessage };
+};
 
-
-export const addToCart = async(userId,productId,qty,variantId)=>{
+export const addToCart = async(userId, productId, qty, variantId) => {
   qty = Number(qty);
 
   const product = await Product.findById(productId);
-  if(!product || product.isDeleted||!product.isActive){
-    throw new Error("Product is Unavailable")
+  if(!product || product.isDeleted || !product.isActive){
+    throw new Error("Product is Unavailable");
   }
 
   const variant = product.variants.id(variantId);
 
-console.log(" Variant stock:", variant.stock, "Type:", typeof variant.stock);
   if(!variant){
     throw new Error("Variant not found");
   }
 
-  if (!variant.stock || variant.stock <= 0) {
-  throw new Error("Product is out of stock");
-}
+  if(!variant.stock || variant.stock <= 0){
+    throw new Error("Product is out of stock");
+  }
 
   if(variant.stock < qty){
     throw new Error(`Only ${variant.stock} items available`);
   }
 
-  if(qty>5){
-    throw new Error("Maximum 5 items allowed ")
+  if(qty > 5){
+    throw new Error("Maximum 5 items allowed");
   }
 
   let cart = await Cart.findOne({userId});
   if(!cart){
-    cart = new Cart({userId,items:[]});
+    cart = new Cart({userId, items:[]});
   }
-  
-  
-  const index = cart.items.findIndex(item=>
-    item.productId.toString() === productId.toString()&&
-    item.variantId.toString()=== variantId.toString()
-  )
- 
-  if(index >-1){
-    const newQty = cart.items[index].quantity+qty;
+
+  const offerData = await getBestOfferForProduct(product, variant.price);
+  const offerPrice = offerData ? Math.round(offerData.finalPrice) : null;
+
+  const index = cart.items.findIndex(item =>
+    item.productId.toString() === productId.toString() &&
+    item.variantId.toString() === variantId.toString()
+  );
+
+  if(index > -1){
+    const newQty = cart.items[index].quantity + qty;
 
     if(newQty > variant.stock){
-      throw new Error(`Only ${variant.stock} items available`)
-    }
+       throw new Error(`Only ${variant.stock} items available`);
+   }
 
-    if(newQty>5){
-      throw new Error("Maximum 5 items allowed")
+
+    if(newQty > 5) {
+      throw new Error("Maximum 5 items allowed");
     }
+    
     cart.items[index].quantity = newQty;
-  }else{
-    cart.items.push({productId,variantId,quantity:qty})
+    cart.items[index].offerPrice = offerPrice;
+  } else {
+    cart.items.push({productId, variantId, quantity: qty, offerPrice});
   }
- 
+
   await cart.save();
-}
-
-
+};
 export const removeFromCart = async(userId,productId,variantId)=>{
   const cart = await Cart.findOne({userId});
   if(!cart){

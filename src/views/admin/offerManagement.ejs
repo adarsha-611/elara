@@ -336,9 +336,26 @@
     </span>
 </td>
                             <td>
-                                <span class="status-badge <%= o.isActive ? 'status-active' : 'status-inactive' %>">
-                                    <%= o.isActive ? "ACTIVE" : "INACTIVE" %>
-                                </span>
+                                <%
+    const now = new Date();
+    let statusText = "";
+    let statusClass = "";
+
+    if (o.endDate && new Date(o.endDate) < now) {
+        statusText = "EXPIRED";
+        statusClass = "status-inactive";
+    } else if (o.isActive) {
+        statusText = "ACTIVE";
+        statusClass = "status-active";
+    } else {
+        statusText = "INACTIVE";
+        statusClass = "status-inactive";
+    }
+%>
+
+<span class="status-badge <%= statusClass %>">
+    <%= statusText %>
+</span>
                             </td>
                             <td class="<%= validityClass %>"><%= validityText %></td>
                             <td style="text-align:right;">
@@ -374,7 +391,7 @@
         Swal.fire({
             icon: 'success',
             title: 'Success',
-            text: '<%= success_msg %>',
+            text: '<%= success_msg[0] %>',
             timer: 3000,
             showConfirmButton: false
         });
@@ -384,7 +401,7 @@
         Swal.fire({
             icon: 'error',
             title: 'Error',
-            text: '<%= error_msg %>',
+           text: '<%= error_msg[0] %>',
             confirmButtonColor: '#3D2B24'
         });
     <% } %>

@@ -43,7 +43,7 @@ export function validateAddress(data) {
       .trim()
       .min(2)
       .max(50)
-      .pattern(/^[a-zA-Z\s]+$/)  
+      .pattern(/^[a-zA-Z\s.'-]+$/) 
       .required()
       .messages({
         "string.empty": "City/Town is required",
@@ -57,7 +57,7 @@ export function validateAddress(data) {
       .trim()
       .min(2)
       .max(50)
-      .pattern(/^[a-zA-Z\s]+$/)  
+      .pattern(/^[a-zA-Z\s.'-]+$/)
       .required()
       .messages({
         "string.empty": "State is required",

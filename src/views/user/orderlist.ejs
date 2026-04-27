@@ -3,13 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <title>My Orders | ELARA</title>
-
 <script src="https://cdn.tailwindcss.com"></script>
-
 <link rel="stylesheet" href="/css/profile.css">
-
 <style>
 :root {
     --primary-taupe: #a3866a;
@@ -27,7 +23,6 @@ body {
     color: #333;
 }
 
-/* Layout */
 .account-container {
     display: flex;
     max-width: 1300px;
@@ -36,12 +31,7 @@ body {
     gap: 30px;
 }
 
-
-
-/* Main Content */
-.orders-content {
-    flex: 1;
-}
+.orders-content { flex: 1; }
 
 .section-title {
     font-family: 'Playfair Display', serif;
@@ -75,6 +65,7 @@ body {
     padding: 20px 15px;
     border-bottom: 1px solid #f9f9f9;
     font-size: 0.9rem;
+    vertical-align: middle;
 }
 
 .item-thumbnails {
@@ -90,7 +81,6 @@ body {
     background: #f0f0f0;
 }
 
-/* Status Badges */
 .status-badge {
     padding: 6px 14px;
     border-radius: 20px;
@@ -101,6 +91,19 @@ body {
 .status-badge.delivered { background: #e6f4ea; color: #1e7e34; }
 .status-badge.shipped { background: #e8f0fe; color: #1967d2; }
 .status-badge.processing { background: #fff9e6; color: #967000; }
+.status-badge.pending { background: #fff9e6; color: #967000; }
+.status-badge.cancelled { background: #fee2e2; color: #dc2626; }
+
+.payment-failed-badge {
+    display: inline-block;
+    background: #fee2e2;
+    color: #dc2626;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 0.72rem;
+    font-weight: 600;
+    margin-top: 6px;
+}
 
 .view-link {
     color: var(--primary-taupe);
@@ -108,36 +111,42 @@ body {
     font-weight: 600;
 }
 
+.retry-link {
+    color: #a3866a;
+    font-weight: 700;
+    font-size: 0.8rem;
+    border-bottom: 1px solid #a3866a;
+    text-decoration: none;
+    display: block;
+    margin-bottom: 6px;
+}
 
-/* Responsive */
 @media (max-width: 992px) {
     .account-container { flex-direction: column; }
     .sidebar { width: 100%; }
 }
-.pagination-container{
-    margin-top:30px;
-    display:flex;
-    justify-content:center;
+
+.pagination-container {
+    margin-top: 30px;
+    display: flex;
+    justify-content: center;
 }
 
-.pagination{
-    display:flex;
-    gap:8px;
+.pagination { display: flex; gap: 8px; }
+
+.page-btn {
+    width: 35px;
+    height: 35px;
+    border: 1px solid #ddd;
+    background: white;
+    border-radius: 6px;
+    cursor: pointer;
 }
 
-.page-btn{
-    width:35px;
-    height:35px;
-    border:1px solid #ddd;
-    background:white;
-    border-radius:6px;
-    cursor:pointer;
-}
-
-.page-btn.active{
-    background:var(--primary-taupe);
-    color:white;
-    border-color:var(--primary-taupe);
+.page-btn.active {
+    background: var(--primary-taupe);
+    color: white;
+    border-color: var(--primary-taupe);
 }
 </style>
 </head>
@@ -148,10 +157,8 @@ body {
 
 <main class="account-container">
 
- 
     <%- include('../partials/profileSidebar', { user, path: '/profile/orders' }) %>
 
-  
     <section class="orders-content">
         <h1 class="section-title">My Orders</h1>
 
@@ -164,94 +171,98 @@ body {
                         <th>Items</th>
                         <th>Total</th>
                         <th>Status</th>
-                        <th></th>
+                        <th>Action</th>
                     </tr>
                 </thead>
-               <tbody>
-<% if (orders.length > 0) { %>
-  <% orders.forEach(order => { %>
-    <tr>
-      <td class="order-id-text">
-  <%= order.orderId %>
-</td>
+                <tbody>
+                    <% if (orders.length > 0) { %>
+                        <% orders.forEach(order => { %>
+                            <tr>
+                                <!-- Order Number -->
+                                <td><%= order.orderId %></td>
 
-      <td>
-        <%= new Date(order.createdAt).toLocaleDateString("en-IN", {
-            year: "numeric",
-            month: "long",
-            day: "numeric"
-        }) %>
-      </td>
+                                <!-- Date -->
+                                <td>
+                                    <%= new Date(order.createdAt).toLocaleDateString("en-IN", {
+                                        year: "numeric",
+                                        month: "long",
+                                        day: "numeric"
+                                    }) %>
+                                </td>
 
-      <td>
-        <div class="item-thumbnails">
-  <% order.items.slice(0,2).forEach(item => { %>
-    <img src="<%= item.productImage %>" alt="Product">
-  <% }) %>
-</div>
+                                <!-- Items -->
+                                <td>
+                                    <div class="item-thumbnails">
+                                        <% order.items.slice(0, 2).forEach(item => { %>
+                                            <img src="<%= item.productImage %>" alt="Product">
+                                        <% }) %>
+                                    </div>
+                                </td>
 
-      </td>
+                                <!-- Total -->
+                                <td>₹ <%= order.totalAmount.toLocaleString() %></td>
 
-      <td>₹ <%= order.totalAmount.toLocaleString() %></td>
+                                <!-- Status -->
+                                <td>
+                                    <span class="status-badge <%= order.orderStatus.toLowerCase() %>">
+                                        <%= order.orderStatus %>
+                                    </span>
+                                    <% if (order.paymentStatus === 'failed') { %>
+                                        <div>
+                                            <span class="payment-failed-badge">Payment Failed</span>
+                                        </div>
+                                    <% } %>
+                                </td>
 
-      <td>
-        <span class="status-badge <%= order.orderStatus.toLowerCase() %>">
-          <%= order.orderStatus %>
-        </span>
-      </td>
-
-      <td>
-        <a href="/profile/orders/<%= order._id %>" class="view-link">
-          View
-        </a>
-      </td>
-    </tr>
-  <% }) %>
-<% } else { %>
-  <tr>
-    <td colspan="6" style="text-align:center;">No orders found</td>
-  </tr>
-<% } %>
-</tbody>
-    
+                                <!-- Action -->
+                                <td>
+                                    <% if (order.paymentStatus === 'failed') { %>
+                                        <a href="/payment-failed/<%= order._id %>" class="retry-link">
+                                            Retry →
+                                        </a>
+                                    <% } %>
+                                    <a href="/profile/orders/<%= order._id %>" class="view-link">View</a>
+                                </td>
+                            </tr>
+                        <% }) %>
+                    <% } else { %>
+                        <tr>
+                            <td colspan="6" style="text-align:center; padding: 40px;">No orders found</td>
+                        </tr>
+                    <% } %>
+                </tbody>
             </table>
-            
         </div>
-         <div class="pagination-container">
-<% if(totalPages > 1){ %>
 
-<div class="pagination">
+        <div class="pagination-container">
+            <% if (totalPages > 1) { %>
+                <div class="pagination">
+                    <% if (currentPage > 1) { %>
+                        <a href="/profile/orders?page=<%= currentPage - 1 %>">
+                            <button class="page-btn">‹</button>
+                        </a>
+                    <% } %>
 
-<% if(currentPage > 1){ %>
-<a href="/profile/orders?page=<%= currentPage - 1 %>">
-<button class="page-btn">‹</button>
-</a>
-<% } %>
+                    <% for (let i = 1; i <= totalPages; i++) { %>
+                        <a href="/profile/orders?page=<%= i %>">
+                            <button class="page-btn <%= currentPage === i ? 'active' : '' %>">
+                                <%= i %>
+                            </button>
+                        </a>
+                    <% } %>
 
-<% for(let i = 1; i <= totalPages; i++){ %>
-
-<a href="/profile/orders?page=<%= i %>">
-<button class="page-btn <%= currentPage === i ? 'active' : '' %>">
-<%= i %>
-</button>
-</a>
-
-<% } %>
-
-<% if(currentPage < totalPages){ %>
-<a href="/profile/orders?page=<%= currentPage + 1 %>">
-<button class="page-btn">›</button>
-</a>
-<% } %>
-
-</div>
-
-<% } %>
-</div>
-
+                    <% if (currentPage < totalPages) { %>
+                        <a href="/profile/orders?page=<%= currentPage + 1 %>">
+                            <button class="page-btn">›</button>
+                        </a>
+                    <% } %>
+                </div>
+            <% } %>
+        </div>
     </section>
-   
+
 </main>
+
 <%- include('../partials/footer') %>
 
 </body>

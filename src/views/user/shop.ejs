@@ -346,9 +346,30 @@
                         %>
                         <div class="product-card">
                             <div class="img-container">
+                                <% if (product.offerData) { %>
+                        <div style="
+                         position:absolute;
+                         top:10px;
+                         left:10px;
+                         background:#c62828;
+                         color:#fff;
+                         padding:4px 8px;
+                         font-size:11px;
+                         font-weight:600;
+                         border-radius:4px;
+                        ">
+                 <% if (product.offerData.offer.discountType === "percentage") { %>
+                    <%= product.offerData.offer.discountValue %>% OFF
+                <% } else { %>
+                 ₹<%= product.offerData.offer.discountValue %> OFF
+                <% } %>
+             </div>
+        <% } %>
+        
                                 <a href="/productDetail/<%= product._id %>">
                                     <img src="<%= displayVariant && displayVariant.images.length > 0 ? displayVariant.images[0] : '/images/default.png' %>" alt="<%= product.name %>">
                                 </a>
+                                
         <i class="wishlist-icon 
    <%= wishlistProductIds.includes(product._id.toString()) ? 'fa-solid' : 'fa-regular' %> 
    fa-heart"
@@ -360,8 +381,20 @@
 
                             <div class="product-info">
                                 <h4><a href="/productDetail/<%= product._id %>"><%= product.name %></a></h4>
-                                <p class="price">₹ <%= displayVariant ? displayVariant.price.toLocaleString('en-IN') : 'N/A' %></p>
-                            </div>
+<% if (product.offerData) { %>
+    <p class="price" style="color:#888; text-decoration: line-through;">
+        ₹ <%= displayVariant.price.toLocaleString('en-IN') %>
+    </p>
+
+    <p class="price" style="color:#2e7d32;">
+        ₹ <%= Math.round(product.offerData.finalPrice).toLocaleString('en-IN') %>
+    </p>
+
+<% } else { %>
+    <p class="price">
+        ₹ <%= displayVariant ? displayVariant.price.toLocaleString('en-IN') : 'N/A' %>
+    </p>
+<% } %>                            </div>
                         </div>
                     <% }) %>
                 <% } else { %>

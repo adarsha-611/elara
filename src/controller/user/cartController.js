@@ -2,45 +2,55 @@ import cartSchema from "../../model/cartSchema.js";
 import Product from "../../model/productSchema.js";
 import Cart from "../../model/cartSchema.js"
 import { addToCart,removeFromCart, syncCartProducts, updateCartQty, validateCheckout } from "../../services/user/cartService.js";
+import { getBestOfferForProduct } from "../../services/user/shopProductService.js";
 
   const getCartPage = async (req, res) => {
   try {
     const userId = req.session.userId;
     if (!userId) return res.redirect('/login');
 
-    const { stockChangedMessage } = await syncCartProducts(userId);
+    const { stockChangedMessage,offerChangedMessage } = await syncCartProducts(userId);
 
     const cart = await Cart.findOne({ userId });
     const cartItems = [];
 
-    for (const item of cart?.items || []) {
-      const product = await Product.findById(item.productId);
-      if (!product) continue;
+  for (const item of cart?.items || []) {
+  const product = await Product.findById(item.productId);
+  if (!product) continue;
 
-      const variant = product.variants.id(item.variantId);
-      if (!variant) {
-        
-        continue;
-      }
+  const variant = product.variants.id(item.variantId);
+  if (!variant) continue;
 
-      const isBlocked = !!(product.isDeleted || !product.isActive);
+const offerData = await getBestOfferForProduct(product, variant.price);
 
-      cartItems.push({
-        productId: product._id,
-        variantId: item.variantId,
-        name: product.name,
-        price: variant.price,
-        stock: variant.stock,
-        quantity: item.quantity,
-        image: variant.images?.[0] || "/images/no-image.png",
-        isBlocked: isBlocked,                    
-        isOutOfStock: variant.stock === 0
-      });
-    }  
+  const finalPrice = offerData
+    ? offerData.finalPrice
+    : variant.price;
+
+  const isBlocked = !!(product.isDeleted || !product.isActive);
+
+  cartItems.push({
+    productId: product._id,
+    variantId: item.variantId,
+    name: product.name,
+
+    price: finalPrice,          // ✅ FIXED
+    originalPrice: variant.price, // (optional for UI strike)
+
+    stock: variant.stock,
+    quantity: item.quantity,
+    image: variant.images?.[0] || "/images/no-image.png",
+
+    offerData,                 // ✅ send to UI
+
+    isBlocked,
+    isOutOfStock: variant.stock === 0
+  });
+}
 
     res.render("user/cart", {
       cartItems,
-      successMessage: stockChangedMessage
+      successMessage: stockChangedMessage,offerChangedMessage
     });
   } catch (error) {
     console.error("Cart page error:", error);

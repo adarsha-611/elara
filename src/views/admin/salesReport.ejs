@@ -631,7 +631,7 @@
           <option value="yearly">Yearly </option>
           <option value="custom"> Custom Range</option>
         </select>
-        <div id="customDateBlock" style="display: none;"> align-items: center; gap: 8px;">
+<div id="customDateBlock" style="display: none; flex-wrap: wrap; align-items: center; gap: 8px;">
           <div class="custom-range-wrapper">
             <input type="date" id="fromDate" value="2025-01-01" style="width:110px">
             <span>—</span>
@@ -663,6 +663,10 @@
       <div class="tc-hdr"><span class="ch-ttl">Sales Breakdown</span><span id="tcMeta">12 records</span></div>
       <div class="tw"><table><thead><tr><th onclick="srt(0)">Date <span class="si"></span></th><th onclick="srt(1)">Orders <span class="si"></span></th><th onclick="srt(2)">Order Amount <span class="si"></span></th><th onclick="srt(3)">Discount <span class="si"></span></th><th onclick="srt(4)">Coupon Deduction <span class="si"></span></th><th onclick="srt(5)">Net Revenue <span class="si"></span></th></tr></thead><tbody id="tbody"></tbody></table></div>
     </div>
+    <div class="pag">
+  <span id="pgInfo" style="font-size:11px; color:var(--mu);"></span>
+  <div class="pg-btns" id="pgBtns"></div>
+</div>
   </div>
 </div>
 <div id="toast" class="toast"></div>
@@ -719,6 +723,34 @@ function updateSummaryCards(data) {
     if (cards[1]) cards[1].innerHTML = `₹${(totalAmount / 100000).toFixed(1)}L`;
     if (cards[2]) cards[2].innerHTML = `₹${(totalDiscount / 100000).toFixed(1)}L`;
     if (cards[3]) cards[3].innerHTML = `₹${(totalCoupon / 100000).toFixed(1)}L`;
+}
+
+function applyCustomFromPicker() {
+    const fromStr = document.getElementById('fromDate').value;
+    const toStr = document.getElementById('toDate').value;
+
+    if (!fromStr || !toStr) {
+        toast('Please select both From and To dates');
+        return;
+    }
+
+    const fromDate = new Date(fromStr);
+    const toDate = new Date(toStr);
+
+    // NEW: validate range order
+    if (fromDate > toDate) {
+        toast('Start date cannot be after end date');
+        return;
+    }
+
+    // NEW: prevent future-only ranges from being misleading
+    if (fromDate > new Date()) {
+        toast('Start date cannot be in the future');
+        return;
+    }
+
+    toDate.setHours(23, 59, 59);
+    // ... rest of function
 }
 
 // ==================== BUILD CHART ====================
