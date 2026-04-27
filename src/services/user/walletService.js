@@ -13,28 +13,29 @@ export const getWalletService = async(userId)=>{
 }
 
 
-export const addMoneyToWallet = async(userId,amount)=>{
-    let wallet = await Wallet.findOne({userId});
+// walletService.js — update addMoneyToWallet to accept a reason
+export const addMoneyToWallet = async (userId, amount, reason = "Wallet Top-up") => {
+    let wallet = await Wallet.findOne({ userId });
 
-    if(!wallet){
+    if (!wallet) {
         wallet = await Wallet.create({
             userId,
-            balance:0,
-            transactions:[]
+            balance: 0,
+            transactions: []
         });
     }
 
-    wallet.balance+=Number(amount);
+    wallet.balance += Number(amount);
 
     wallet.transactions.push({
-        type:"credit",
+        type: "credit",
         amount,
-        reason:"Wallet Top-up"
+        reason   // ✅ now dynamic
     });
 
     await wallet.save();
     return wallet;
-}
+};
 
 
 export const deductWalletBalance = async(userId,amount)=>{

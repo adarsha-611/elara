@@ -96,7 +96,12 @@ const cancelOrder = async (req, res) => {
     const { orderId, itemId } = req.params;
     const { reason } = req.body;
 
+<<<<<<< HEAD
    const result = await cancelOrderService(orderId, itemId, reason);
+=======
+    // ✅ Capture result from service
+    const result = await cancelOrderService(orderId, itemId, reason);
+>>>>>>> feature/refferal
 
     return res.status(200).json({
       success: true,

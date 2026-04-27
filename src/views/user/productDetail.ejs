@@ -392,8 +392,11 @@
         </div>
 
         <div class="product-info-panel">
-            <nav class="breadcrumb">Home / <%= product.category %> / <%= product.name %></nav>
-            <h1 class="product-title text-dark"><%= product.name %></h1>
+<nav class="breadcrumb">
+    <a href="/home">Home</a> / 
+    <a href="/shop">Shop</a> / 
+    <%= product.name %>
+</nav>            <h1 class="product-title text-dark"><%= product.name %></h1>
 
             <div class="status-container">
     <% const firstStock = product.variants[0].stock; %>
@@ -602,6 +605,7 @@ function getSelectedVariant() {
   return select.value;
 }
 
+<<<<<<< HEAD
 async function addToCart(productId, variantId, quantity = 1) {
     try {
         const res = await fetch("/cart/add", {
@@ -819,24 +823,116 @@ async function addToCart(productId, variantId, quantity = 1) {
 }
 
 // Function to add to cart from wishlist
+=======
+// ---------- ADD TO CART FUNCTION ----------
+>>>>>>> feature/refferal
 async function addToCartFromWishlist(productId, variantId, btn) {
     const res = await fetch(`/wishlist/addtocart/${productId}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ variantId })  
+        body: JSON.stringify({ variantId })
     });
 
     const data = await res.json();
 
     if (data.success) {
         showToast("Added to cart");
+        // ✅ Update cart count immediately
+        if (window.updateCartCount) window.updateCartCount();
         btn.closest(".product-card").remove();
     } else {
         showToast(data.message, "error");
     }
 }
+<<<<<<< HEAD
 
 // Product availability check
+=======
+</script>
+<script>
+const currentImg = document.getElementById("current-img");
+const thumbnailGrid = document.getElementById("thumbnailGrid");
+const colorSelect = document.getElementById("colorSelect");
+const priceEl = document.getElementById("price");
+const stockStatus = document.getElementById("stock-status");
+
+async function addToCart(productId, variantId, quantity = 1) {
+    try {
+        const res = await fetch("/cart/add", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ productId, variantId, quantity })
+        });
+
+        const data = await res.json();
+
+        if (data.success) {
+            showToast("Added to cart");
+            // ✅ Update cart count immediately
+            if (window.updateCartCount) window.updateCartCount();
+        } else {
+            showToast(data.message || "Failed", "error");
+        }
+
+    } catch (err) {
+        console.error(err);
+        showToast("Error", "error");
+    }
+}
+// ---------- Function to change subimage ----------
+function changeImage(src, thumb) {
+    currentImg.src = src;
+
+    // remove active from all thumbnails
+    thumbnailGrid.querySelectorAll("img").forEach(img => img.classList.remove("active"));
+
+    // add active to clicked thumbnail
+    thumb.classList.add("active");
+}
+
+// ---------- Function to change variant ----------
+function changeVariant() {
+    const selectedOption = colorSelect.options[colorSelect.selectedIndex];
+    const images = JSON.parse(selectedOption.dataset.images);
+    const price = selectedOption.dataset.price;
+    const stock = selectedOption.dataset.stock;
+
+    // Update main image
+    currentImg.src = images[0];
+
+    // Update price
+    priceEl.innerHTML = `₹${price} <span style="font-size: 1rem; color: #888; text-decoration: line-through; margin-left: 10px;">₹${(price * 1.2).toFixed(0)}</span>`;
+
+    // Update stock badge
+    stockStatus.className = "stock-badge"; // reset
+    if (stock == 0) {
+        stockStatus.classList.add("stock-out");
+        stockStatus.innerText = "Out of Stock";
+    } else if (stock <= 3) {
+        stockStatus.classList.add("stock-low");
+        stockStatus.innerText = `Only ${stock} left!`;
+    } else {
+        stockStatus.classList.add("stock-in");
+        stockStatus.innerText = "In Stock";
+    }
+
+    // Update thumbnails
+    thumbnailGrid.innerHTML = "";
+    images.forEach((img, index) => {
+        const thumb = document.createElement("img");
+        thumb.src = img;
+        thumb.alt = `Thumbnail ${index+1}`;
+        if(index === 0) thumb.classList.add("active");
+        thumb.onclick = () => changeImage(img, thumb);
+        thumbnailGrid.appendChild(thumb);
+    });
+}
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+>>>>>>> feature/refferal
 const productId = "<%= product._id %>";
 
 async function checkProductAvailability() {

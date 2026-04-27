@@ -1002,7 +1002,11 @@
             submitBtn.disabled = true;
             
             try {
+<<<<<<< HEAD
 const url = currentFormMode === 'add' ? '/checkout/address/add' : '/checkout/address/edit';
+=======
+                const url = currentFormMode === 'add' ? '/checkout/address/add' : '/checkout/address/edit';
+>>>>>>> feature/refferal
                 const response = await fetch(url, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },

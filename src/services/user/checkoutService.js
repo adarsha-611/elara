@@ -63,7 +63,12 @@ export const getCheckoutData = async (userId) => {
   };
 };
 
+<<<<<<< HEAD
 export const placeOrderService = async (userId, addressId, paymentMethod,paymentStatus) => {
+=======
+
+export const placeOrderService = async (userId, addressId, paymentMethod, paymentStatus, appliedCoupon = null) => {
+>>>>>>> feature/refferal
   const user = await User.findById(userId);
   const cart = await Cart.findOne({ userId }).populate("items.productId");
 
@@ -112,32 +117,43 @@ export const placeOrderService = async (userId, addressId, paymentMethod,payment
 
     totalAmount += itemTotal;
   }
-if (paymentMethod === "wallet") {
-    await deductWalletBalance(userId, totalAmount);
+
+  // ✅ Apply coupon discount if present
+  const discount = appliedCoupon?.discount || 0;
+  const finalAmount = totalAmount - discount;
+
+  if (paymentMethod === "wallet") {
+    await deductWalletBalance(userId, finalAmount); // ✅ deduct after discount
   }
 
- 
   const order = await Order.create({
     user: userId,
     items: orderItems,
     totalAmount,
+    discount,                          // ✅ store discount
+    finalAmount,                       // ✅ store what customer actually pays
+    couponApplied: appliedCoupon?.couponId || null,  // ✅ store coupon ref
     shippingAddress: addressDoc,
     paymentMethod,
     paymentStatus:
-    paymentMethod === "wallet"
-    ? "paid"
-    : paymentStatus || "pending",
-     orderStatus: "pending",
+      paymentMethod === "wallet"
+        ? "paid"
+        : paymentStatus || "pending",
+    orderStatus: "pending",
     orderId: generateOrderId()
   });
 
+  // ✅ Increment coupon usedCount after order is saved
+  if (appliedCoupon?.couponId) {
+    await incrementCouponUsage(appliedCoupon.couponId);
+  }
+
+  // Deduct stock
   for (const cartItem of cart.items) {
     const product = cartItem.productId;
-
     const variant = product.variants.find(
       v => v._id.toString() === String(cartItem.variantId)
     );
-
     variant.stock -= cartItem.quantity;
     await product.save();
   }
@@ -147,18 +163,13 @@ if (paymentMethod === "wallet") {
 
   return order;
 };
-export const applyCouponService = async(code,userId,session)=>{
 
-  const coupon = await Coupon.findOne({code: code.toUpperCase()});
 
-  if(!coupon){
-    return {success:false,message:"Invalid coupon"};
-  }
 
-  if(!coupon.isActive){
-    return {success:false,message:"Coupon expired"};
-  }
+export const applyCouponService = async (code, userId, session) => {
+    const now = new Date();
 
+<<<<<<< HEAD
   const cart = await Cart.findOne({ userId }).populate("items.productId");
 
   if(!cart || cart.items.length === 0){
@@ -196,22 +207,104 @@ export const applyCouponService = async(code,userId,session)=>{
 
     if (coupon.maxDiscount){
       discount = Math.min(discount,coupon.maxDiscount);
+=======
+    const coupon = await Coupon.findOne({ code: code.toUpperCase() });
+
+    if (!coupon) {
+        return { success: false, message: "Invalid coupon code" };
+>>>>>>> feature/refferal
     }
-  }else{
-    discount = coupon.discountValue;
-  }
 
-  const finalTotal = totalAmount - discount;
+    if (!coupon.isActive) {
+        return { success: false, message: "This coupon is no longer active" };
+    }
 
-  session.appliedCoupon = {
-    couponId:coupon._id,
-    discount,
-    finalTotal
-  }
+    // ✅ Date validation
+    if (now < new Date(coupon.startDate)) {
+        return { success: false, message: "This coupon is not valid yet" };
+    }
 
-  return {
-    success: true,
-    discountAmount: discount,
-    newTotal: finalTotal
-  };
-}
+    if (now > new Date(coupon.endDate)) {
+        return { success: false, message: "This coupon has expired" };
+    }
+
+    // ✅ Usage limit check
+    if (coupon.usedCount >= coupon.usageLimit) {
+        return { success: false, message: "This coupon has reached its usage limit" };
+    }
+
+    const cart = await Cart.findOne({ userId }).populate("items.productId");
+
+    if (!cart || cart.items.length === 0) {
+        return { success: false, message: "Your cart is empty" };
+    }
+
+    // ✅ Calculate cart total
+    let totalAmount = 0;
+
+    for (const item of cart.items) {
+        const product = item.productId;
+        if (!product) continue;
+
+        const variant = product.variants.find(
+            v => v._id.toString() === item.variantId.toString()
+        );
+        if (!variant) continue;
+
+        totalAmount += variant.price * item.quantity;
+    }
+
+    // ✅ Minimum order check
+    if (coupon.minOrder > 0 && totalAmount < coupon.minOrder) {
+        return {
+            success: false,
+            message: `Minimum order amount of ₹${coupon.minOrder} required to use this coupon`
+        };
+    }
+
+    // ✅ Calculate discount
+    let discount = 0;
+
+    if (coupon.discountType === "percentage") {
+        discount = (totalAmount * coupon.discountValue) / 100;
+        if (coupon.maxDiscount > 0) {
+            discount = Math.min(discount, coupon.maxDiscount);
+        }
+    } else {
+        // fixed discount cannot exceed total
+        discount = Math.min(coupon.discountValue, totalAmount);
+    }
+
+    discount = Math.round(discount * 100) / 100; // round to 2 decimal places
+    const finalTotal = Math.round((totalAmount - discount) * 100) / 100;
+
+    // ✅ Store in session
+    session.appliedCoupon = {
+        couponId: coupon._id,
+        code: coupon.code,
+        discount,
+        finalTotal
+    };
+
+    return {
+        success: true,
+        message: `Coupon "${coupon.code}" applied successfully!`,
+        discountAmount: discount,
+        newTotal: finalTotal,
+        originalTotal: totalAmount
+    };
+};
+
+// ✅ Call this when order is successfully placed
+export const incrementCouponUsage = async (couponId) => {
+    await Coupon.findByIdAndUpdate(couponId, { $inc: { usedCount: 1 } });
+};
+
+// ✅ Call this to remove coupon (e.g. user clicks "Remove Coupon")
+export const removeCouponService = async (session) => {
+    if (!session.appliedCoupon) {
+        return { success: false, message: "No coupon applied" };
+    }
+    delete session.appliedCoupon;
+    return { success: true, message: "Coupon removed successfully" };
+};

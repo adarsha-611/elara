@@ -18,6 +18,7 @@ export const getAllProducts = async (filters = {}) => {
     query.name = { $regex: filters.search.trim(), $options: "i" };
   }
 
+<<<<<<< HEAD
   if (filters.category && filters.category.trim()) {
     const categoryIds = filters.category.split(",");
     query.category = { $in: categoryIds };
@@ -111,6 +112,19 @@ export const getBestOfferForProduct = async (product, variantPrice = null) => {
 
   if (!offers.length) {
     console.log("No offers found, returning null");
+=======
+export async function getProductById(productId) {
+  try {
+    const id = new mongoose.Types.ObjectId(productId);
+    const product = await Product.findOne({
+      _id: id,
+      isActive: true,
+      isDeleted: false
+    })
+    return product;
+  } catch (error) {
+    console.log("product detail error", error);
+>>>>>>> feature/refferal
     return null;
   }
   

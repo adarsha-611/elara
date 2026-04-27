@@ -57,6 +57,7 @@ const verifyPaymentController = async (req, res) => {
       });
     }
 
+<<<<<<< HEAD
     // Update the existing order to paid — don't create a new one
     const order = await Order.findByIdAndUpdate(
       orderId,
@@ -65,7 +66,22 @@ const verifyPaymentController = async (req, res) => {
         paymentId: razorpay_payment_id
       },
       { new: true }
+=======
+    // ✅ Pull coupon from session
+    const appliedCoupon = req.session.appliedCoupon || null;
+    console.log("verify-payment appliedCoupon:", appliedCoupon); // confirm it's there
+
+    const order = await placeOrderService(
+      userId,
+      addressId,
+      "online",
+      "paid",
+      appliedCoupon  // ✅ now passed correctly
+>>>>>>> feature/refferal
     );
+
+    // ✅ Clear coupon from session after order is placed
+    delete req.session.appliedCoupon;
 
     return res.json({
       success: true,
