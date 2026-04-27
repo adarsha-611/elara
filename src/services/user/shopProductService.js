@@ -70,7 +70,7 @@ export async function getProductById(productId) {
       _id: id,
       isActive: true,
       isDeleted: false
-    });
+    })
     return product;
   } catch (error) {
     console.log("product detail error", error);

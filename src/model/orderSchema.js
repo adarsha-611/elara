@@ -6,41 +6,35 @@ const orderItemSchema = new mongoose.Schema({
     ref: "Product",
     required: true,
   },
-   productName: {          
+  productName: {
     type: String,
     required: true
   },
-
-  productImage: {         
+  productImage: {
     type: String
   },
-
   variantColor: {
     type: String,
     required: true,
   },
-
   quantity: {
     type: Number,
     required: true,
     min: 1,
   },
-
   price: {
     type: Number,
     required: true,
   },
-
   total: {
     type: Number,
     required: true,
   },
   isRefunded: {
-  type: Boolean,
-  default: false
-},
-
-itemStatus: {
+    type: Boolean,
+    default: false
+  },
+  itemStatus: {
     type: String,
     enum: [
       "pending",
@@ -53,28 +47,14 @@ itemStatus: {
     ],
     default: "pending",
   },
-
   cancelRequest: {
-  requested: {
-    type: Boolean,
-    default: false
+    requested: { type: Boolean, default: false },
+    reason: { type: String, trim: true },
+    cancelledAt: Date
   },
-  reason: {
-    type: String,
-    trim: true
-  },
-  cancelledAt: Date
-},
-
   returnRequest: {
-    requested: {
-      type: Boolean,
-      default: false,
-    },
-    reason: {
-      type: String,
-      trim: true,
-    },
+    requested: { type: Boolean, default: false },
+    reason: { type: String, trim: true },
     status: {
       type: String,
       enum: ["none", "pending", "accepted", "rejected"],
@@ -83,7 +63,6 @@ itemStatus: {
     requestedAt: Date,
     processedAt: Date,
   }
-
 }, { _id: true });
 
 const orderSchema = new mongoose.Schema({
@@ -102,15 +81,23 @@ const orderSchema = new mongoose.Schema({
     required: true,
     min: 0,
   },
-  discount: {
-  type: Number,
-  default: 0
-},
 
-couponDiscount: {
-  type: Number,
-  default: 0
-},
+  couponApplied: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Coupon",
+    default: null
+  },
+
+  discount: {
+    type: Number,
+    default: 0
+  },
+
+  finalAmount: {
+    type: Number,
+    required: true,
+    min: 0
+  },
 
   shippingAddress: {
     fullName: { type: String, required: true },
@@ -123,7 +110,7 @@ couponDiscount: {
 
   paymentMethod: {
     type: String,
-    enum: ["cod", "online","wallet"],
+    enum: ["cod", "online", "wallet"],
     required: true,
   },
 
@@ -141,7 +128,8 @@ couponDiscount: {
       "out for delivery",
       "delivered",
       "cancelled",
-      "returned"
+      "returned",
+      "partially_cancelled" 
     ],
     default: "pending",
   },

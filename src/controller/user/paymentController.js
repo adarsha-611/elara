@@ -47,12 +47,20 @@ const verifyPaymentController = async (req, res) => {
       });
     }
 
+    // ✅ Pull coupon from session
+    const appliedCoupon = req.session.appliedCoupon || null;
+    console.log("verify-payment appliedCoupon:", appliedCoupon); // confirm it's there
+
     const order = await placeOrderService(
       userId,
       addressId,
       "online",
-      "paid"
+      "paid",
+      appliedCoupon  // ✅ now passed correctly
     );
+
+    // ✅ Clear coupon from session after order is placed
+    delete req.session.appliedCoupon;
 
     return res.json({
       success: true,
@@ -61,7 +69,6 @@ const verifyPaymentController = async (req, res) => {
 
   } catch (error) {
     console.error("VERIFY ERROR:", error);
-
     return res.status(500).json({
       success: false,
       message: "Payment verification failed"

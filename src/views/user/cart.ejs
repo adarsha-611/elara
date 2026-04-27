@@ -531,39 +531,26 @@ plus.addEventListener("click", () => {
 function updateDatabase(productId, variantId, quantity, input, total, price) {
   fetch("/cart/qtyupdate", {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({
-      productId,
-      variantId,
-      quantity
-    })
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ productId, variantId, quantity })
   })
   .then(res => res.json())
   .then(data => {
-
     if (!data.success) {
       showToast(data.message);
-
-   
       if (data.stock !== undefined) {
         input.value = data.stock;
         total.innerText = `₹ ${price * data.stock}`;
       }
-
       updateSubtotal();
       return;
     }
-
-  
     input.value = quantity;
     total.innerText = `₹ ${price * quantity}`;
     updateSubtotal();
+    if (window.updateCartCount) window.updateCartCount(); // ✅ add this
   })
-  .catch(() => {
-    showToast("Server error");
-  });
+  .catch(() => showToast("Server error"));
 }
 
 /* ---------------- CHECKOUT BLOCK CHECK ---------------- */

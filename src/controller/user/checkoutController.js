@@ -5,7 +5,7 @@ import Mongoose from "mongoose";
 import User from '../../model/userSchema.js';
 import Coupon from "../../model/couponSchema.js"
 import { validateAddress } from "../../utils/validators/joi_address.js";
-import { getCheckoutData,placeOrderService,applyCouponService } from "../../services/user/checkoutService.js";
+import { getCheckoutData,placeOrderService,applyCouponService,removeCouponService,incrementCouponUsage } from "../../services/user/checkoutService.js";
 import { addUserAddress,editUserAddress,deleteUserAddress,setDefaultAddressService} from "../../services/user/addressService.js";
 
  const getCheckOutPage = async (req, res) => {
@@ -36,7 +36,6 @@ import { addUserAddress,editUserAddress,deleteUserAddress,setDefaultAddressServi
     res.redirect("/cart");
   }
 };
-
 const checkaddAddress = async (req, res) => {
   try {
     const addressData = {
@@ -50,24 +49,60 @@ const checkaddAddress = async (req, res) => {
       isDefault: req.body.isDefault === "on" || req.body.isDefault === true
     };
 
-    
     const { error, value } = validateAddress(addressData);
 
     if (error) {
-      const message = error.details.map(err => err.message).join(", ");
-      req.flash("error", message);
-      return res.redirect("/checkout");
+      // ✅ Return JSON with field-level errors for frontend to display
+      const errors = error.details.map(err => ({
+        field: err.path[0],
+        message: err.message
+      }));
+      return res.json({ success: false, errors });
     }
 
-   
     await addUserAddress(req.session.userId, value);
-
-    req.flash("success", "Address added");
-    res.redirect("/checkout");
+    return res.json({ success: true });
 
   } catch (err) {
-    req.flash("error", err.message);
-    res.redirect("/checkout");
+    return res.json({ success: false, message: err.message });
+  }
+};
+
+
+const getAddressById = async (req, res) => {
+  try {
+    const userId = req.session.userId;
+    const { addressId } = req.params;
+
+    const user = await User.findById(userId);
+
+    if (!user) {
+      return res.json({
+        success: false,
+        message: "User not found"
+      });
+    }
+
+    const address = user.addresses.id(addressId);
+
+    if (!address) {
+      return res.json({
+        success: false,
+        message: "Address not found"
+      });
+    }
+
+    return res.json({
+      success: true,
+      address
+    });
+
+  } catch (error) {
+    console.log("Get Address Error:", error);
+    return res.json({
+      success: false,
+      message: "Failed to load address"
+    });
   }
 };
 
@@ -76,9 +111,12 @@ const checkeditAddress = async (req, res) => {
     const { error, value } = validateAddress(req.body);
 
     if (error) {
-      const message = error.details.map(err => err.message).join(", ");
-      req.flash("error", message);
-      return res.redirect("/checkout");
+      // ✅ Return JSON with field-level errors
+      const errors = error.details.map(err => ({
+        field: err.path[0],
+        message: err.message
+      }));
+      return res.json({ success: false, errors });
     }
 
     await editUserAddress(
@@ -87,12 +125,10 @@ const checkeditAddress = async (req, res) => {
       value
     );
 
-    req.flash("success", "Address updated");
-    res.redirect("/checkout");
+    return res.json({ success: true });
 
   } catch (err) {
-    req.flash("error", err.message);
-    res.redirect("/checkout");
+    return res.json({ success: false, message: err.message });
   }
 };
 
@@ -102,13 +138,10 @@ const checkdeleteAddress = async (req, res) => {
       req.session.userId,
       req.params.addressId
     );
-
-    req.flash("success", "Address deleted");
-    res.redirect("/checkout");
+    return res.json({ success: true });
 
   } catch (err) {
-    req.flash("error", err.message);
-    res.redirect("/checkout");
+    return res.json({ success: false, message: err.message });
   }
 };
 
@@ -144,15 +177,30 @@ const orderSuccess = async (req, res) => {
          return res.redirect("/shop"); } 
   };
 
+
 const placeOrder = async (req, res) => {
   try {
     const userId = req.session.userId;
-   let { addressId, paymentMethod } = req.body;
-      if (paymentMethod === "razorpay") {
-          paymentMethod = "online";
-    }
+    let { addressId, paymentMethod } = req.body;
 
-    const order = await placeOrderService(userId, addressId, paymentMethod);
+    if (paymentMethod === "razorpay") {
+      paymentMethod = "online";
+    }
+        console.log("=== placeOrder session.appliedCoupon ===", req.session.appliedCoupon);
+
+    // ✅ Pull coupon from session
+    const appliedCoupon = req.session.appliedCoupon || null;
+        console.log("=== appliedCoupon passed to service ===", appliedCoupon);
+
+    const order = await placeOrderService(userId, addressId, paymentMethod, undefined, appliedCoupon);
+
+  
+    console.log("=== Order discount ===", order.discount);
+    console.log("=== Order finalAmount ===", order.finalAmount);
+    console.log("=== Order totalAmount ===", order.totalAmount);
+
+
+    delete req.session.appliedCoupon;
 
     req.flash("success", "Order placed successfully");
     return res.redirect(`/order-success/${order._id}`);
@@ -161,7 +209,6 @@ const placeOrder = async (req, res) => {
     console.log("Place Order Error:", err.message);
     const data = await getCheckoutData(req.session.userId);
 
-   
     const now = new Date();
     const availableCoupons = await Coupon.find({
       isActive: true,
@@ -169,7 +216,6 @@ const placeOrder = async (req, res) => {
       endDate: { $gte: now }
     });
     const razorpayKey = process.env.RAZORPAY_KEY_ID;
-
 
     if (err.message.toLowerCase().includes("stock")) {
       return res.render("user/checkout", {
@@ -190,26 +236,45 @@ const placeOrder = async (req, res) => {
       successMessages: [],
       errorMessages: [err.message],
       availableCoupons,
-      razorpayKey   
+      razorpayKey
     });
   }
 };
 
-const applyCoupon = async(req,res)=>{
-  try {
-    const {code} = req.body;
-    const userId = req.session.userId;
-         console.log('=== Apply Coupon Request ===');
-        console.log('Received code:', code);
-console.log("Session:", req.session);
-    const result = await applyCouponService(code,userId,req.session);
-    return res.json(result)
-  } catch (error) {
-    console.log(error);
-    res.json({success:false,message:"Something went wrong"});
-  }
 
-}
+const applyCoupon = async (req, res) => {
+    try {
+        const { code } = req.body;
+        const userId = req.session.userId;
+
+        if (!code || !code.trim()) {
+            return res.json({ success: false, message: "Please enter a coupon code" });
+        }
+
+        if (!userId) {
+            return res.json({ success: false, message: "Please login to apply a coupon" });
+        }
+
+        const result = await applyCouponService(code.trim(), userId, req.session);
+        return res.json(result);
+
+    } catch (error) {
+        console.error("Apply coupon error:", error);
+        return res.json({ success: false, message: "Something went wrong" });
+    }
+};
+
+const removeCoupon = async (req, res) => {
+    try {
+        const result = await removeCouponService(req.session);
+        return res.json(result);
+    } catch (error) {
+        console.error("Remove coupon error:", error);
+        return res.json({ success: false, message: "Something went wrong" });
+    }
+};
+
+
 export default {
   getCheckOutPage,
   checkaddAddress,
@@ -218,5 +283,7 @@ export default {
   checksetDefaultAddress,
   orderSuccess,
   placeOrder,
-  applyCoupon
+  applyCoupon,
+  removeCoupon,
+  getAddressById
 }

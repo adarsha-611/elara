@@ -36,6 +36,7 @@ router.post('/checkout/address/edit', isLoggedIn, checkoutController.checkeditAd
 router.post('/checkout/address/delete/:addressId', isLoggedIn, checkoutController.checkdeleteAddress);
 router.post('/checkout/address/default/:addressId', isLoggedIn, checkoutController.checksetDefaultAddress);
 router.post('/checkout/apply-coupon',isLoggedIn,checkoutController.applyCoupon)
+router.get('/checkout/address/get/:addressId',checkoutController.getAddressById)
 
 router.get('/order-success/:orderId', isLoggedIn, checkoutController.orderSuccess);
 router.post('/checkout/place-order', isLoggedIn, checkoutController.placeOrder);

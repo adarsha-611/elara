@@ -407,8 +407,11 @@
         </div>
 
         <div class="product-info-panel">
-            <nav class="breadcrumb">Home / <%= product.category %> / <%= product.name %></nav>
-            <h1 class="product-title text-dark"><%= product.name %></h1>
+<nav class="breadcrumb">
+    <a href="/home">Home</a> / 
+    <a href="/shop">Shop</a> / 
+    <%= product.name %>
+</nav>            <h1 class="product-title text-dark"><%= product.name %></h1>
 
             <div class="status-container">
     <% const firstStock = product.variants[0].stock; %>
@@ -639,23 +642,23 @@ function getSelectedVariant() {
 
 // ---------- ADD TO CART FUNCTION ----------
 async function addToCartFromWishlist(productId, variantId, btn) {
-
     const res = await fetch(`/wishlist/addtocart/${productId}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ variantId })  
+        body: JSON.stringify({ variantId })
     });
 
     const data = await res.json();
 
     if (data.success) {
         showToast("Added to cart");
+        // ✅ Update cart count immediately
+        if (window.updateCartCount) window.updateCartCount();
         btn.closest(".product-card").remove();
     } else {
         showToast(data.message, "error");
     }
 }
-
 </script>
 <script>
 const currentImg = document.getElementById("current-img");
@@ -669,13 +672,15 @@ async function addToCart(productId, variantId, quantity = 1) {
         const res = await fetch("/cart/add", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ productId, variantId, quantity }) // ✅ FIX
+            body: JSON.stringify({ productId, variantId, quantity })
         });
 
         const data = await res.json();
 
         if (data.success) {
             showToast("Added to cart");
+            // ✅ Update cart count immediately
+            if (window.updateCartCount) window.updateCartCount();
         } else {
             showToast(data.message || "Failed", "error");
         }

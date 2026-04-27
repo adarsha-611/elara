@@ -1,117 +1,106 @@
-
 import { validateSignup } from "../../../utils/validators/joi_signup.js";
 import { verifyOTP, sendOTP } from "../../../services/email/emailService.js";
 import { findUserByemail, findUserByreferralCode } from "../../../services/user/userService.js";
-import {register} from '../../../services/user/auth/signupService.js'
+import { register } from '../../../services/user/auth/signupService.js';
 
-const getSignup = async(req,res)=>{
+const getSignup = async (req, res) => {
     try {
         const error = req.flash('error');
-        return res.render("user/auth/signup", { error }) 
+        return res.render("user/auth/signup", { error });
     } catch (error) {
-        console.log("Error rendering signup page:", error);
         res.status(500).send("server error: " + error.message);
     }
-}
+};
 
-
-
-const postSignup = async(req,res)=>{
+const postSignup = async (req, res) => {
     try {
-        const{error,value} = validateSignup(req.body);
-        
+        const { error, value } = validateSignup(req.body);
+
         if (error) {
-           return res.render("user/auth/signup", {
-            error: error.details.map(err => err.message).join('. '),
-            oldData: req.body
-});
+            return res.render("user/auth/signup", {
+                error: error.details.map(err => err.message).join('. '),
+                oldData: req.body
+            });
         }
-        
+
         const existingUser = await findUserByemail(value.email);
-        if(existingUser){
-            req.flash('error', 'An account with this email already exists. Please login instead.');
+        if (existingUser) {
+            req.flash('error', 'An account with this email already exists.');
             return res.redirect('/signup');
         }
 
- if (value.referralCodeUsed) {
-    const referredUser = await findUserByreferralCode(value.referralCodeUsed);
+        if (value.referralCode) {
+            const referredUser = await findUserByreferralCode(value.referralCode);
+            if (!referredUser) {
+                req.flash('error', 'Invalid referral code');
+                return res.redirect('/signup');
+            }
+        }
 
-  if (!referredUser) {
-    req.flash('error', 'Invalid referral code');
-    return res.redirect('/signup');
-  }
-}
-
-        
-        req.session.tempUser = value;
+        // ✅ Store full value object including referralCode
+        req.session.tempUser = {
+            fullName: value.fullName,
+            email: value.email,
+            password: value.password,
+            referralCode: value.referralCode || null  // ✅ explicitly preserve
+        };
         req.session.userEmail = value.email;
 
-        
         await sendOTP(value.email);
-        
         return res.render('user/auth/signupOtp', { email: value.email });
-    }
-    catch(error){
+
+    } catch (error) {
         console.log("Signup Error:", error);
-        req.flash('errors', ['An error occurred during registration. Please try again later.']);
+        req.flash('error', 'An error occurred. Please try again.');
         return res.redirect('/signup');
     }
-}
-
- const verifyOtp = async (req, res) => {
-  try {
-    const { otp } = req.body;
-    const email = req.session.userEmail;
-    const tempUser = req.session.tempUser;
-
-    if (!email || !tempUser) {
-      req.flash('error', 'Session expired. Please signup again.');
-      return res.redirect('/signup');
-    }
-
-    const isOtpValid = await verifyOTP(email, otp);
-
-    if (!isOtpValid) {
-      req.flash('error', 'Invalid or expired OTP');
-      return res.render('user/auth/signupOtp', { email });
-    }
-
-    await register(tempUser);
-
-    delete req.session.tempUser;
-    delete req.session.userEmail;
-
-    req.flash('success', 'Account created successfully. Please login.');
-    return res.redirect('/login');
-
-  } catch (error) {
-    console.log("OTP Verification Error:", error);
-    return res.render('user/auth/signupOtp', {
-      email: req.session.userEmail,
-      error: error.message
-    });
-  }
 };
 
+const verifyOtp = async (req, res) => {
+    try {
+        const { otp } = req.body;
+        const email = req.session.userEmail;
+        const tempUser = req.session.tempUser;
 
- const resendOtp = async(req,res)=>{
+        if (!email || !tempUser) {
+            req.flash('error', 'Session expired. Please signup again.');
+            return res.redirect('/signup');
+        }
+
+        console.log("tempUser at OTP verify:", tempUser); // ✅ confirm referralCode is here
+
+        const isOtpValid = await verifyOTP(email, otp);
+        if (!isOtpValid) {
+            req.flash('error', 'Invalid or expired OTP');
+            return res.render('user/auth/signupOtp', { email });
+        }
+
+        await register(tempUser);
+
+        delete req.session.tempUser;
+        delete req.session.userEmail;
+
+        req.flash('success', 'Account created successfully. Please login.');
+        return res.redirect('/login');
+
+    } catch (error) {
+        console.log("OTP Verification Error:", error);
+        return res.render('user/auth/signupOtp', {
+            email: req.session.userEmail,
+            error: error.message
+        });
+    }
+};
+
+const resendOtp = async (req, res) => {
     try {
         const email = req.session.userEmail;
-        if(!email){
-            return res.status(400).json({ success: false, message: 'Email not found in session' });
-        }
+        if (!email) return res.status(400).json({ success: false, message: 'Email not found in session' });
         await sendOTP(email);
         return res.status(200).json({ success: true, message: 'OTP resent successfully' });
     } catch (error) {
-        console.log("Resend OTP Error:", error);
         return res.status(500).json({ success: false, message: 'Failed to resend OTP' });
     }
- }
+};
 
- export default {
-     getSignup,
-     postSignup,
-     verifyOtp,
-     resendOtp
- }
-
+export default { getSignup, postSignup, verifyOtp, resendOtp };

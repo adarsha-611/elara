@@ -143,15 +143,35 @@ let refundAmount = 0;
 
 
 
- if(order.paymentMethod !== "cod" && !item.isRefunded){
-  const refundAmount = item.price*item.quantity;
+// REPLACE this block:
+if (order.paymentMethod !== "cod" && !item.isRefunded) {
+  let refundAmount = item.price * item.quantity;  // ❌ shadows outer refundAmount
 
-  await cancelRefundToWallet(order.user,refundAmount,order._id);
+  if (order.discount && order.totalAmount) {
+    const discountRatio = order.discount / order.totalAmount;
+    refundAmount = refundAmount - (refundAmount * discountRatio);
+    refundAmount = Math.round(refundAmount * 100) / 100;
+  }
 
+  await cancelRefundToWallet(order.user, refundAmount, order._id);
   item.isRefunded = true;
   refundDone = true;
+}
 
- }
+
+if (order.paymentMethod !== "cod" && !item.isRefunded) {
+  refundAmount = item.price * item.quantity;  // ✅ assigns to outer variable
+
+  if (order.discount && order.totalAmount) {
+    const discountRatio = order.discount / order.totalAmount;
+    refundAmount = refundAmount - (refundAmount * discountRatio);
+    refundAmount = Math.round(refundAmount * 100) / 100;
+  }
+
+  await cancelRefundToWallet(order.user, refundAmount, order._id);
+  item.isRefunded = true;
+  refundDone = true;
+}
 
 
 const cancelledCount = order.items.filter(
@@ -166,16 +186,6 @@ if (cancelledCount === order.items.length) {
 }
 
 await order.save();
-
-  const allCancelled = order.items.every(
-    i => i.itemStatus === "cancelled"
-  );
-
-  if (allCancelled) {
-    order.orderStatus = "cancelled";
-  }
-
-  await order.save();
 
   return {
     refundDone,
