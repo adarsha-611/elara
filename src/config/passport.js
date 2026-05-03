@@ -38,6 +38,13 @@ passport.use(
             await user.save();
           }
         }
+
+        if(user.isBlocked){
+           console.log("USER IS BLOCKED - sending message"); 
+          return done (null,false,{
+            message:"Your account is not accessible.Please contact support."
+          })
+        }
         return done(null, user);
       } 
     catch (error) {

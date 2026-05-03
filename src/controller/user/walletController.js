@@ -2,20 +2,28 @@ import { getWalletService ,addMoneyToWallet,deductWalletBalance,returnRefundToWa
 import razorpayInstance from "../../config/razorpay.js";
 import crypto from "crypto";
 import User from "../../model/userSchema.js";
-const getWalletPage =async(req,res)=>{
-    try {
-        const userId = req.session.userId;
-        const wallet = await getWalletService(userId);
-        const user = await User.findById(userId);
-        return res.render("user/wallet",{
-            user,
-            wallet
-        })
-    } catch (error) {
-        console.log(error);
-        return res.status(500).send("Server error")
-    }
-}
+
+const getWalletPage = async (req, res) => {
+  try {
+    const userId = req.session.userId;
+    const page = parseInt(req.query.page) || 1;        
+
+    const wallet = await getWalletService(userId, page, 5);
+    const user = await User.findById(userId);
+
+    return res.render("user/wallet", {
+      user,
+      wallet,
+      currentPage: wallet.currentPage,
+      totalPages: wallet.totalPages
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).send("Server error");
+  }
+};
+
+
 
 const createWalletOrder = async(req,res)=>{
     try {
@@ -46,8 +54,6 @@ const createWalletOrder = async(req,res)=>{
 
 const verifyWalletPayment = async (req, res) => {
     try {
-        console.log("=== VERIFY API HIT ===");
-        console.log("Full Body:", req.body);
         
         const {
             razorpay_order_id,
@@ -68,9 +74,6 @@ const verifyWalletPayment = async (req, res) => {
             .update(body)
             .digest("hex");
 
-        console.log("Expected Signature:", expectedSignature);
-        console.log("Received Signature:", razorpay_signature);
-
         if (expectedSignature !== razorpay_signature) {
             return res.json({
                 success: false,
@@ -78,7 +81,6 @@ const verifyWalletPayment = async (req, res) => {
             });
         }
         const wallet = await addMoneyToWallet(req.session.userId, Number(amount));
-        console.log("Wallet updated:", wallet.balance);
 
         res.json({ success: true, message: "Money added to wallet" });
 

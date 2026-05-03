@@ -34,10 +34,10 @@ export const createProduct = async (data, files) => {
    
     const variants = variantKeys.map((key) => {
       const variant = rawVariants[key];
-      const images = files
-        .filter(file => file.fieldname.includes(`variants[${key}][images]`))
-        .map(file => "/uploads/products/" + file.filename);
-
+     const images = files
+      .filter(file => file.fieldname.includes(`variants[${key}][images]`))
+      .map(file => file.path);
+      console.log(`Variant ${key} images:`, images);
       return {
         color: variant.color,
         price: Number(variant.price),
@@ -95,11 +95,14 @@ export const updateProduct = async (id, data, files) => {
     for (const key in rawVariants) {
       const incoming = rawVariants[key];
 
-      let images = incoming.existingImages
-        ? Object.values(incoming.existingImages)
-        : [];
+      const images = new Array(4).fill(null);
 
-      
+      if (incoming.existingImages) {
+        for (const [idx, url] of Object.entries(incoming.existingImages)) {
+          images[parseInt(idx)] = url;
+        }
+      }
+
       files.forEach(file => {
         const match = file.fieldname.match(/variants\[(\d+)\]\[images\]\[(\d+)\]/);
         if (!match) return;
@@ -108,28 +111,26 @@ export const updateProduct = async (id, data, files) => {
         const imgIdx = parseInt(match[2]);
 
         if (fileVIdx == key) {
-          images[imgIdx] = "/uploads/products/" + file.filename;
-        }
+        images[imgIdx] = file.path; 
+    }
       });
 
-      
-      if (incoming._id) {
-        
-        const existingVariant = product.variants.id(incoming._id);
+      const finalImages = images.filter(img => img !== null);
 
+      if (incoming._id) {
+        const existingVariant = product.variants.id(incoming._id);
         if (existingVariant) {
           existingVariant.color = incoming.color;
           existingVariant.price = Number(incoming.price);
           existingVariant.stock = Number(incoming.stock);
-          existingVariant.images = images;
+          existingVariant.images = finalImages; 
         }
       } else {
-       
         product.variants.push({
           color: incoming.color,
           price: Number(incoming.price),
           stock: Number(incoming.stock),
-          images
+          images: finalImages
         });
       }
     }

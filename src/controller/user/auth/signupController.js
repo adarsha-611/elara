@@ -32,17 +32,18 @@ const postSignup = async (req, res) => {
         if (value.referralCode) {
             const referredUser = await findUserByreferralCode(value.referralCode);
             if (!referredUser) {
-                req.flash('error', 'Invalid referral code');
-                return res.redirect('/signup');
+                return res.render("user/auth/signup", {
+                    error: "Invalid referral code. Please check and try again.",
+                    oldData: req.body  
+                });
             }
         }
 
-        // ✅ Store full value object including referralCode
         req.session.tempUser = {
             fullName: value.fullName,
             email: value.email,
             password: value.password,
-            referralCode: value.referralCode || null  // ✅ explicitly preserve
+            referralCodeUsed: value.referralCode || null  
         };
         req.session.userEmail = value.email;
 
@@ -62,21 +63,33 @@ const verifyOtp = async (req, res) => {
         const email = req.session.userEmail;
         const tempUser = req.session.tempUser;
 
+        console.log("Verifying OTP:", otp, "for email:", email); 
+
         if (!email || !tempUser) {
             req.flash('error', 'Session expired. Please signup again.');
             return res.redirect('/signup');
         }
 
-        console.log("tempUser at OTP verify:", tempUser); // ✅ confirm referralCode is here
+        try {
+            await verifyOTP(email, otp);
+        } catch (otpErr) {
+            console.log("OTP Error caught:", otpErr.message); 
+            
+            let message = 'Invalid OTP. Please try again.';
+            if (otpErr.message === 'OTP expired') {
+                message = 'Your OTP has expired. Please request a new one.';
+            } else if (otpErr.message === 'OTP not found') {
+                message = 'OTP not found. Please request a new one.';
+            }
 
-        const isOtpValid = await verifyOTP(email, otp);
-        if (!isOtpValid) {
-            req.flash('error', 'Invalid or expired OTP');
-            return res.render('user/auth/signupOtp', { email });
+            return res.render('user/auth/signupOtp', { 
+                email, 
+                error: message, 
+                success: '' 
+            });
         }
 
         await register(tempUser);
-
         delete req.session.tempUser;
         delete req.session.userEmail;
 
@@ -84,10 +97,11 @@ const verifyOtp = async (req, res) => {
         return res.redirect('/login');
 
     } catch (error) {
-        console.log("OTP Verification Error:", error);
+        console.log("Unexpected error:", error);
         return res.render('user/auth/signupOtp', {
             email: req.session.userEmail,
-            error: error.message
+            error: 'Something went wrong. Please try again.',
+            success: ''
         });
     }
 };

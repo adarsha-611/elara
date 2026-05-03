@@ -31,6 +31,7 @@ const getUsers = async (req, res) => {
             currentPage,
             totalPages,
             search,
+            currentMenu:"users",
             success: req.flash("success"),
             error: req.flash("error"),
             sidebarPage: "users"

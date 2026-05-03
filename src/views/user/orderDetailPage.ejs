@@ -369,23 +369,28 @@
         <section class="details-content">
             <h1 class="font-serif text-3xl mb-8 text-stone-800" style="font-family: 'Playfair Display', serif;">Order Details</h1>
 
-            <!-- ✅ Payment Failed Banner — shown at top if payment failed -->
-            <% if(order.paymentStatus === 'failed') { %>
-            <div class="payment-failed-banner">
-                <div class="banner-left">
-                    <div class="banner-icon">
-                        <i class="fa-solid fa-xmark"></i>
-                    </div>
-                    <div class="banner-text">
-                        <strong>Payment Failed</strong>
-                        <span>Your payment could not be processed. Please retry to confirm your order.</span>
-                    </div>
-                </div>
-                <a href="/payment-failed/<%= order._id %>" class="btn-retry">
-                    Retry Payment →
-                </a>
-            </div>
-            <% } %>
+<% if(order.paymentStatus === 'failed' || (order.paymentMethod === 'online' && order.paymentStatus === 'pending')) { %>
+<div class="payment-failed-banner">
+    <div class="banner-left">
+        <div class="banner-icon">
+            <i class="fa-solid fa-xmark"></i>
+        </div>
+        <div class="banner-text">
+            <strong style="color:#dc2626;">
+                <%= order.paymentStatus === 'failed' ? 'Payment Failed' : 'Payment Pending' %>
+            </strong>
+            <span>
+                <%= order.paymentStatus === 'failed' 
+                    ? 'Your payment could not be processed. Please retry to confirm your order.' 
+                    : 'Your payment was not completed. Please retry to confirm your order.' %>
+            </span>
+        </div>
+    </div>
+    <a href="/payment-failed/<%= order._id %>" class="btn-retry">
+        Retry Payment →
+    </a>
+</div>
+<% } %>
 
             <!-- Order Status Card -->
             <div class="card">
@@ -476,120 +481,138 @@ const cancellableItems = order.items.filter(i =>
                 </div>
                 
 
-                <!-- Items list -->
                 <% order.items.forEach(item => { %>
-                <div class="order-item">
-                    <% let variant = item.product?.variants?.find(v => v.color === item.variantColor); %>
-                    <img src="<%= (variant && variant.images?.length > 0) ? variant.images[0] : '/images/no-image.png' %>" alt="Product">
+<div class="order-item">
+    <% let variant = item.product?.variants?.find(v => v.color === item.variantColor); %>
+    <img src="<%= (variant && variant.images?.length > 0) ? variant.images[0] : '/images/no-image.png' %>" alt="Product">
 
-                    <div class="item-details">
-                        <span class="item-name"><%= item.product?.name || "Jewelry Item" %></span>
-                        <div class="item-info-text">Qty: <%= item.quantity %> &nbsp;|&nbsp; Price: ₹<%= item.total.toLocaleString() %></div>
-                        <div class="item-info-text">Color: <%= item.variantColor %></div>
+    <div class="item-details">
+        <span class="item-name"><%= item.product?.name || "Jewelry Item" %></span>
+        <div class="item-info-text">
+    Qty: <%= item.quantity %> | 
+    <% if (item._offer) { %>
+        <span style="text-decoration:line-through; color:#999;">
+            ₹<%= (item.price * item.quantity).toLocaleString() %>
+        </span>
+        <span style="color:#2e7d32; font-weight:700; margin-left:6px;">
+            ₹<%= ((item.price - item._offerDiscount) * item.quantity).toLocaleString() %>
+        </span>
+        <span style="background:#e8f5e9; color:#2e7d32; font-size:0.75rem; 
+                     padding:2px 8px; border-radius:10px; margin-left:6px;">
+            <%= item._offer.name %> applied
+        </span>
+    <% } else { %>
+        Price: ₹<%= item.total.toLocaleString() %>
+    <% } %>
+</div>
 
-                        <%
-                        let displayStatus = item.itemStatus;
-                        let badgeClass = 'badge-pending';
+        <div class="item-info-text">Color: <%= item.variantColor %></div>
 
-                        if(item.returnRequest?.status === 'pending'){
-                            displayStatus = 'Return Requested';
-                            badgeClass = 'badge-out';
-                        } else if(item.returnRequest?.status === 'accepted'){
-                            displayStatus = 'Returned';
-                            badgeClass = 'badge-delivered';
-                        } else if(item.returnRequest?.status === 'rejected'){
-                            displayStatus = 'Return Rejected';
-                            badgeClass = 'badge-cancelled';
-                        } else {
-                            if(item.itemStatus === 'pending' || item.itemStatus === 'confirmed') badgeClass = 'badge-pending';
-                            if(item.itemStatus === 'shipped') badgeClass = 'badge-shipped';
-                            if(item.itemStatus === 'out for delivery') badgeClass = 'badge-out';
-                            if(item.itemStatus === 'delivered') badgeClass = 'badge-delivered';
-                            if(item.itemStatus === 'cancelled') badgeClass = 'badge-cancelled';
-                        }
-                        %>
+        <%
+        let displayStatus = item.itemStatus;
+        let badgeClass = 'badge-pending';
 
-                        <span class="status-badge <%= badgeClass %>">
-                            <%= displayStatus.toUpperCase() %>
-                        </span>
-                    </div>
+        if(item.returnRequest?.status === 'pending'){
+            displayStatus = 'Return Requested';
+            badgeClass = 'badge-out';
+        } else if(item.returnRequest?.status === 'accepted'){
+            displayStatus = 'Returned';
+            badgeClass = 'badge-delivered';
+        } else if(item.returnRequest?.status === 'rejected'){
+            displayStatus = 'Return Rejected';
+            badgeClass = 'badge-cancelled';
+        } else {
+            if(item.itemStatus === 'pending' || item.itemStatus === 'confirmed') badgeClass = 'badge-pending';
+            if(item.itemStatus === 'shipped') badgeClass = 'badge-shipped';
+            if(item.itemStatus === 'out for delivery') badgeClass = 'badge-out';
+            if(item.itemStatus === 'delivered') badgeClass = 'badge-delivered';
+            if(item.itemStatus === 'cancelled') badgeClass = 'badge-cancelled';
+        }
+        %>
 
-                    <!-- ✅ Hide cancel/return buttons if payment failed -->
-                    <% if(order.paymentStatus !== 'failed') { %>
-                        <% if(['pending','confirmed','shipped','out for delivery'].includes(item.itemStatus)) { %>
-                            <button onclick="openCancelModal('<%= order._id %>','<%= item._id %>')" class="btn-cancel-item">
-                                CANCEL
-                            </button>
-                        <% } else if(item.itemStatus === 'delivered') { %>
-                            <div style="display:flex; flex-direction:column; gap:8px;">
-                                <button onclick="openReviewModal('<%= item.product._id %>')" class="btn-return-item">
-                                    WRITE REVIEW
-                                </button>
-                                <% if(!item.returnRequest || item.returnRequest.status === 'none') { %>
-                                    <button onclick="openReturnModal('<%= order._id %>','<%= item._id %>')" class="btn-return-item">
-                                        RETURN
-                                    </button>
-                                <% } %>
-                            </div>
-                        <% } %>
-                    <% } %>
-                </div>
-                <% }) %>
-
-<<<<<<< HEAD
-                <div class="flex justify-center gap-4 mt-8">
-                    <% if(order.paymentStatus === 'paid') { %>
-                        <a href="/profile/orders/<%= order._id %>/invoice" class="btn-action btn-primary">Download Invoice</a>
-                    <% } %>
-                    <a href="/profile/orders" class="btn-action btn-secondary">Back to My Orders</a>
-                </div>
-=======
-    <!-- CANCEL BUTTON -->
-    <button onclick="openCancelModal('<%= order._id %>','<%= item._id %>')" class="btn-cancel-item">
-        CANCEL
-    </button>
-
-<% } else if (item.itemStatus === 'delivered') { %>
-
-    <div style="display:flex; flex-direction:column; gap:8px;">
-
-        <!-- REVIEW BUTTON (TOP) -->
-        <button 
-            onclick="openReviewModal('<%= item.product._id %>')" 
-            class="btn-return-item">
-            WRITE REVIEW
-        </button>
-
-        <!-- RETURN BUTTON (ONLY IF NOT REQUESTED) -->
-        <% if (!item.returnRequest || item.returnRequest.status === 'none') { %>
-            <button 
-                onclick="openReturnModal('<%= order._id %>','<%= item._id %>')" 
-                class="btn-return-item">
-                RETURN
-            </button>
-        <% } %>
-
+        <span class="status-badge <%= badgeClass %>">
+            <%= displayStatus.toUpperCase() %>
+        </span>
     </div>
 
-<% } %>
-            </div>
-            <% }) %>
+    <% if(order.paymentStatus !== 'failed') { %>
 
+        <% if(['pending','confirmed','shipped','out for delivery'].includes(item.itemStatus)) { %>
+            <button onclick="openCancelModal('<%= order._id %>','<%= item._id %>')" class="btn-cancel-item">
+                CANCEL
+            </button>
+
+        <% } else if(item.itemStatus === 'delivered') { %>
+
+            <div style="display:flex; flex-direction:column; gap:8px;">
+
+                <button onclick="openReviewModal('<%= item.product._id %>')" class="btn-return-item">
+                    WRITE REVIEW
+                </button>
+
+                <% if(!item.returnRequest || item.returnRequest.status === 'none') { %>
+                    <button onclick="openReturnModal('<%= order._id %>','<%= item._id %>')" class="btn-return-item">
+                        RETURN
+                    </button>
+                <% } %>
+
+            </div>
+
+        <% } %>
+
+    <% } %>
+
+</div>
+<% }) %>
 
 <div style="margin-top: 25px; border-top: 1px solid var(--border-color); padding-top: 20px;">
     <div style="display: flex; flex-direction: column; gap: 10px; max-width: 350px; margin-left: auto;">
-        
-        <div style="display: flex; justify-content: space-between; font-size: 0.9rem; color: #555;">
-            <span>Subtotal</span>
-            <span>₹<%= order.totalAmount.toLocaleString() %></span>
+
+        <%
+        // Calculate subtotal after item-level offer discounts
+        let subtotalAfterOffers = order.items.reduce((sum, item) => {
+            if (item._offer && item._offerDiscount) {
+                return sum + ((item.price - item._offerDiscount) * item.quantity);
+            }
+            return sum + item.total;
+        }, 0);
+
+        // Calculate total offer savings
+        let offerSavings = order.items.reduce((sum, item) => {
+            if (item._offer && item._offerDiscount) {
+                return sum + (item._offerDiscount * item.quantity);
+            }
+            return sum;
+        }, 0);
+        %>
+
+        <!-- Original price row -->
+        <% if (offerSavings > 0) { %>
+        <div style="display: flex; justify-content: space-between; color: #999;">
+            <span>Original Price</span>
+            <span style="text-decoration: line-through;">₹<%= order.totalAmount.toLocaleString() %></span>
         </div>
 
+        <!-- Offer savings row -->
+        <div style="display: flex; justify-content: space-between; color: #2e7d32;">
+            <span>Offer Discount</span>
+            <span>- ₹<%= offerSavings.toLocaleString() %></span>
+        </div>
+        <% } %>
+
+        <!-- Subtotal after offers -->
+        <div style="display: flex; justify-content: space-between;">
+            <span>Subtotal</span>
+            <span>₹<%= subtotalAfterOffers.toLocaleString() %></span>
+        </div>
+
+        <!-- Coupon discount -->
         <% if (order.discount && order.discount > 0) { %>
-        <div style="display: flex; justify-content: space-between; font-size: 0.9rem; color: #2e7d32;">
+        <div style="display: flex; justify-content: space-between; color: #2e7d32;">
             <span>
                 Coupon Discount
                 <% if (order.couponApplied) { %>
-                    <span style="font-size: 0.75rem; background: #e8f5e9; padding: 2px 8px; border-radius: 10px; margin-left: 5px;">
+                    <span style="font-size: 0.75rem; background: #e8f5e9; padding: 2px 8px; border-radius: 10px;">
                         APPLIED
                     </span>
                 <% } %>
@@ -598,7 +621,8 @@ const cancellableItems = order.items.filter(i =>
         </div>
         <% } %>
 
-        <div style="display: flex; justify-content: space-between; font-size: 1rem; font-weight: 700; color: var(--dark-brown); border-top: 1px solid var(--border-color); padding-top: 10px; margin-top: 5px;">
+        <!-- Final total -->
+        <div style="display: flex; justify-content: space-between; font-weight: 700; border-top: 1px solid #eee; padding-top: 10px; margin-top: 5px;">
             <span>Total Paid</span>
             <span>₹<%= (order.finalAmount || order.totalAmount).toLocaleString() %></span>
         </div>
@@ -606,11 +630,28 @@ const cancellableItems = order.items.filter(i =>
     </div>
 </div>
 
-            <div class="flex justify-center gap-4 mt-8">
-                <a href="/profile/orders/<%= order._id %>/invoice" class="btn-action btn-primary">Download Invoice</a>
-                <a href="/profile/orders" class="btn-action btn-secondary">Back to My Orders</a>
->>>>>>> feature/refferal
-            </div>
+
+<%
+const isDelivered = order.items.every(i => i.itemStatus === 'delivered');
+const isCodDelivered = order.paymentMethod === 'cod' && isDelivered;
+const showInvoice = order.paymentStatus === 'paid' || isCodDelivered;
+const showRetry = order.paymentStatus === 'failed' || 
+                  (order.paymentMethod === 'online' && order.paymentStatus === 'pending');
+%>
+
+<div class="flex justify-center gap-4 mt-8">
+    <% if(showInvoice) { %>
+        <a href="/profile/orders/<%= order._id %>/invoice" class="btn-action btn-primary">
+            Download Invoice
+        </a>
+    <% } %>
+
+    
+
+    <a href="/profile/orders" class="btn-action btn-secondary">
+        Back to My Orders
+    </a>
+</div>
         </section>
     </main>
 

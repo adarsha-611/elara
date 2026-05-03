@@ -333,19 +333,18 @@ document.getElementById('productForm').addEventListener('submit', async e => {
 
     // Only keep hidden inputs when NO new file was selected
     document.querySelectorAll('.image-upload-box').forEach(box => {
-        const fileInput = box.querySelector('.file-input');
-        const previewVisible = box.querySelector('.preview-container').style.display !== 'none';
+    const fileInput = box.querySelector('.file-input');
 
-        if (fileInput.files?.length > 0 && previewVisible) {
-            // New file → remove old hidden (if any)
-            box.querySelector('input[type="hidden"]')?.remove();
+    if (fileInput.files?.length > 0) {
+        // New file selected → remove existing hidden URL input
+        box.querySelector('input[type="hidden"]')?.remove();
 
-            const vIdx = box.closest('.variant-block').dataset.variantIndex;
-            const iIdx = box.dataset.imgIndex;
-            formData.append(`variants[${vIdx}][images][${iIdx}]`, fileInput.files[0]);
-        }
-        // If no file → hidden stays → old URL preserved
-    });
+        const vIdx = box.closest('.variant-block').dataset.variantIndex;
+        const iIdx = box.dataset.imgIndex;
+        formData.append(`variants[${vIdx}][images][${iIdx}]`, fileInput.files[0]);
+    }
+    // No file selected → hidden input remains → backend keeps old Cloudinary URL
+});
 
     try {
         const res = await fetch(`/admin/edit-product/<%= product._id %>`, {

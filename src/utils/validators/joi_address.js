@@ -3,6 +3,7 @@ import Joi from "joi";
 export function validateAddress(data) {
   const schema = Joi.object({
     addressId: Joi.string().allow("").optional(),
+    paymentStatus: Joi.string().allow("").optional(),
 
     fullName: Joi.string()
       .trim()
@@ -18,14 +19,20 @@ export function validateAddress(data) {
         "any.required": "Full name is required"
       }),
 
-    phoneNumber: Joi.string()
-      .pattern(/^[0-9]{10}$/)
-      .required()
-      .messages({
-        "string.pattern.base": "Phone number must be exactly 10 digits",
-        "string.empty": "Phone number is required",
-        "any.required": "Phone number is required"
-      }),
+   phoneNumber: Joi.string()
+  .pattern(/^[6-9]\d{9}$/)
+  .custom((value, helpers) => {
+    if (/^(\d)\1{9}$/.test(value)) {
+      return helpers.error('any.invalid');
+    }
+    return value;
+  })
+  .required()
+  .messages({
+    "string.pattern.base": "Enter a valid 10-digit phone number",
+    "any.invalid": "Invalid phone number",
+    "string.empty": "Phone number is required"
+  }),
 
     street: Joi.string()
       .trim()
@@ -68,13 +75,19 @@ export function validateAddress(data) {
       }),
 
     pincode: Joi.string()
-      .pattern(/^[0-9]{6}$/)
-      .required()
-      .messages({
-        "string.pattern.base": "Pincode must be exactly 6 digits",
-        "string.empty": "Pincode is required",
-        "any.required": "Pincode is required"
-      }),
+      .pattern(/^[1-9][0-9]{5}$/)
+      .custom((value, helpers) => {
+       if (/^(\d)\1{5}$/.test(value)) {
+          return helpers.error('any.invalid');
+      }
+      return value;
+    })
+    .required()
+    .messages({
+     "string.pattern.base": "Enter valid 6-digit pincode",
+     "any.invalid": "Invalid pincode"
+    }),
+
 
     addressType: Joi.string()
       .valid("Home", "Work")

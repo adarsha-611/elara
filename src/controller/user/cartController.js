@@ -34,14 +34,14 @@ const offerData = await getBestOfferForProduct(product, variant.price);
     variantId: item.variantId,
     name: product.name,
 
-    price: finalPrice,          // ✅ FIXED
-    originalPrice: variant.price, // (optional for UI strike)
+    price: finalPrice,          
+    originalPrice: variant.price, 
 
     stock: variant.stock,
     quantity: item.quantity,
     image: variant.images?.[0] || "/images/no-image.png",
 
-    offerData,                 // ✅ send to UI
+    offerData,                 
 
     isBlocked,
     isOutOfStock: variant.stock === 0

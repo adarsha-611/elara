@@ -19,17 +19,15 @@ export const syncCartProducts = async(userId) => {
     const variant = product.variants.id(item.variantId);
     if(!variant) continue;
 
-    // Stock check (existing logic)
     if(item.quantity > variant.stock){
       item.quantity = Math.max(1, variant.stock);
       stockChangedMessage = `Quantity reduced to ${item.quantity} due to stock changes.`;
     }
 
-    // Offer check — compare stored offer price vs current offer
+   
     const offerData = await getBestOfferForProduct(product, variant.price);
     const currentFinalPrice = offerData ? offerData.finalPrice : variant.price;
 
-    // If item has a saved offerPrice and it no longer matches current
     if(item.offerPrice !== undefined && item.offerPrice !== null){
       if(!offerData || Math.round(currentFinalPrice) !== Math.round(item.offerPrice)){
         offerChangedMessage = `An offer on "${product.name}" has changed or expired. Price has been updated.`;

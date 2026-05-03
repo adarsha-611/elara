@@ -40,7 +40,7 @@ router.post("/reset-password", forgotPasswordController.postResetPasword);
 
 router.get("/auth/google", loginController.googleAuth);
 
-router.get("/auth/google/callback",...loginController.googleCallback);
+router.get("/auth/google/callback",loginController.googleCallback);
 
 
 export default router;

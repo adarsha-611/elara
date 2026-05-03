@@ -22,15 +22,8 @@ export const getOfferPageData = async(page=1,limit=5)=>{
 }
 
 export const addOfferService = async(data)=>{
-    console.log("ADD OFFER SERVICE CALLED");
-console.log("DATA:", data);
-console.log("Discount:", data.discountValue);
     if(data.offerType === "product" && data.discountType === "fixed"){
         const product = await Product.findById(data.productId);
-        console.log("SERVICE HIT", data);
-        
-        console.log("PRODUCT:", product);
-console.log("VARIANT PRICE:", product?.variants?.[0]?.price);
         if(!product){
             throw new Error("Product not found");
         }
@@ -42,7 +35,6 @@ if(!basePrice){
 }
 
 if(data.discountValue >= basePrice){
-        console.log("VALIDATION TRIGGERED ❌");
     throw new Error("Offer amount cannot be greater than or equal to product price");
 }
     }

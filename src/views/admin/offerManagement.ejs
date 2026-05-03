@@ -407,46 +407,54 @@
     <% } %>
 
 
-        function openOfferModal() {
-            document.getElementById("modal-title").innerText = "New Offer";
-            document.getElementById("offerForm").reset();
-            document.getElementById("offerForm").action = "/admin/offers/create";
-            document.getElementById("edit-id").value = "";
-            document.getElementById("offerType").value = "product";
-            // Reset checkbox to checked (default active)
-            document.querySelector('input[name="isActive"]').checked = true;
-            switchTab('product');
-            document.body.classList.add("modal-open");
-        }
+       function openOfferModal() {
+    document.getElementById("modal-title").innerText = "New Offer";
+    document.getElementById("offerForm").reset();
+    document.getElementById("offerForm").action = "/admin/offers/create";
+    document.getElementById("edit-id").value = "";
+    document.getElementById("offerType").value = "product";
+    document.querySelector('input[name="isActive"]').checked = true;
 
-        function openOfferModalForEdit(id, name, offerType, discountType, discountValue, productId, categoryId, startDate, endDate, isActive) {
-            document.getElementById("modal-title").innerText = "Update Offer";
-            document.getElementById("edit-id").value = id;
-            document.getElementById("offer-name").value = name;
-            document.getElementById("discount-type").value = discountType;
-            document.getElementById("discount-val").value = discountValue;
-            
-            if(startDate) document.getElementById("start-date").value = startDate;
-            else document.getElementById("start-date").value = '';
-            if(endDate) document.getElementById("end-date").value = endDate;
-            else document.getElementById("end-date").value = '';
-            
-            document.querySelector('input[name="isActive"]').checked = isActive === true || isActive === "true";
-            
-            switchTab(offerType);
-            
-            if(offerType === "product" && productId){
-                document.getElementById("product-select").value = productId;
-            } else if(offerType === "category" && categoryId){
-                document.getElementById("category-select").value = categoryId;
-            } else {
-                if(offerType === "product") document.getElementById("product-select").value = "";
-                if(offerType === "category") document.getElementById("category-select").value = "";
-            }
-            
-            document.getElementById("offerForm").action = `/admin/offers/update/${id}`;
-            document.body.classList.add("modal-open");
-        }
+    
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementById('start-date').min = today;
+    document.getElementById('end-date').min = today;
+
+    switchTab('product');
+    document.body.classList.add("modal-open");
+}
+
+
+     function openOfferModalForEdit(id, name, offerType, discountType, discountValue, productId, categoryId, startDate, endDate, isActive) {
+    document.getElementById("modal-title").innerText = "Update Offer";
+    document.getElementById("edit-id").value = id;
+    document.getElementById("offer-name").value = name;
+    document.getElementById("discount-type").value = discountType;
+    document.getElementById("discount-val").value = discountValue;
+
+    const today = new Date().toISOString().split('T')[0];
+    const startVal = startDate || today;
+
+    document.getElementById("start-date").value = startVal;
+    document.getElementById("end-date").value = endDate || '';
+
+        document.getElementById('start-date').min = today;
+    document.getElementById('end-date').min = startVal;
+
+    document.querySelector('input[name="isActive"]').checked = isActive === true || isActive === "true";
+
+    switchTab(offerType);
+
+    if (offerType === "product" && productId) {
+        document.getElementById("product-select").value = productId;
+    } else if (offerType === "category" && categoryId) {
+        document.getElementById("category-select").value = categoryId;
+    }
+
+    document.getElementById("offerForm").action = `/admin/offers/update/${id}`;
+    document.body.classList.add("modal-open");
+}
+
 
         function closeOfferModal() { 
             document.body.classList.remove('modal-open'); 
@@ -489,6 +497,9 @@
                 }
             });
         });
+        document.getElementById('start-date').addEventListener('change', function() {
+    document.getElementById('end-date').min = this.value;
+});
     </script>
 </body>
 </html>

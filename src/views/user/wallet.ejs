@@ -29,15 +29,14 @@
         body { font-family: 'Poppins', sans-serif; background: #FAF9F7; }
         .serif { font-family: 'Playfair Display', serif; }
 
-        .profile-container { max-width: 1400px; margin: 0 auto; padding: 3rem 1.5rem; }
+        .profile-container { max-width: 1400px; margin: 0 auto; margin-top: 120px; padding: 3rem 1.5rem; }
         .profile-main { display: flex; flex-direction: column; gap: 2.5rem; }
 
         @media (min-width: 768px) {
             .profile-main { flex-direction: row; align-items: flex-start; }
         }
 
-        .sidebar-container { width: 100%; flex-shrink: 0; }
-        @media (min-width: 768px) { .sidebar-container { width: 280px; } }
+        .sidebar-container { width: 288px; min-width: 288px; flex-shrink: 0; }
 
         .content-area { flex: 1; min-width: 0; }
 
@@ -180,8 +179,8 @@
     <div class="profile-container">
         <div class="profile-main">
             
-            <div class="sidebar-container">
-                <%- include('../partials/profileSidebar', { user, path: '/profile/wallet' }) %>
+<div style="width: 288px; min-width: 288px; flex-shrink: 0;">
+                    <%- include('../partials/profileSidebar', { user, path: '/profile/wallet' }) %>
             </div>
 
             <div class="content-area">
@@ -233,7 +232,7 @@
                             </div>
                         </div>
 
-                        <div class="overflow-x-auto">
+                        <div >
                             <table>
                                 <thead>
                                     <tr>
@@ -305,13 +304,42 @@
                         </div>
                         
                         <!-- Transaction count info -->
-                        <div class="mt-6 pt-4 border-t border-elara-border flex justify-between items-center text-xs text-gray-400">
-                            <span id="transactionCount">Showing <span id="visibleCount">0</span> of <span id="totalCount">0</span> transactions</span>
-                            <span class="flex items-center gap-2">
-                                <i class="fa-regular fa-clock"></i> 
-                                Latest transactions first
-                            </span>
-                        </div>
+                        <!-- Transaction count info -->
+<div class="mt-6 pt-4 border-t border-elara-border flex justify-between items-center text-xs text-gray-400">
+    <span>
+        Showing <strong><%= wallet.transactions.length %></strong> of 
+        <strong><%= wallet.totalTransactions %></strong> transactions
+    </span>
+    <span class="flex items-center gap-2">
+        <i class="fa-regular fa-clock"></i> Latest transactions first
+    </span>
+</div>
+
+<% if (totalPages > 1) { %>
+<div class="mt-6 flex items-center justify-center gap-2">
+    <a href="?page=<%= currentPage - 1 %>" 
+       class="<%= currentPage === 1 ? 'pointer-events-none opacity-30' : 'hover:bg-elara-soft' %> 
+              w-10 h-10 flex items-center justify-center rounded-full border border-elara-border text-sm text-elara-dark transition-all">
+        ←
+    </a>
+
+    <% for (let i = 1; i <= totalPages; i++) { %>
+        <a href="?page=<%= i %>"
+           class="w-10 h-10 flex items-center justify-center rounded-full text-sm font-semibold transition-all
+                  <%= i === currentPage 
+                      ? 'bg-elara-dark text-white border border-elara-dark' 
+                      : 'border border-elara-border text-elara-dark hover:bg-elara-soft' %>">
+            <%= i %>
+        </a>
+    <% } %>
+
+    <a href="?page=<%= currentPage + 1 %>"
+       class="<%= currentPage === totalPages ? 'pointer-events-none opacity-30' : 'hover:bg-elara-soft' %> 
+              w-10 h-10 flex items-center justify-center rounded-full border border-elara-border text-sm text-elara-dark transition-all">
+        →
+    </a>
+</div>
+<% } %>
                     </div>
                 </div>
             </div>

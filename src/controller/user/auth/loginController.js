@@ -1,15 +1,17 @@
 import { findUserByemail } from "../../../services/user/userService.js";
 import { compareString } from "../../../utils/bcrypt.js";
 import passport from "passport";
-const getLogin = async(req,res)=>{
-    try {
-       const error = req.flash('error');
-       const success = req.flash('success');
-       return res.render("user/auth/login", { error, success }) 
-    } catch (error) {
-        console.log("error rendering login page:", error);
-        res.status(500).send("server error: " + error.message);
-    }
+
+const getLogin = async (req, res) => {
+  try {
+    return res.render("user/auth/login", {
+      error: res.locals.error,
+      success: res.locals.success
+    });
+  } catch (error) {
+    console.log("error rendering login page:", error);
+    res.status(500).send("server error: " + error.message);
+  }
 }
 
 const postLogin = async(req,res)=>{
@@ -52,7 +54,8 @@ const postLogin = async(req,res)=>{
 
         if(user.isBlocked){
             return res.render("user/auth/login", {
-               error: "Your account has been blocked."
+               error: "Your account is not accessible.Please contact support.",
+               success:[]
            });
        }
        
@@ -74,16 +77,26 @@ const googleAuth = passport.authenticate("google", {
   scope: ["profile", "email"],
 });
 
-const googleCallback = [
-  passport.authenticate("google", { failureRedirect: "/login" }),
-  (req, res) => {
-    req.session.userId = req.user._id;
-    req.session.userEmail = req.user.email;
-    req.session.userName = req.user.fullName;
+const googleCallback = (req, res, next) => {
+  passport.authenticate("google", (err, user, info) => {
+    if (err) return next(err);
 
-    res.redirect("/home");
-  },
-];
+    if (!user) {
+      req.flash("error", info?.message || "Google login failed.");
+      return res.redirect("/login");
+    }
+
+    req.logIn(user, (err) => {
+      if (err) return next(err);
+      req.session.userId = user._id;
+      req.session.userEmail = user.email;
+      req.session.userName = user.fullName;
+      return res.redirect("/home");
+    });
+  })(req, res, next);
+};
+
+
 export default {
     getLogin,
     postLogin,

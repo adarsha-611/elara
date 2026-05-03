@@ -1,142 +1,447 @@
 <!DOCTYPE html>
-<html lang="en"><head>
-<meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>Elara - Luxury Jewelry</title>
-<script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&amp;family=Lato:wght@300;400;700&amp;display=swap" rel="stylesheet"/>
-<link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet"/>
-<script>
-        tailwind.config = {
-            darkMode: "class",
-            theme: {
-                extend: {
-                    colors: {
-                        primary: "#a3866a", // Taupe/Gold accent color
-                        "primary-dark": "#8a7055",
-                        "background-light": "#f6f3f0", // Creamy white
-                        "background-dark": "#1a1a1a", // Dark gray for dark mode
-                        "charcoal": "#333333",
-                        "charcoal-dark": "#1f1f1f", // Footer dark
-                        "card-light": "#ffffff",
-                        "card-dark": "#2a2a2a",
-                    },
-                    fontFamily: {
-                        display: ["'Playfair Display'", "serif"],
-                        body: ["'Lato'", "sans-serif"],
-                    },
-                    borderRadius: {
-                        DEFAULT: "4px",
-                    },
-                },
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>ElARA-Home</title>
+  <!-- Tailwind CSS CDN + Google Fonts -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Custom Tailwind Configuration Override -->
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            gold: '#C5A47E',
+            'soft-beige': '#F5F0EB',
+            'luxury-black': '#111111',
+          },
+          fontFamily: {
+            serif: ['Playfair Display', 'Georgia', 'serif'],
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+          },
+          animation: {
+            'fade-in-up': 'fadeInUp 0.8s ease-out forwards',
+            'shimmer': 'shimmer 3s infinite',
+          },
+          keyframes: {
+            fadeInUp: {
+              '0%': { opacity: '0', transform: 'translateY(30px)' },
+              '100%': { opacity: '1', transform: 'translateY(0)' },
             },
-        };
-    </script>
-<style>.aspect-h-4 {
-            padding-bottom: 56.25%;
-        }
-    </style>
+            shimmer: {
+              '0%': { backgroundPosition: '-200% 0' },
+              '100%': { backgroundPosition: '200% 0' },
+            },
+          },
+        },
+      },
+    }
+  </script>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+
+    html {
+      scroll-behavior: smooth;
+    }
+    body {
+      background-color: #FFFFFF;
+    }
+    .hover-glow:hover {
+      box-shadow: 0 0 20px rgba(197, 164, 126, 0.6);
+      transition: box-shadow 0.4s ease;
+    }
+    .gold-shimmer {
+      background: linear-gradient(120deg, #C5A47E, #E4D5C0, #C5A47E);
+      background-size: 200% auto;
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      animation: shimmer 4s linear infinite;
+    }
+    @keyframes shimmer {
+      0% { background-position: -200% 0; }
+      100% { background-position: 200% 0; }
+    }
+    .card-hover {
+      transition: transform 0.4s cubic-bezier(0.2, 0.9, 0.4, 1.1), box-shadow 0.4s ease;
+    }
+    .card-hover:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 25px 35px -12px rgba(0, 0, 0, 0.15);
+    }
+    .img-zoom-container {
+      overflow: hidden;
+      border-radius: 1rem;
+    }
+    .img-zoom {
+      transition: transform 0.5s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+      will-change: transform;
+    }
+    .group:hover .img-zoom {
+      transform: scale(1.12);
+    }
+    .portrait-video-container {
+      transition: all 0.5s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+      overflow: hidden;
+      border-radius: 2rem;
+      width: 100%;
+      max-width: 520px;
+      margin: 0 auto;
+    }
+    .portrait-video-container:hover {
+      transform: scale(1.03);
+      box-shadow: 0 30px 50px -20px rgba(0,0,0,0.4);
+    }
+    .portrait-video {
+      aspect-ratio: 9 / 16;
+      width: 100%;
+      height: auto;
+      object-fit: cover;
+      transition: transform 0.7s ease;
+      min-height: 500px;
+    }
+    .portrait-video-container:hover .portrait-video {
+      transform: scale(1.02);
+    }
+    .fade-scroll {
+      opacity: 0;
+      transform: translateY(30px);
+      transition: opacity 0.9s ease, transform 0.9s ease;
+    }
+    .fade-scroll.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    /* Parallax effect */
+    .parallax-bg {
+      background-attachment: fixed;
+      background-position: center;
+      background-repeat: no-repeat;
+      background-size: cover;
+    }
+    @media (max-width: 768px) {
+      .parallax-bg {
+        background-attachment: scroll;
+      }
+      .portrait-video {
+        min-height: 400px;
+      }
+    }
+    /* Underline animation */
+    .nav-link {
+      position: relative;
+      padding-bottom: 4px;
+    }
+    .nav-link::after {
+      content: '';
+      position: absolute;
+      width: 0;
+      height: 1px;
+      bottom: 0;
+      left: 0;
+      background-color: #C5A47E;
+      transition: width 0.3s ease;
+    }
+    .nav-link:hover::after {
+      width: 100%;
+    }
+    .section-title {
+      position: relative;
+      display: inline-block;
+    }
+    .section-title:after {
+      content: '';
+      position: absolute;
+      bottom: -12px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 60px;
+      height: 2px;
+      background: #C5A47E;
+    }
+
+  </style>
 </head>
-<body class="bg-background-light dark:bg-background-dark text-charcoal dark:text-gray-200 transition-colors duration-300 font-body">
-<%- include('../partials/header') %>
+<body class="font-sans antialiased">
 
-<header class="w-full max-w-[1400px] mx-auto grid grid-cols-1 md:grid-cols-12 gap-4 px-4 md:px-8 mb-16">
-<div class="md:col-span-8 relative h-[600px] bg-gray-200 overflow-hidden group">
-<img alt="Woman wearing elegant black blazer and gold statement earrings" class="w-full h-full object-cover" src="/Images/Gemini_Generated_Image_i22pa3i22pa3i22p.png"/>
-<div class="absolute inset-0 bg-gradient-to-r from-black/40 to-transparent flex flex-col justify-center px-12 md:px-20 text-white">
-<h2 class="font-display text-4xl mb-4 tracking-wider">ELARA</h2>
-<h1 class="font-display text-5xl md:text-6xl mb-4 leading-tight">Statement Gold Earrings</h1>
-<p class="font-body text-lg mb-8 font-light tracking-wide opacity-90">Shop the latest collection.</p>
-<a class="bg-[#a3866a] hover:bg-[#8a7055] text-white px-8 py-3 w-max uppercase text-sm tracking-widest transition-colors shadow-lg" href="/shop">Shop Now</a>
-</div>
-</div>
-<div class="md:col-span-4 flex flex-col gap-4 h-[600px]">
-<div class="h-1/2 overflow-hidden bg-gray-200 relative">
-<img alt="Close up of gold drop earrings" class="w-full h-full object-cover" src="/Images/Earrings fo Daily Use _ Earrings.jfif"/>
-</div>
-<div class="h-1/2 overflow-hidden bg-gray-200 relative">
-<img alt="Woman touching her gold necklace and earrings" class="w-full h-full object-cover" src="/Images/night women.jfif"/>
-</div>
-</div>
-</header>
-<section class="w-full bg-primary py-16 text-center text-white px-4">
-<h2 class="font-display text-3xl md:text-4xl mb-4 tracking-wide">WELCOME, ELARA</h2>
-<p class="font-body font-light tracking-wide text-sm opacity-90">Slow luxury, handcrafted for the modern woman.</p>
-</section>
-<section class="max-w-6xl mx-auto py-20 px-4 md:px-8">
-<h3 class="font-display text-3xl md:text-4xl text-center mb-16 tracking-widest text-charcoal dark:text-white uppercase">New Arrivals</h3>
-<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-<div class="group cursor-pointer">
-<div class="bg-gray-100 dark:bg-card-dark aspect-square overflow-hidden mb-4 relative">
-<img alt="Venus Hoops gold earrings" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD8q5ojBt03YjfacY-_3V6ES37M2fpHFGDfjNVG2OEyjtHJ3PLtGAhsJ93W39mcqSxbw1X6N_zBQ2h485PM9QuOo8SyRlGl-YUVgxCgM8dZuv3AdTD8JWjaDZ6vM8jPfpAzq5OmPUu8TZgEfWtfItYZtHZK89c1l1uJDgsen8ew1fiwKa1BD6ndM7xtSh3flxu2IMZakwy3Y4Tdq6j0fxqVkYneTJoqXj9dNzvn-hDRS5UkA24pM6HIlnq338R9so0eouEh439TT895"/>
-</div>
-<div class="bg-white dark:bg-card-dark p-4 border border-gray-100 dark:border-gray-700 shadow-sm">
-<h4 class="font-display text-lg mb-1 text-charcoal dark:text-white">Venus Hoops</h4>
-<p class="text-gray-500 dark:text-gray-400 text-sm font-light">₹ 18,500</p>
-</div>
-</div>
-<div class="group cursor-pointer">
-<div class="bg-gray-100 dark:bg-card-dark aspect-square overflow-hidden mb-4 relative">
-<img alt="Cleo Drops gold earrings" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBxzecwdNwy-MTdJfcRV_64iOFI0fUfUErCvECgZ3x_kPBdh9lw23RpnkjXymW1zrzfZPdUu9Wf5hmDQ7ww7LhBPmRLlFXgSMCRivtLnFjVTsAhjvoARKb-jqZpiU8YnFE3PxvtYvOhFg-JDj5Kb6uePKXXIxiCu3ORTvAsyW2Xum0KPREojniBxrEpVZ02jG0_6O3gb9K9Tn-H6cNemY6EaKwiViSFNEB0_HpujKWkBe86OuyWKE07Qvjt7jzeTwM9oAwmj16PP4pT"/>
-</div>
-<div class="bg-white dark:bg-card-dark p-4 border border-gray-100 dark:border-gray-700 shadow-sm">
-<h4 class="font-display text-lg mb-1 text-charcoal dark:text-white">Cleo Drops</h4>
-<p class="text-gray-500 dark:text-gray-400 text-sm font-light">₹ 25,200</p>
-</div>
-</div>
-<div class="group cursor-pointer">
-<div class="bg-gray-100 dark:bg-card-dark aspect-square overflow-hidden mb-4 relative">
-<img alt="Eaning Waslite pearl earrings" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD6loSxuL1FZ5frpVMXBULn38qKsMpyCDCwseyzzHXCkupmwvqNffykPEH7TrlrA54XUybAr76AAPiJHQtFOLYzaUhtFW0qDvJ7YWDsiI3uluLGv54EkXSgsTJrTxhFHDTZpnaO9M0kh-EfEoI7KRZXFoRivEhP3JaZWkZ6p5VXsLKjPmNg9w3EJ_li-t1CfdIRlb11VGoC9K5w0LKBgZbq2ofHBFGuum8aVyETYqooSrjTZeb8SwThBn5ojKkoI9hsFCwPgy_XSq6o"/>
-</div>
-<div class="bg-white dark:bg-card-dark p-4 border border-gray-100 dark:border-gray-700 shadow-sm">
-<h4 class="font-display text-lg mb-1 text-charcoal dark:text-white">Eaning Waslite</h4>
-<p class="text-gray-500 dark:text-gray-400 text-sm font-light">₹ 15,900</p>
-</div>
-</div>
-<div class="group cursor-pointer">
-<div class="bg-gray-100 dark:bg-card-dark aspect-square overflow-hidden mb-4 relative">
-<img alt="Aurora Studs flower earrings" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCzbCGzc5XyRzAbXqZLIRUrYlgw4ZjqLly5SBQOS0Cmr2LulbsDHfPne2J6dlOZO-buLAfRkboQO7ob1M_sq_usPH5ag4qLy48Ztx1U8W1C9u72L_edFfHlS5KtVlXoJNP-DFr1mSTEGLzA-6rUg08EjoAfvbDkr5ELclk6JCYT7asqOPpzOpHOIAYGHxkYTC0r_dMe20qNWwgNxzX65F4L8sTsNi_DIDbrnnW5r6wK_F1rUafFKCRScM7xKnhKuIOE6eaLOtzNHfDg"/>
-</div>
-<div class="bg-white dark:bg-card-dark p-4 border border-gray-100 dark:border-gray-700 shadow-sm">
-<h4 class="font-display text-lg mb-1 text-charcoal dark:text-white">Aurora Studs</h4>
-<p class="text-gray-500 dark:text-gray-400 text-sm font-light">₹ 12,400</p>
-</div>
-</div>
-</div>
-</section>
-<section class="max-w-6xl mx-auto pb-24 px-4 md:px-8">
-<h3 class="font-display text-3xl md:text-4xl text-center mb-16 tracking-widest text-charcoal dark:text-white uppercase">Trending More</h3>
-<div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-<div class="group cursor-pointer">
-<div class="bg-gray-100 dark:bg-card-dark h-64 overflow-hidden mb-0 relative">
-<img alt="Heritage Link chain earrings" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBPomr9scrmG6vOsefYgSXfLxE_Q5PPdIlK9pO1NiED39ikj-nQxBvjTI9v3sGE5p1rOUNWxd1QtiF8KwLwB_WkCqBpaPdc-N_-U_KwFn-U67A3WS0iuM1WirBlUtKfuThKTGCx1QhyjcwGFMYcZo9dNW_PDEr59RKAlk6X4hayFoDH_4x_gUoSTh7CN88qy1T14C_dhnrbZr2YsEgOvDGbwxfBgjF2GChSLTZfgbuUkVLzvW5TUnrgLxuxdBjRzguEV0sd8qG13EeZ"/>
-</div>
-<div class="bg-white dark:bg-card-dark p-6 border border-gray-100 dark:border-gray-700 shadow-sm">
-<h4 class="font-display text-xl mb-2 text-charcoal dark:text-white">Heritage Link</h4>
-<p class="text-gray-500 dark:text-gray-400 font-light">₹ 32,560</p>
-</div>
-</div>
-<div class="group cursor-pointer">
-<div class="bg-gray-100 dark:bg-card-dark h-64 overflow-hidden mb-0 relative">
-<img alt="Dawn Develraps floral earrings" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDmWiShuSOxx26NlwAgQboD4Mddnya1ZXqR5UDl1W5epkTLGU1ose1BFd0D8WWPku8C08kOWqXSzTkL7DaTwTcD4JDqR6wurQj1zQXNrtNIJgQv9s1_H_Bq0eKgPWsdRaKiwuj1gOP2nM7i7AMdczHWVnlVmWPyKOji6rYXQ1aWV8xAO-qibgwbZVHSFZHqQyxZQ7eFbmb4a3tOj6BxtKaKY5JEZL_ecJ8rRuaWKbl8NXRugnbKXw8P-uHvdMF236NraG9Okt1ywQ2z"/>
-</div>
-<div class="bg-white dark:bg-card-dark p-6 border border-gray-100 dark:border-gray-700 shadow-sm">
-<h4 class="font-display text-xl mb-2 text-charcoal dark:text-white">Dawn Develraps</h4>
-<p class="text-gray-500 dark:text-gray-400 font-light">₹ 19,800</p>
-</div>
-</div>
-<div class="group cursor-pointer">
-<div class="bg-gray-100 dark:bg-card-dark h-64 overflow-hidden mb-0 relative">
-<img alt="Luna Crescent moon earrings" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCTTHblRaYj3qbN3y7JieryDZnZE9mGtYzLL4yRm532pjScBKtGE_rzoWLAySJaqhgTOGJWskaw-ZnyB2O83ddYtCiSdPIiygn10z6pD1a5btGDLdmFqflHcFx6YddXQ1eTLdUg1VfiSmMxgxBQX9xaIoji9jFOU7vCZPFMKndfKLZrtMNgzaUUrohLt2cg2HBEMMNUTL0hhha15ATIY9xTYhKyHEKHJSQMrkQ1lYZcas98_CW0lwRlOHorBM9aT-ir800yO9MwB3By"/>
-</div>
-<div class="bg-white dark:bg-card-dark p-6 border border-gray-100 dark:border-gray-700 shadow-sm">
-<h4 class="font-display text-xl mb-2 text-charcoal dark:text-white">Luna Crescent</h4>
-<p class="text-gray-500 dark:text-gray-400 font-light">₹ 21,000</p>
-</div>
-</div>
-</div>
-</section>
-<%- include('../partials/footer') %>
+  
+   <%- include('../partials/header') %>
+  <!-- ==================== HERO SECTION with Portrait Video ==================== -->
+  <section class="relative h-screen w-full overflow-hidden">
+    <!-- Video Background -->
+    <div class="absolute inset-0 w-full h-full">
+      <video autoplay muted loop playsinline class="absolute min-w-full min-h-full object-cover">
+        <source src="/Images/9430543-uhd_4096_2160_25fps.mp4" type="video/mp4">
+      </video>
+      <div class="absolute inset-0 bg-black/20"></div>
+    </div>
+    
+    <!-- Centered Hero Text -->
+    <div class="relative h-full flex flex-col justify-center items-center text-center px-6 z-10 animate-fade-in-up">
+      <h1 class="text-white font-serif text-5xl md:text-7xl lg:text-8xl font-bold tracking-wide drop-shadow-lg">
+        Timeless <span class="gold-shimmer">Elegance</span>
+      </h1>
+      <p class="text-white/90 text-lg md:text-2xl mt-6 tracking-wider font-light max-w-2xl">Luxury Earrings Collection</p>
+      <a href="/shop" 
+   class="mt-10 inline-block px-10 py-4 bg-white/10 backdrop-blur-sm border border-white/40 text-white font-medium text-lg tracking-wide rounded-full hover:bg-gold hover:border-gold hover:text-black transition-all duration-500 hover-glow">
+  Shop Now →
+</a>
+    </div>
+    
+    <!-- Scroll Down Indicator -->
+    <div class="absolute bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce">
+      <div class="w-6 h-10 border-2 border-white/60 rounded-full flex justify-center"><div class="w-1 h-2 bg-white/80 rounded-full mt-2"></div></div>
+    </div>
+  </section>
 
+  <!-- ==================== VIDEO SECTION: LARGER Portrait Video ==================== -->
+  <section class="py-24 bg-soft-beige">
+    <div class="container mx-auto px-6 md:px-12 flex flex-col lg:flex-row items-center gap-16">
+      <div class="flex-1 text-center lg:text-left fade-scroll">
+        <span class="text-gold uppercase tracking-[0.3em] text-sm font-semibold">Artistry in Motion</span>
+        <h2 class="font-serif text-4xl md:text-5xl mt-4 text-luxury-black">Crafted to Perfection</h2>
+        <p class="text-gray-600 mt-6 leading-relaxed max-w-md">Each piece is meticulously handcrafted, celebrating the harmony between modern design and timeless heritage.</p>
+        <button class="mt-8 border-b-2 border-gold pb-1 text-luxury-black font-medium hover:text-gold transition">Discover the process →</button>
+      </div>
+      <div class="flex-[1.2] flex justify-center fade-scroll">
+        <!-- LARGER container with hover zoom effect - Increased size significantly -->
+        <div class="portrait-video-container shadow-2xl rounded-3xl cursor-pointer">
+          <img src="/Images/Be Bold in the Parker Capsule Collection ✨.jfif" alt="">
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== NEW ARRIVALS SECTION ==================== -->
+  <section class="py-24 bg-white">
+    <div class="container mx-auto px-6 md:px-12">
+      <div class="text-center mb-16 fade-scroll">
+        <h2 class="font-serif text-4xl md:text-5xl text-luxury-black section-title pb-4">New Arrivals</h2>
+        <p class="text-gray-500 max-w-md mx-auto mt-8">Be the first to wear our latest masterpieces</p>
+      </div>
+      
+      <!-- New Arrivals Grid -->
+<div class="grid md:grid-cols-4 gap-10">
+  <% newArrivals.forEach(product => { %>
+    <div class="group relative card-hover fade-scroll">
+      <div class="img-zoom-container relative rounded-2xl overflow-hidden bg-soft-beige">
+        <img 
+          src="<%= product.variants[0]?.images[0] %>" 
+          alt="<%= product.name %>" 
+          class="img-zoom w-full h-80 object-cover transition duration-500" 
+          loading="lazy"
+        >
+        <div class="absolute top-4 left-4 bg-gold text-black text-xs font-semibold px-3 py-1 rounded-full">
+          Just In
+        </div>
+        <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center gap-6">
+          <a href="/product/<%= product._id %>" class="bg-white text-black px-5 py-2 rounded-full text-sm font-medium hover:bg-gold hover:text-white transition transform hover:scale-105">
+            Quick View
+          </a>
+        </div>
+      </div>
+      <div class="mt-5 text-center">
+        <h3 class="font-serif text-lg font-semibold text-luxury-black"><%= product.name %></h3>
+        <p class="text-gold font-medium tracking-wide mt-1">
+          ₹<%= product.variants[0]?.price?.toLocaleString() %>
+        </p>
+      </div>
+    </div>
+  <% }) %>
+</div>
+    </div>
+  </section>
+
+  <!-- ==================== TRENDING COLLECTIONS SECTION ==================== -->
+  <section class="py-24 bg-soft-beige">
+    <div class="container mx-auto px-6 md:px-12">
+      <div class="text-center mb-16 fade-scroll">
+        <h2 class="font-serif text-4xl md:text-5xl text-luxury-black section-title pb-4">Trending Collections</h2>
+        <p class="text-gray-500 max-w-md mx-auto mt-8">Our most coveted pieces loved by thousands</p>
+      </div>
+<div class="grid md:grid-cols-4 gap-10">
+  <% trendingProducts.forEach(product => { %>
+
+    <div class="group relative card-hover fade-scroll">
+      
+      <!-- IMAGE -->
+      <div class="img-zoom-container relative rounded-2xl overflow-hidden bg-soft-beige">
+        <img 
+          src="<%= product.variants[0]?.images[0] || '/images/default.png' %>" 
+          alt="<%= product.name %>" 
+          class="img-zoom w-full h-80 object-cover transition duration-500"
+        >
+
+        <div class="absolute top-4 left-4 bg-gold text-black text-xs font-semibold px-3 py-1 rounded-full">
+          Trending
+        </div>
+
+        <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition flex items-center justify-center">
+          <a href="/product/<%= product._id %>" class="bg-white px-5 py-2 rounded-full text-sm">
+            Quick View
+          </a>
+        </div>
+      </div>
+
+      <!-- TEXT -->
+      <div class="mt-5 text-center">
+        <h3 class="font-serif text-lg font-semibold text-luxury-black">
+          <%= product.name %>
+        </h3>
+        <p class="text-gold mt-1">
+          ₹<%= product.variants[0]?.price?.toLocaleString() || '0' %>
+        </p>
+      </div>
+
+    </div>
+
+  <% }) %>
+</div>     
+      <div class="text-center mt-16">
+        <a href="/shop" class="px-10 py-3 border border-gold text-gold rounded-full hover:bg-gold hover:text-white transition-all duration-300 font-medium">Explore All Trends →</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== FEATURED COLLECTION BANNER ==================== -->
+  <section class="relative py-28 bg-luxury-black text-white overflow-hidden parallax-bg" style="background-image: url('https://images.unsplash.com/photo-1611085583191-a3b181a88401?q=80&w=2070&auto=format'); background-blend-mode: overlay; background-color: #111;">
+    <div class="absolute inset-0 bg-black/50"></div>
+    <div class="relative container mx-auto px-6 text-center fade-scroll">
+      <span class="text-gold text-sm tracking-[0.2em] uppercase">Limited Edition</span>
+      <h2 class="font-serif text-5xl md:text-7xl mt-4">La Collection Royale</h2>
+      <p class="max-w-xl mx-auto mt-6 text-white/80">Exquisite diamonds set in 18k gold. A tribute to timeless elegance.</p>
+      <button class="mt-10 inline-block bg-gold text-black px-8 py-3 rounded-full font-medium hover:bg-white hover:text-black transition-all duration-300">Discover Now</button>
+    </div>
+  </section>
+
+  <!-- ==================== CUSTOMER TESTIMONIALS ==================== -->
+  <section class="py-24 bg-white">
+    <div class="container mx-auto px-6 md:px-12 text-center">
+      <div class="fade-scroll">
+        <h2 class="font-serif text-4xl text-luxury-black">Whispers of Elegance</h2>
+        <div class="w-16 h-px bg-gold mx-auto my-6"></div>
+      </div>
+      <div class="grid md:grid-cols-3 gap-10 mt-12">
+        <div class="p-8 rounded-2xl bg-soft-beige fade-scroll text-center shadow-sm hover:shadow-md transition">
+          <p class="text-gray-700 italic">“The craftsmanship is unparalleled. Every detail shines, feels like wearing art.”</p>
+          <div class="mt-6 text-gold font-semibold">— Victoria H.</div>
+        </div>
+        <div class="p-8 rounded-2xl bg-soft-beige fade-scroll text-center shadow-sm hover:shadow-md transition">
+          <p class="text-gray-700 italic">“Lumière earrings are my go-to for every gala. Absolutely stunning quality.”</p>
+          <div class="mt-6 text-gold font-semibold">— Alistair W.</div>
+        </div>
+        <div class="p-8 rounded-2xl bg-soft-beige fade-scroll text-center shadow-sm hover:shadow-md transition">
+          <p class="text-gray-700 italic">“Minimal yet luxurious. Perfect for the modern woman who desires elegance.”</p>
+          <div class="mt-6 text-gold font-semibold">— Catherine D.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+ 
+
+  <!-- ==================== FOOTER ==================== -->
+  <footer class="bg-luxury-black text-white/80 pt-20 pb-8">
+    <div class="container mx-auto px-6 md:px-12 grid grid-cols-1 md:grid-cols-4 gap-10">
+      <div>
+        <h3 class="font-serif text-2xl text-white tracking-wide">LUMIÈRE</h3>
+        <p class="mt-4 text-sm">Timeless luxury earrings, made with passion and heritage.</p>
+        <div class="flex space-x-4 mt-6">
+          <a href="#" class="hover:text-gold text-white/70 transition"><svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M22 12c0-5.523-4.477-10-10-10S2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.879v-6.987h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.892h-2.33v6.987C18.343 21.128 22 16.991 22 12z"/></svg></a>
+          <a href="#" class="hover:text-gold transition"><svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069z"/></svg></a>
+          <a href="#" class="hover:text-gold transition"><svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069z"/></svg></a>
+        </div>
+      </div>
+      <div>
+        <h4 class="text-white font-semibold uppercase tracking-wide text-sm">Explore</h4>
+        <ul class="mt-4 space-y-2 text-sm">
+          <li><a href="#" class="hover:text-gold">New Arrivals</a></li>
+          <li><a href="#" class="hover:text-gold">Best Sellers</a></li>
+          <li><a href="#" class="hover:text-gold">Gift Guide</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4 class="text-white font-semibold uppercase tracking-wide text-sm">Support</h4>
+        <ul class="mt-4 space-y-2 text-sm">
+          <li><a href="#" class="hover:text-gold">FAQs</a></li>
+          <li><a href="#" class="hover:text-gold">Returns & Exchanges</a></li>
+          <li><a href="#" class="hover:text-gold">Care Guide</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4 class="text-white font-semibold uppercase tracking-wide text-sm">Newsletter</h4>
+        <p class="text-sm mt-2">Subscribe for exclusive previews.</p>
+        <div class="mt-4 flex">
+          <input type="email" placeholder="Your email" class="bg-white/10 px-4 py-2 rounded-l-full w-full text-white placeholder:text-white/50 focus:outline-none">
+          <button class="bg-gold text-black px-5 rounded-r-full font-medium hover:bg-white transition">→</button>
+        </div>
+      </div>
+    </div>
+    <div class="border-t border-white/20 mt-12 pt-8 text-center text-xs text-white/50">
+      © 2025 LUMIÈRE — Timeless Elegance.
+    </div>
+  </footer>
+
+  <!-- ==================== JAVASCRIPT ==================== -->
+  <script>
+    (function() {
+      const header = document.getElementById('mainHeader');
+      const logo = document.getElementById('logo');
+      window.addEventListener('scroll', () => {
+        if (window.scrollY > 50) {
+          header.classList.add('bg-white', 'shadow-md');
+          header.classList.remove('bg-transparent');
+          if(logo) logo.classList.add('text-luxury-black');
+          if(logo) logo.classList.remove('text-white');
+          document.querySelectorAll('nav a, header button').forEach(el => {
+            if(window.scrollY > 50) {
+              el.classList.add('text-luxury-black');
+              el.classList.remove('text-white');
+            } else {
+              el.classList.remove('text-luxury-black');
+              el.classList.add('text-white');
+            }
+          });
+        } else {
+          header.classList.remove('bg-white', 'shadow-md');
+          header.classList.add('bg-transparent');
+          if(logo) logo.classList.add('text-white');
+          if(logo) logo.classList.remove('text-luxury-black');
+          document.querySelectorAll('nav a, header button').forEach(el => {
+            if(window.scrollY <= 50) {
+              el.classList.remove('text-luxury-black');
+              el.classList.add('text-white');
+            }
+          });
+        }
+      });
+      
+      const fadeElements = document.querySelectorAll('.fade-scroll');
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('visible');
+            observer.unobserve(entry.target);
+          }
+        });
+      }, { threshold: 0.2, rootMargin: "0px 0px -30px 0px" });
+      
+      fadeElements.forEach(el => observer.observe(el));
+      
+      document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function(e) {
+          const href = this.getAttribute('href');
+          if(href !== "#" && href !== "") {
+            const target = document.querySelector(href);
+            if(target) {
+              e.preventDefault();
+              target.scrollIntoView({ behavior: 'smooth' });
+            }
+          }
+        });
+      });
+    })();
+  </script>
 </body>
 </html>

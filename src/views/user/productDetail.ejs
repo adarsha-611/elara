@@ -486,9 +486,10 @@
           
             
             <div class="action-buttons">
-            <button 
+<button 
     class="btn-primary" 
-   onclick="addToCart('<%= product._id %>', getSelectedVariant(), 1)"">
+    id="cartBtn"
+    onclick="handleCartBtn()">
     Add to Cart
 </button>
 
@@ -580,10 +581,10 @@
 
 </div>
 <div id="toast" class="toast"></div>
-<%- include('../partials/footer') %>
 
+<%- include('../partials/footer') %>
 <script>
-// Toast function
+// ---------- TOAST ----------
 function showToast(message, type = "success") {
   const toast = document.getElementById("toast");
   if (!toast) return;
@@ -591,466 +592,270 @@ function showToast(message, type = "success") {
   toast.innerText = message;
   toast.className = "toast show";
 
-  if (type === "error") {
-    toast.classList.add("error");
-  }
+  if (type === "error") toast.classList.add("error");
 
   setTimeout(() => {
     toast.className = "toast";
   }, 2500);
 }
 
+// ---------- GET VARIANT ----------
 function getSelectedVariant() {
   const select = document.getElementById("colorSelect");
-  return select.value;
+  return select ? select.value : null;
 }
 
-<<<<<<< HEAD
+// ---------- ADD TO CART ----------
 async function addToCart(productId, variantId, quantity = 1) {
-    try {
-        const res = await fetch("/cart/add", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ productId, variantId, quantity })
-        });
-
-        const data = await res.json();
-
-        if (data.success) {
-            showToast("Added to cart");
-        } else {
-            showToast(data.message || "Failed", "error");
-        }
-
-    } catch (err) {
-        console.error(err);
-        showToast("Error", "error");
-    }
-}
-
-// Image change function
-function changeImage(src, thumb) {
-    const currentImg = document.getElementById("current-img");
-    currentImg.src = src;
-    
-    const thumbnailGrid = document.getElementById("thumbnailGrid");
-    thumbnailGrid.querySelectorAll("img").forEach(img => img.classList.remove("active"));
-    thumb.classList.add("active");
-}
-
-// Main variant change function - FIXED
-window.changeVariant = async function() {
-    console.log("🔵 changeVariant function called!");
-    
-    const colorSelect = document.getElementById("colorSelect");
-    if (!colorSelect) {
-        console.error("❌ colorSelect element not found!");
-        return;
-    }
-    
-    const selectedOption = colorSelect.options[colorSelect.selectedIndex];
-    const variantId = selectedOption.value;
-    const productId = "<%= product._id %>";
-    
-    console.log("🟡 Selected variant:", { variantId, productId });
-    
-    // Get data from selected option
-    const images = JSON.parse(selectedOption.dataset.images);
-    const stock = parseInt(selectedOption.dataset.stock);
-    const originalPrice = parseFloat(selectedOption.dataset.price);
-    
-    console.log("🟢 Variant data:", { imagesCount: images.length, stock, originalPrice });
-    
-    // Update main image
-    const currentImg = document.getElementById("current-img");
-    if (currentImg) currentImg.src = images[0];
-    
-    // Update stock status
-    const stockStatus = document.getElementById("stock-status");
-    if (stockStatus) {
-        stockStatus.className = "stock-badge";
-        if (stock == 0) {
-            stockStatus.classList.add("stock-out");
-            stockStatus.innerText = "Out of Stock";
-        } else if (stock <= 3) {
-            stockStatus.classList.add("stock-low");
-            stockStatus.innerText = `Only ${stock} left!`;
-        } else {
-            stockStatus.classList.add("stock-in");
-            stockStatus.innerText = "In Stock";
-        }
-    }
-    
-    // Update thumbnails
-    const thumbnailGrid = document.getElementById("thumbnailGrid");
-    if (thumbnailGrid) {
-        thumbnailGrid.innerHTML = "";
-        images.forEach((img, index) => {
-            const thumb = document.createElement("img");
-            thumb.src = img;
-            thumb.alt = `Thumbnail ${index+1}`;
-            if(index === 0) thumb.classList.add("active");
-            thumb.onclick = () => {
-                const currentImgElem = document.getElementById("current-img");
-                if (currentImgElem) currentImgElem.src = img;
-                document.querySelectorAll("#thumbnailGrid img").forEach(i => i.classList.remove("active"));
-                thumb.classList.add("active");
-            };
-            thumbnailGrid.appendChild(thumb);
-        });
-    }
-    
-    // Fetch offer data for this variant
-    try {
-        const apiUrl = `/variant-offer/${productId}/${variantId}`;
-        console.log("📡 Fetching from URL:", apiUrl);
-        
-        const response = await fetch(apiUrl);
-        console.log("📡 Response status:", response.status);
-        
-        const data = await response.json();
-        console.log("📡 Response data:", data);
-        
-        const priceEl = document.getElementById("price");
-        if (!priceEl) {
-            console.error("❌ price element not found!");
-            return;
-        }
-        
-        if (data.success && data.offerData) {
-            console.log("✅ Offer found! Final price:", data.offerData.finalPrice);
-            const discountPercent = data.offerData.offer.discountType === "percentage" 
-                ? `${data.offerData.offer.discountValue}% OFF`
-                : `₹${data.offerData.offer.discountValue} OFF`;
-                
-            priceEl.innerHTML = `
-                <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
-                    <span style="font-size: 2rem; font-weight: 600; color: #4A302C;">
-                        ₹${Math.round(data.offerData.finalPrice)}
-                    </span>
-                    <span style="text-decoration: line-through; color: #888; font-size: 1.1rem;">
-                        ₹${data.variantPrice}
-                    </span>
-                    <span style="background: #e8f5e9; color: #2e7d32; font-size: 0.85rem; font-weight: 600; padding: 4px 10px; border-radius: 20px;">
-                        ${discountPercent}
-                    </span>
-                </div>
-            `;
-        } else {
-            console.log("⚠️ No offer found for this variant");
-            priceEl.innerHTML = `
-                <span style="font-size: 2rem; font-weight: 600;">
-                    ₹${originalPrice}
-                </span>
-            `;
-        }
-    } catch (error) {
-        console.error("❌ Error fetching variant offer:", error);
-        const priceEl = document.getElementById("price");
-        if (priceEl) {
-            priceEl.innerHTML = `
-                <span style="font-size: 2rem; font-weight: 600;">
-                    ₹${originalPrice}
-                </span>
-            `;
-        }
-    }
-};
-
-// Test function to verify JavaScript is working
-window.testVariantSwitch = function() {
-    console.log("🧪 Test function called - JavaScript is working!");
-    alert("JavaScript is working! Check console for details.");
-};
-
-// Add event listener when page loads
-document.addEventListener('DOMContentLoaded', function() {
-    console.log("🚀 Page loaded, checking for colorSelect element...");
-    const colorSelect = document.getElementById("colorSelect");
-    if (colorSelect) {
-        console.log("✅ colorSelect found, current value:", colorSelect.value);
-        console.log("✅ onchange attribute:", colorSelect.getAttribute("onchange"));
-        
-        // Add manual event listener as backup
-        colorSelect.addEventListener('change', function() {
-            console.log("🔄 Select change event triggered!");
-            window.changeVariant();
-        });
-    } else {
-        console.error("❌ colorSelect NOT found!");
-    }
-    
-    // Test if changeVariant is defined
-    if (typeof window.changeVariant === 'function') {
-        console.log("✅ changeVariant function is defined");
-    } else {
-        console.error("❌ changeVariant function is NOT defined");
-    }
-});
-
-// Keep your existing functions
-function showToast(message, type = "success") {
-    const toast = document.getElementById("toast");
-    if (!toast) return;
-    toast.innerText = message;
-    toast.className = "toast show";
-    if (type === "error") toast.classList.add("error");
-    setTimeout(() => { toast.className = "toast"; }, 2500);
-}
-
-function getSelectedVariant() {
-    const select = document.getElementById("colorSelect");
-    return select ? select.value : null;
-}
-
-async function addToCart(productId, variantId, quantity = 1) {
-    try {
-        const res = await fetch("/cart/add", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ productId, variantId, quantity })
-        });
-        const data = await res.json();
-        if (data.success) {
-            showToast("Added to cart");
-        } else {
-            showToast(data.message || "Failed", "error");
-        }
-    } catch (err) {
-        console.error(err);
-        showToast("Error", "error");
-    }
-}
-
-// Function to add to cart from wishlist
-=======
-// ---------- ADD TO CART FUNCTION ----------
->>>>>>> feature/refferal
-async function addToCartFromWishlist(productId, variantId, btn) {
-    const res = await fetch(`/wishlist/addtocart/${productId}`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ variantId })
+  try {
+    const res = await fetch("/cart/add", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ productId, variantId, quantity })
     });
 
     const data = await res.json();
 
     if (data.success) {
-        showToast("Added to cart");
-        // ✅ Update cart count immediately
-        if (window.updateCartCount) window.updateCartCount();
-        btn.closest(".product-card").remove();
+      showToast("Added to cart");
+      if (window.updateCartCount) window.updateCartCount();
     } else {
-        showToast(data.message, "error");
+      showToast(data.message || "Failed", "error");
     }
+  } catch (err) {
+    console.error(err);
+    showToast("Error", "error");
+  }
 }
-<<<<<<< HEAD
 
-// Product availability check
-=======
-</script>
-<script>
-const currentImg = document.getElementById("current-img");
-const thumbnailGrid = document.getElementById("thumbnailGrid");
-const colorSelect = document.getElementById("colorSelect");
-const priceEl = document.getElementById("price");
-const stockStatus = document.getElementById("stock-status");
+// ---------- IMAGE CHANGE ----------
+function changeImage(src, thumb) {
+  const currentImg = document.getElementById("current-img");
+  const thumbnailGrid = document.getElementById("thumbnailGrid");
 
-async function addToCart(productId, variantId, quantity = 1) {
-    try {
-        const res = await fetch("/cart/add", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ productId, variantId, quantity })
+  currentImg.src = src;
+
+  thumbnailGrid.querySelectorAll("img").forEach(img =>
+    img.classList.remove("active")
+  );
+
+  thumb.classList.add("active");
+}
+
+// ---------- VARIANT CHANGE (WITH OFFER FIX) ----------
+async function changeVariant() {
+  const colorSelect = document.getElementById("colorSelect");
+  const selectedOption = colorSelect.options[colorSelect.selectedIndex];
+
+  const variantId = selectedOption.value;
+  const productId = "<%= product._id %>";
+
+  const images = JSON.parse(selectedOption.dataset.images);
+  const stock = parseInt(selectedOption.dataset.stock);
+  const originalPrice = parseFloat(selectedOption.dataset.price);
+
+  const currentImg = document.getElementById("current-img");
+  const thumbnailGrid = document.getElementById("thumbnailGrid");
+  const stockStatus = document.getElementById("stock-status");
+  const priceEl = document.getElementById("price");
+
+  // ✅ Update image
+  currentImg.src = images[0];
+
+  // ✅ Update thumbnails
+  thumbnailGrid.innerHTML = "";
+  images.forEach((img, index) => {
+    const thumb = document.createElement("img");
+    thumb.src = img;
+    if (index === 0) thumb.classList.add("active");
+
+    thumb.onclick = () => changeImage(img, thumb);
+
+    thumbnailGrid.appendChild(thumb);
+  });
+
+  // ✅ Update stock
+  stockStatus.className = "stock-badge";
+  if (stock === 0) {
+    stockStatus.classList.add("stock-out");
+    stockStatus.innerText = "Out of Stock";
+  } else if (stock <= 3) {
+    stockStatus.classList.add("stock-low");
+    stockStatus.innerText = `Only ${stock} left!`;
+  } else {
+    stockStatus.classList.add("stock-in");
+    stockStatus.innerText = "In Stock";
+  }
+
+  // ✅ Fetch offer dynamically
+  try {
+    const res = await fetch(`/variant-offer/${productId}/${variantId}`);
+    const data = await res.json();
+
+    if (data.success && data.offerData) {
+      const discountText =
+        data.offerData.offer.discountType === "percentage"
+          ? `${data.offerData.offer.discountValue}% OFF`
+          : `₹${data.offerData.offer.discountValue} OFF`;
+
+      priceEl.innerHTML = `
+        <div style="display:flex;gap:12px;align-items:center;">
+          <span style="font-size:2rem;font-weight:600;">
+            ₹${Math.round(data.offerData.finalPrice)}
+          </span>
+
+          <span style="text-decoration:line-through;color:#888;">
+            ₹${originalPrice}
+          </span>
+
+          <span style="background:#e8f5e9;color:#2e7d32;padding:4px 10px;border-radius:20px;font-size:0.8rem;">
+            ${discountText}
+          </span>
+        </div>
+      `;
+    } else {
+      priceEl.innerHTML = `₹${originalPrice}`;
+    }
+  } catch (err) {
+    console.error(err);
+    priceEl.innerHTML = `₹${originalPrice}`;
+  }
+}
+
+// ---------- PRODUCT AVAILABILITY ----------
+const productId = "<%= product._id %>";
+
+async function checkProductAvailability() {
+  try {
+    const res = await fetch(`/product-status/${productId}`);
+    const data = await res.json();
+
+    if (!data.available) {
+  window.location.href = "/shop?toast=product_unlisted";
+
+
+      setTimeout(() => {
+        window.location.href = "/shop";
+      }, 3000);
+    }
+  } catch (err) {
+    console.error(err);
+  }
+}
+
+// ---------- INIT ----------
+document.addEventListener("DOMContentLoaded", () => {
+
+  // wishlist
+  document.querySelectorAll(".btn-wishlist").forEach(btn => {
+    btn.addEventListener("click", async function(e) {
+      e.preventDefault();
+
+      const productId = this.dataset.productId;
+      const variantId = getSelectedVariant();
+
+      try {
+        const res = await fetch(`/wishlist/toggle/${productId}`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ variantId })
         });
 
         const data = await res.json();
 
         if (data.success) {
-            showToast("Added to cart");
-            // ✅ Update cart count immediately
-            if (window.updateCartCount) window.updateCartCount();
+          if (data.status === "added") {
+            this.classList.add("active");
+            this.querySelector(".heart-icon").innerHTML = "♥";
+            showToast("Added to wishlist");
+          } else {
+            this.classList.remove("active");
+            this.querySelector(".heart-icon").innerHTML = "♡";
+            showToast("Removed from wishlist");
+          }
         } else {
-            showToast(data.message || "Failed", "error");
+          showToast(data.message || "Error", "error");
         }
-
-    } catch (err) {
+      } catch (err) {
         console.error(err);
-        showToast("Error", "error");
-    }
+        showToast("Server error", "error");
+      }
+    });
+  });
+
+  // availability check
+  setInterval(checkProductAvailability, 5000);
+});
+
+
+// ---------- CART STATE PER VARIANT ----------
+// Pre-populate which variants are already in cart (from server)
+const cartVariants = <%- JSON.stringify(cartVariantIds) %>;
+
+function updateCartButton(variantId) {
+  const btn = document.getElementById("cartBtn");
+  if (cartVariants.includes(variantId)) {
+    btn.textContent = "Go to Cart";
+    btn.style.background = "#4A302C";
+    btn.onclick = () => window.location.href = "/cart";
+  } else {
+    btn.textContent = "Add to Cart";
+    btn.style.background = "";
+    btn.onclick = handleCartBtn;
+  }
 }
-// ---------- Function to change subimage ----------
-function changeImage(src, thumb) {
-    currentImg.src = src;
 
-    // remove active from all thumbnails
-    thumbnailGrid.querySelectorAll("img").forEach(img => img.classList.remove("active"));
-
-    // add active to clicked thumbnail
-    thumb.classList.add("active");
+function handleCartBtn() {
+  const variantId = getSelectedVariant();
+  addToCart("<%= product._id %>", variantId, 1);
 }
 
-// ---------- Function to change variant ----------
-function changeVariant() {
-    const selectedOption = colorSelect.options[colorSelect.selectedIndex];
-    const images = JSON.parse(selectedOption.dataset.images);
-    const price = selectedOption.dataset.price;
-    const stock = selectedOption.dataset.stock;
+// ---------- ADD TO CART (updated) ----------
+async function addToCart(productId, variantId, quantity = 1) {
+  try {
+    const res = await fetch("/cart/add", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ productId, variantId, quantity })
+    });
 
-    // Update main image
-    currentImg.src = images[0];
+    const data = await res.json();
 
-    // Update price
-    priceEl.innerHTML = `₹${price} <span style="font-size: 1rem; color: #888; text-decoration: line-through; margin-left: 10px;">₹${(price * 1.2).toFixed(0)}</span>`;
-
-    // Update stock badge
-    stockStatus.className = "stock-badge"; // reset
-    if (stock == 0) {
-        stockStatus.classList.add("stock-out");
-        stockStatus.innerText = "Out of Stock";
-    } else if (stock <= 3) {
-        stockStatus.classList.add("stock-low");
-        stockStatus.innerText = `Only ${stock} left!`;
+    if (data.success) {
+      showToast("Added to cart ✓");
+      if (!cartVariants.includes(variantId)) {
+        cartVariants.push(variantId);  // ✅ track it
+      }
+      updateCartButton(variantId);     // ✅ switch button
+      if (window.updateCartCount) window.updateCartCount();
     } else {
-        stockStatus.classList.add("stock-in");
-        stockStatus.innerText = "In Stock";
+      showToast(data.message || "Failed", "error");
     }
-
-    // Update thumbnails
-    thumbnailGrid.innerHTML = "";
-    images.forEach((img, index) => {
-        const thumb = document.createElement("img");
-        thumb.src = img;
-        thumb.alt = `Thumbnail ${index+1}`;
-        if(index === 0) thumb.classList.add("active");
-        thumb.onclick = () => changeImage(img, thumb);
-        thumbnailGrid.appendChild(thumb);
-    });
-}
-</script>
-
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
-<script>
->>>>>>> feature/refferal
-const productId = "<%= product._id %>";
-
-async function checkProductAvailability() {
-    try {
-        const res = await fetch(`/product-status/${productId}`);
-        const data = await res.json();
-
-        if (!data.available) {
-            Swal.fire({
-                toast: true,
-                position: 'top-end',
-                icon: 'warning',
-                title: 'This product is no longer available',
-                showConfirmButton: false,
-                timer: 3000,
-                background: '#4A302C',   
-                color: '#fff',           
-                iconColor: '#facc15',    
-                customClass: {
-                    popup: 'rounded-lg shadow-lg'
-                }
-            });
-            setTimeout(() => {
-                window.location.href = "/shop";
-            }, 3000);
-        }
-    } catch (err) {
-        console.error(err);
-    }
+  } catch (err) {
+    console.error(err);
+    showToast("Error", "error");
+  }
 }
 
-// Wishlist functionality
-document.addEventListener('DOMContentLoaded', () => {
-    document.querySelectorAll('.btn-wishlist').forEach(btn => {
-        btn.addEventListener('click', async function(e) {
-            e.preventDefault();
-            
-            const productId = this.dataset.productId;
-            const variantId = getSelectedVariant();
-            
-            console.log("Wishlist toggle:", { productId, variantId });
-            
-            try {
-                const response = await fetch(`/wishlist/toggle/${productId}`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ variantId })
-                });
-                
-                const data = await response.json();
-                
-                if (data.success) {
-                    if (data.status === "added") {
-                        this.classList.add('active');
-                        this.querySelector(".heart-icon").innerHTML = '♥';
-                        showToast("Added to wishlist");
-                    } else {
-                        this.classList.remove('active');
-                        this.querySelector(".heart-icon").innerHTML = '♡';
-                        showToast("Removed from wishlist");
-                    }
-                } else {
-                    showToast(data.message || "Error", "error");
-                }
-            } catch (err) {
-                console.error(err);
-                showToast("Server error", "error");
-            }
-        });
-    });
+// ---------- UPDATE BUTTON ON VARIANT CHANGE ----------
+// Add this at the end of changeVariant() function
+// inside the existing changeVariant() after stock/price updates:
+async function changeVariant() {
+  // ... your existing changeVariant code ...
+
+  // ✅ Add this at the end:
+  const variantId = getSelectedVariant();
+  updateCartButton(variantId);
+}
+
+// ---------- INIT ----------
+document.addEventListener("DOMContentLoaded", () => {
+  // ✅ Set initial button state on page load
+  updateCartButton(getSelectedVariant());
+
+  // ... rest of your existing DOMContentLoaded code ...
 });
 
-// Start checking product availability
-setInterval(checkProductAvailability, 5000);
 </script>
-<script>
-document.addEventListener('DOMContentLoaded', () => {
-document.querySelectorAll('.btn-wishlist').forEach(btn => {
-    btn.addEventListener('click', async function(e) {
-        e.preventDefault();
-
-        const productId = this.dataset.productId;
-
-        const variantId = getSelectedVariant();
-
-        console.log("Wishlist:", { productId, variantId });
-
-        try {
-            const response = await fetch(`/wishlist/toggle/${productId}`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ variantId })
-            });
-
-            const data = await response.json();
-
-            if (data.success) {
-                if (data.status === "added") {
-                    this.classList.add('active');
-                    this.querySelector(".heart-icon").innerHTML = '♥';
-                    showToast("Added to wishlist");
-                } else {
-                    this.classList.remove('active');
-                    this.querySelector(".heart-icon").innerHTML = '♡';
-                    showToast("Removed from wishlist");
-                }
-            } else {
-                showToast(data.message || "Error", "error");
-            }
-
-        } catch (err) {
-            console.error(err);
-            showToast("Server error", "error");
-        }
-    });
-});
-});
-</script>
-
 </body>
 </html>

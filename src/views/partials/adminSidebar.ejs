@@ -6,9 +6,10 @@
     
     <nav class="sidebar-nav">
         <% 
-            // Normalize variables safely to prevent "toLowerCase is not a function"
-            const activePage = (typeof currentPage === 'string') ? currentPage.toLowerCase() : ''; 
-            const activeSidebar = (typeof sidebarPage === 'string') ? sidebarPage.toLowerCase() : '';
+// ✅ 
+const activePage = (typeof currentMenu === 'string') ? currentMenu.toLowerCase() : 
+                   (typeof currentPage === 'string') ? currentPage.toLowerCase() : '';
+const activeSidebar = (typeof sidebarPage === 'string') ? sidebarPage.toLowerCase() : '';
         %>
         <ul>
             <li class="<%= activePage === 'dashboard' ? 'active' : '' %>">

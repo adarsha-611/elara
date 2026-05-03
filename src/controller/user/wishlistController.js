@@ -2,7 +2,6 @@ import Wishlist from "../../model/wishlistSchema.js";
 import { toggleWishlist, moveToCartFromWishlist } from "../../services/user/wishlistService.js";
 
 const getWishlist = async (req, res) => {
-    console.log("🔥 getWishlist controller called");
     try {
         const userId = req.session.userId;
         if (!userId) {
@@ -17,14 +16,14 @@ const getWishlist = async (req, res) => {
         const wishlistDoc = await Wishlist.findOne({ userId })
             .populate({
                 path: "products.productId",
-                select: "name price variants images",   // removed match filter (causes issues)
+                select: "name price variants images",   
             });
 
         let wishlistItems = [];
 
         if (wishlistDoc && wishlistDoc.products) {
             wishlistItems = wishlistDoc.products
-                .filter(item => item.productId !== null)   // remove deleted products
+                .filter(item => item.productId !== null)   
                 .map(item => {
                     const product = item.productId;
 
@@ -41,7 +40,6 @@ const getWishlist = async (req, res) => {
                 });
         }
 
-        // Apply search in memory (safer than match in populate)
         if (search) {
             wishlistItems = wishlistItems.filter(item => 
                 item.product && 
@@ -96,8 +94,6 @@ const addToCartFromWishlist = async (req, res) => {
         const userId = req.session.userId;
         const productId = req.params.productId;
         const { variantId } = req.body;
-
-        console.log("CONTROLLER addToCartFromWishlist:", { productId, variantId });
 
         if (!userId) {
             return res.status(401).json({ success: false, message: "Please login" });

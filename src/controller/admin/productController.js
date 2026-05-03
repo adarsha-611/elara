@@ -15,6 +15,7 @@ export const getProductPage = async (req, res) => {
       products,
       totalPages,
       currentPage,
+      currentMenu:"products",
       sidebarPage: "product"
   });
   } catch (error) {

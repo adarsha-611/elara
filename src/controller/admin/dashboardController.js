@@ -5,7 +5,7 @@ const getDashboardPage = async(req,res)=>{
         const data = await getDashboardData();
 
         res.render("admin/dashboard",{
-            currentPage: 'dashboard',
+            currentMenu: 'dashboard',
             sidebarPage:"dashboard",
             ...data
         })

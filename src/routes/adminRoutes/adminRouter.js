@@ -2,7 +2,7 @@ import express from "express";
 import loginController from "../../controller/admin/loginController.js";
 import categoryController from "../../controller/admin/categoryController.js";
 import productController from "../../controller/admin/productController.js";
-import { upload } from "../../middlewares/upload.js";
+import upload from "../../config/multer.js";
 import orderPageController from "../../controller/admin/orderPageController.js";
 import userManagementController from "../../controller/admin/userManagementController.js";
 import adminAuth from "../../middlewares/adminAuthMiddleware.js";
@@ -30,20 +30,32 @@ router.post("/delete-category/:id",adminAuth, categoryController.postCategorySta
 router.get('/categories/active',adminAuth, categoryController.getActiveCategories);
 
 
-//ProductManagemnet
-router.get('/products',adminAuth,productController.getProductPage);
-router.get('/add-product',adminAuth,productController.getAddProductPage);
+// Product Management
+router.get('/products', adminAuth, productController.getProductPage);
+
+router.get('/add-product', adminAuth, productController.getAddProductPage);
+
 router.post(
-  '/add-product',adminAuth,
-  upload.any(),  
+  '/add-product',
+  adminAuth,
+  upload.any(),   
   productController.postAddProduct
 );
-router.get("/edit-product/:id",adminAuth,productController.getEditProductPage);
-router.post("/edit-product/:id",adminAuth,
-    upload.any(),
-    productController.postEditProduct
-)
-router.patch("/toggle-product-status/:id",adminAuth, productController.productStatus);
+
+router.get("/edit-product/:id", adminAuth, productController.getEditProductPage);
+
+router.post(
+  "/edit-product/:id",
+  adminAuth,
+  upload.any(),  
+  productController.postEditProduct
+);
+
+router.patch(
+  "/toggle-product-status/:id",
+  adminAuth,
+  productController.productStatus
+);
 
 
 //OrderManagement

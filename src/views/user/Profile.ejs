@@ -24,11 +24,11 @@
 </head>
 <body class="bg-elara-beige"> <%- include('../partials/header') %>
 
-    <main class="max-w-6xl mx-auto px-6 py-12">
+    <main class="max-w-6xl mx-auto px-6 py-12" style="height: 700px; margin-top: 120px;">
         <div class="flex flex-col md:flex-row gap-8 items-start">
             
-            <div class="w-full md:w-72 shrink-0">
-                <%- include('../partials/profileSidebar', { user, path: '/profile' }) %>
+<div style="width: 288px; min-width: 288px; flex-shrink: 0;">
+                    <%- include('../partials/profileSidebar', { user, path: '/profile' }) %>
             </div>
 
             <section class="flex-1 bg-elara-ivory rounded-2xl shadow-sm border border-white overflow-hidden">

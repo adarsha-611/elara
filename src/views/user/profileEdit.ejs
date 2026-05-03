@@ -32,8 +32,8 @@
     <main class="max-w-6xl mx-auto px-6 py-16">
         <div class="flex flex-col md:flex-row gap-10 items-start">
             
-            <div class="w-full md:w-72 shrink-0">
-                <%- include('../partials/profileSidebar', { user, path: '/profile' }) %>
+  <div style="width: 288px; min-width: 288px; flex-shrink: 0;">
+                    <%- include('../partials/profileSidebar', { user, path: '/profile' }) %>
             </div>
 
             <section class="flex-1 bg-elara-ivory rounded-3xl shadow-[0_20px_60px_rgba(61,43,36,0.05)] border border-white overflow-hidden">
@@ -50,8 +50,7 @@
                             <div class="relative">
                                 <div class="w-28 h-28 rounded-full border-4 border-white shadow-md overflow-hidden bg-elara-beige flex items-center justify-center">
                                     <% if (user.profileImage) { %>
-                                        <img src="/uploads/profiles/<%= user.profileImage %>" id="previewImg" class="w-full h-full object-cover">
-                                    <% } else { %>
+<img src="<%= user.profileImage && user.profileImage.startsWith('http') ? user.profileImage : '/uploads/profiles/' + user.profileImage %>" id="previewImg" class="w-full h-full object-cover">                                    <% } else { %>
                                         <div id="avatarPlaceholder" class="text-elara-brown opacity-30">
                                             <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
                                         </div>

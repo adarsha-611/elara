@@ -10,7 +10,7 @@ const getCouponPage = async (req, res) => {
 
         return res.render("admin/couponManagement", {
             coupons,
-            currentPage:"coupons",
+            currentMenu:"coupons",
             totalPages,
             sidebarPage: "coupons",
             success_msg: req.flash("success_msg"),

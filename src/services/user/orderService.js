@@ -1,10 +1,11 @@
 import Order from "../../model/orderSchema.js";
 import Product from "../../model/productSchema.js";
 import { cancelRefundToWallet } from "./walletService.js";
-import Review from "../../model/reviewSchema.js"
+import Review from "../../model/reviewSchema.js";
+import Offer from "../../model/offerSchema.js"
 
 
-export const getUserOrders = async (userId, page = 1, limit = 3) => {
+export const getUserOrders = async (userId, page = 1, limit = 7) => {
   const skip = (page - 1) * limit;
 
 
@@ -74,9 +75,51 @@ export const getOrderById = async (orderId, userId) => {
   const order = await Order.findOne({
     _id: orderId,
     user: userId
-  })
-  .populate("items.product")
-  
+  }).populate("items.product");
+
+  if (!order) return null;
+
+  const now = new Date();
+
+  const offers = await Offer.find({
+    isActive: true,
+    startDate: { $lte: now },
+    endDate: { $gte: now }
+  });
+
+  order.items.forEach(item => {
+    const product = item.product;
+    if (!product) return;
+
+    let bestDiscount = 0;
+    let bestOffer = null;
+
+    offers.forEach(offer => {
+      const isProductOffer =
+        offer.offerType === "product" &&
+        offer.productId?.toString() === product._id.toString();
+
+      const isCategoryOffer =
+        offer.offerType === "category" &&
+        offer.categoryId?.toString() === product.category?.toString();
+
+      if (isProductOffer || isCategoryOffer) {
+        const basePrice = item.price;
+        const discount =
+          offer.discountType === "percentage"
+            ? (basePrice * offer.discountValue) / 100
+            : offer.discountValue;
+
+        if (discount > bestDiscount) {
+          bestDiscount = discount;
+          bestOffer = offer;
+        }
+      }
+    });
+
+    item._offerDiscount = bestDiscount;
+    item._offer = bestOffer;
+  });
 
   return order;
 };
@@ -143,11 +186,13 @@ let refundAmount = 0;
 
 
 
-// REPLACE this block:
 if (order.paymentMethod !== "cod" && !item.isRefunded) {
-  let refundAmount = item.price * item.quantity;  // ❌ shadows outer refundAmount
+  const offerDiscount = item.offerDiscount || 0;           
+  const effectivePrice = item.price - offerDiscount;       
 
-  if (order.discount && order.totalAmount) {
+  refundAmount = effectivePrice * item.quantity;
+
+  if (order.discount && order.totalAmount) {               
     const discountRatio = order.discount / order.totalAmount;
     refundAmount = refundAmount - (refundAmount * discountRatio);
     refundAmount = Math.round(refundAmount * 100) / 100;
@@ -160,7 +205,7 @@ if (order.paymentMethod !== "cod" && !item.isRefunded) {
 
 
 if (order.paymentMethod !== "cod" && !item.isRefunded) {
-  refundAmount = item.price * item.quantity;  // ✅ assigns to outer variable
+  refundAmount = item.price * item.quantity;  
 
   if (order.discount && order.totalAmount) {
     const discountRatio = order.discount / order.totalAmount;

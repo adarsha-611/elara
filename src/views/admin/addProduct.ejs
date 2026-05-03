@@ -181,15 +181,10 @@ function createVariantBlock(variantIndex) {   // variantIndex starts from 0
     
     // Attach file input listeners
     block.querySelectorAll('.image-upload-box').forEach(box => {
-        const fileInput = document.createElement('input');
-        fileInput.type = 'file';
-        fileInput.accept = 'image/*';
-        fileInput.className = 'file-input';
-        fileInput.style.display = 'none';
-        box.prepend(fileInput);
+    const fileInput = box.querySelector('.file-input'); // ← use existing one
 
-        const label = box.querySelector('.upload-label');
-        label.addEventListener('click', () => fileInput.click());
+    const label = box.querySelector('.upload-label');
+    label.addEventListener('click', () => fileInput.click());
 
         fileInput.addEventListener('change', (e) => {
             if (!e.target.files?.[0]) return;
@@ -244,30 +239,25 @@ cropImageBtn.addEventListener('click', () => {
     if (!cropperInstance || !currentUploadTarget) return;
 
     const canvas = cropperInstance.getCroppedCanvas({ width: 600, height: 600 });
-    const croppedDataUrl = canvas.toDataURL('image/jpeg', 0.85);
+
     canvas.toBlob(blob => {
-    const file = new File([blob], "cropped.jpg", { type: "image/jpeg" });
+        const file = new File([blob], "cropped.jpg", { type: "image/jpeg" });
 
-    const fileInput = currentUploadTarget.querySelector('.file-input');
+        const fileInput = currentUploadTarget.querySelector('.file-input');
+        const dataTransfer = new DataTransfer();
+        dataTransfer.items.add(file);
+        fileInput.files = dataTransfer.files;
 
-    const dataTransfer = new DataTransfer();
-    dataTransfer.items.add(file);
+        const previewContainer = currentUploadTarget.querySelector('.preview-container');
+        const uploadLabel = currentUploadTarget.querySelector('.upload-label');
+        const previewImg = previewContainer.querySelector('img');
 
-    fileInput.files = dataTransfer.files;
-});
+        previewImg.src = URL.createObjectURL(blob); // ← use blob URL, not dataURL
+        uploadLabel.style.display = 'none';
+        previewContainer.style.display = 'flex';
 
-
-    const previewContainer = currentUploadTarget.querySelector('.preview-container');
-    const uploadLabel = currentUploadTarget.querySelector('.upload-label');
-    const previewImg = previewContainer.querySelector('img');
-
-    
-    previewImg.src = croppedDataUrl;
-    uploadLabel.style.display = 'none';
-    previewContainer.style.display = 'flex';
-
-    // Keep the file input — we'll use it directly in FormData
-    closeModal();
+        closeModal();
+    }, 'image/jpeg', 0.85);
 });
 
 function closeModal() {

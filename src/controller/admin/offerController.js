@@ -21,7 +21,7 @@ const getOfferPage = async(req,res)=>{
 
     return res.render("admin/offerManagement",{
         offers,
-        currentPage,
+        currentMenu :"offers",
         totalPages,
         products,
         categories,

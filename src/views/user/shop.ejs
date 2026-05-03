@@ -39,6 +39,7 @@
             padding: 2rem 5%;
             max-width: 1600px;
             margin: 0 auto;
+            margin-top: 90px;
         }
 
         /* Sidebar & Filters */
@@ -204,16 +205,70 @@
             font-size: 1.1rem;
         }
 
-        /* Pagination */
-        .shop-theme .pagination a.page-num {
-            border-color: #eee;
-            color: var(--primary);
-        }
+       /* Pagination wrapper - centered below the grid */
+.elara-pagination-wrapper {
+    display: flex;
+    justify-content: center;
+    padding: 2rem 5%;
+    max-width: 1600px;
+    margin: 0 auto;
+}
 
-        .shop-theme .pagination a.page-num.active {
-            background-color: var(--primary);
-            border-color: var(--primary);
-        }
+.shop-theme .pagination {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* Circle page numbers */
+.shop-theme .pagination a.page-num {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;          /* Makes it a circle */
+    border: 1px solid #eee;
+    color: var(--primary);
+    text-decoration: none;
+    font-size: 0.9rem;
+    transition: var(--transition);
+}
+
+.shop-theme .pagination a.page-num:hover {
+    background-color: #f0e8e4;
+    border-color: var(--secondary);
+}
+
+.shop-theme .pagination a.page-num.active {
+    background-color: var(--primary);
+    border-color: var(--primary);
+    color: #fff;
+    font-weight: 700;
+}
+
+/* Prev / Next buttons - pill shape */
+.shop-theme .pagination a.nav-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 18px;
+    height: 40px;
+    border-radius: 20px;
+    border: 1px solid #eee;
+    color: var(--primary);
+    text-decoration: none;
+    font-size: 0.85rem;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    transition: var(--transition);
+}
+
+.shop-theme .pagination a.nav-btn:hover {
+    background-color: var(--primary);
+    color: #fff;
+    border-color: var(--primary);
+}
 
         /* Search Bar */
         .shop-theme .search-bar {
@@ -529,6 +584,8 @@
             setTimeout(() => toast.remove(), 400);
         }, 2800);
     }
+
+    
     </script>
 </body>
 </html>

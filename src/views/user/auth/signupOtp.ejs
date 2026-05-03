@@ -9,98 +9,93 @@
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
     
     <style>
         body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            font-family: 'Poppins', sans-serif;
+            background-color: #FAF9F7;
         }
+        .serif { font-family: 'Playfair Display', serif; }
         
         .otp-input {
-            width: 52px;
-            height: 52px;
+            width: 48px;
+            height: 56px;
             text-align: center;
-            font-size: 20px;
+            font-size: 22px;
             font-weight: 500;
-            border: 1.5px solid #d0c4b8;
-            border-radius: 8px;
-            background-color: #faf8f6;
-            color: #4a3f35;
-            transition: all 0.2s ease;
+            border: 1px solid #EDE9E3;
+            border-radius: 12px;
+            background-color: #ffffff;
+            color: #3D2B24;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             outline: none;
-        }
-        
-        /* Red border for validation errors */
-        .otp-input.error-border {
-            border-color: #ef4444;
-            background-color: #fef2f2;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.02);
         }
         
         .otp-input:focus {
-            border-color: #a78a7f;
-            background-color: #ffffff;
-            box-shadow: 0 0 0 3px rgba(167, 138, 127, 0.1);
+            border-color: #A68B67;
+            box-shadow: 0 0 0 4px rgba(166, 139, 103, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .otp-input.error-border {
+            border-color: #ef4444;
+            background-color: #fffafb;
         }
         
+        /* Remove arrows/spinners */
         .otp-input::-webkit-outer-spin-button,
         .otp-input::-webkit-inner-spin-button {
             -webkit-appearance: none;
             margin: 0;
         }
-        
-        .otp-input[type=number] {
-            -moz-appearance: textfield;
+
+        .gradient-btn {
+            background: #3D2B24;
+            transition: all 0.3s ease;
         }
-        
-        @media (max-width: 640px) {
-            .otp-input {
-                width: 44px;
-                height: 44px;
-                font-size: 18px;
-            }
+        .gradient-btn:hover {
+            background: #A68B67;
+            transform: translateY(-1px);
+            box-shadow: 0 10px 20px rgba(166, 139, 103, 0.2);
         }
     </style>
 </head>
-<body class="bg-[#e8dfd6] min-h-screen flex items-center justify-center p-4">
+<body class="min-h-screen flex items-center justify-center p-6">
     
-    <div class="bg-white rounded-2xl shadow-lg p-8 sm:p-12 w-full max-w-xl">
+    <div class="bg-white rounded-[2rem] shadow-[0_20px_50px_rgba(0,0,0,0.05)] p-10 w-full max-w-md border border-[#F4F1EE]">
         
-        <div class="text-center mb-8">
-            <h1 class="text-3xl sm:text-4xl font-light text-gray-800 tracking-wide mb-2">
-                ELARA
-            </h1>
-            <p class="text-sm text-gray-500 font-light tracking-wide">
-                Elegance Redefined
-            </p>
+        <div class="text-center mb-10">
+            <h1 class="serif text-4xl text-[#3D2B24] tracking-tighter mb-2">ELARA</h1>
+            <div class="flex items-center justify-center gap-2">
+                <span class="h-[1px] w-8 bg-[#A68B67]/30"></span>
+                <p class="text-[10px] text-[#A68B67] uppercase tracking-[0.3em] font-bold">Verification</p>
+                <span class="h-[1px] w-8 bg-[#A68B67]/30"></span>
+            </div>
         </div>
-        
-        <h2 class="text-2xl font-normal text-gray-700 text-center mb-4">
-            Verify Your Account
-        </h2>
 
         <% if (locals.error && error.length > 0) { %>
-            <div class="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg mb-6 text-sm text-center">
-                <%= error %>
+            <div class="bg-red-50 text-red-500 px-4 py-3 rounded-xl mb-6 text-xs font-medium text-center flex items-center justify-center gap-2">
+                <i class="fa-solid fa-circle-exclamation"></i> <%= error %>
             </div>
         <% } %>
 
         <% if (locals.success && success.length > 0) { %>
-            <div class="bg-green-50 border border-green-200 text-green-600 px-4 py-3 rounded-lg mb-6 text-sm text-center">
+            <div class="bg-green-50 text-green-600 px-4 py-3 rounded-xl mb-6 text-xs font-medium text-center">
                 <%= success %>
             </div>
         <% } %>
         
-        <p class="text-sm text-gray-500 text-center mb-6 leading-relaxed">
-            We've sent a one-time password to your email <span class="font-medium text-gray-700"><%= email %></span>. Please enter the 6-digit code below to complete your sign-up.
-        </p>
-        
-        <p class="text-xs text-gray-400 text-center mb-8">
-            Resend OTP in <span id="timer" class="font-medium text-gray-600">00:45</span> sec
-        </p>
-        
+        <div class="text-center mb-8">
+            <h2 class="serif text-xl text-[#3D2B24] mb-3">Check your inbox</h2>
+            <p class="text-xs text-gray-500 leading-relaxed px-4">
+                We've sent a code to <span class="text-[#3D2B24] font-semibold"><%= email %></span>
+            </p>
+        </div>
+
         <form action="/verify-otp" method="POST" id="otpForm" novalidate>
-            
-            <div class="flex justify-center gap-2 sm:gap-3 mb-2">
+            <div class="flex justify-between gap-2 mb-4">
                 <input type="number" maxlength="1" class="otp-input" name="otp1" id="otp1" autocomplete="off" pattern="[0-9]" inputmode="numeric" />
                 <input type="number" maxlength="1" class="otp-input" name="otp2" id="otp2" autocomplete="off" pattern="[0-9]" inputmode="numeric" />
                 <input type="number" maxlength="1" class="otp-input" name="otp3" id="otp3" autocomplete="off" pattern="[0-9]" inputmode="numeric" />
@@ -109,60 +104,57 @@
                 <input type="number" maxlength="1" class="otp-input" name="otp6" id="otp6" autocomplete="off" pattern="[0-9]" inputmode="numeric" />
             </div>
 
-            <div id="otpError" class="text-red-500 text-xs text-center mb-6 min-h-[1rem]"></div>
+            <div id="otpError" class="text-red-500 text-[10px] font-bold text-center mb-6 min-h-[1rem] uppercase tracking-wider"></div>
             
             <input type="hidden" name="otp" id="completeOtp" value="">
             
             <button 
                 type="submit" 
-                class="w-full bg-[#a78a7f] hover:bg-[#8f7568] text-white font-medium py-3.5 rounded-lg transition-colors duration-200 uppercase tracking-wide text-sm shadow-sm"
+                class="gradient-btn w-full text-white font-bold py-4 rounded-xl text-[11px] uppercase tracking-[0.2em] shadow-lg"
             >
-                Verify Account
+                Verify & Continue
             </button>
-            
         </form>
         
-        <div class="text-center mt-6">
-            <p class="text-sm text-gray-500 mb-1">Didn't receive the code?</p>
-            <button 
-                id="resendBtn"
-                type="button"
-                class="text-sm text-gray-400 hover:text-[#a78a7f] transition-colors duration-200 disabled:cursor-not-allowed font-medium underline"
-                disabled
-            >
-                Click to resend
-            </button>
+        <div class="text-center mt-10 space-y-4">
+            <div class="text-[11px] text-gray-400 font-medium flex items-center justify-center gap-2">
+                <i class="fa-regular fa-clock"></i>
+                Expires in <span id="timer" class="text-[#3D2B24]">00:45</span>
+            </div>
+
+            <div class="pt-6 border-t border-[#F4F1EE]">
+                <p class="text-xs text-gray-400 mb-2">Didn't receive the code?</p>
+                <button 
+                    id="resendBtn"
+                    type="button"
+                    class="text-xs text-[#A68B67] hover:text-[#3D2B24] transition-all font-bold uppercase tracking-widest disabled:opacity-30 disabled:cursor-not-allowed"
+                    disabled
+                >
+                    Resend OTP
+                </button>
+            </div>
         </div>
     </div>
     
 <script>
+    // Keeping your existing logic exactly as provided
     const otpInputs = document.querySelectorAll('.otp-input');
     const completeOtpField = document.getElementById('completeOtp');
     const otpError = document.getElementById('otpError');
     const otpForm = document.getElementById('otpForm');
 
-    // Auto-focus Logic
     otpInputs.forEach((input, index) => {
         input.addEventListener('input', (e) => {
             const value = e.target.value;
-            
             otpError.textContent = '';
             input.classList.remove('error-border');
-
-            if (value.length > 1) {
-                e.target.value = value.slice(0, 1);
-            }
-            
-            if (value.length === 1 && index < otpInputs.length - 1) {
-                otpInputs[index + 1].focus();
-            }
+            if (value.length > 1) e.target.value = value.slice(0, 1);
+            if (value.length === 1 && index < otpInputs.length - 1) otpInputs[index + 1].focus();
             updateCompleteOtp();
         });
         
         input.addEventListener('keydown', (e) => {
-            if (e.key === 'Backspace' && !e.target.value && index > 0) {
-                otpInputs[index - 1].focus();
-            }
+            if (e.key === 'Backspace' && !e.target.value && index > 0) otpInputs[index - 1].focus();
         });
         
         input.addEventListener('paste', (e) => {
@@ -175,7 +167,6 @@
                 }
             });
             updateCompleteOtp();
-            otpError.textContent = '';
         });
     });
     
@@ -183,71 +174,69 @@
         completeOtpField.value = Array.from(otpInputs).map(input => input.value).join('');
     }
 
-    // Validation
     otpForm.addEventListener('submit', (e) => {
         updateCompleteOtp();
         if (completeOtpField.value.length < 6) {
             e.preventDefault();
-            otpError.textContent = 'Please enter the complete 6-digit verification code.';
+            otpError.textContent = 'Invalid Code Length';
             otpInputs.forEach(input => {
                 if (!input.value) input.classList.add('error-border');
             });
         }
     });
     
-    // Timer Logic
-    let timeLeft = 45;
+    
+    const TIMER_KEY = 'otp_expiry_ts';
+    const TIMER_DURATION = 45; 
+
     const timerElement = document.getElementById('timer');
     const resendBtn = document.getElementById('resendBtn');
     let timerInterval;
 
-    function updateTimer() {
+    function startTimer() {
+        if (!sessionStorage.getItem(TIMER_KEY)) {
+            const expiryTime = Date.now() + TIMER_DURATION * 1000;
+            sessionStorage.setItem(TIMER_KEY, expiryTime);
+        }
+
+        clearInterval(timerInterval);
+        timerInterval = setInterval(tick, 1000);
+        tick(); 
+    }
+
+    function tick() {
+        const expiryTime = parseInt(sessionStorage.getItem(TIMER_KEY), 10);
+        const timeLeft = Math.max(0, Math.ceil((expiryTime - Date.now()) / 1000));
+
         const minutes = Math.floor(timeLeft / 60);
         const seconds = timeLeft % 60;
         timerElement.textContent = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
-        
+
         if (timeLeft <= 0) {
             clearInterval(timerInterval);
             resendBtn.disabled = false;
-            resendBtn.classList.remove('text-gray-400');
-            resendBtn.classList.add('text-[#a78a7f]', 'cursor-pointer');
+            timerElement.textContent = '00:00';
         }
-        timeLeft--;
     }
-    
-    timerInterval = setInterval(updateTimer, 1000);
-    updateTimer();
 
-    // ✅ Resend OTP (FIXED)
+    startTimer();
+
     resendBtn.addEventListener('click', async () => {
         if (!resendBtn.disabled) {
-
-            await fetch("/resend-otp", {
+            const res = await fetch("/resend-otp", {
                 method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({
-                    email: "<%= email %>"
-                })
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ email: "<%= email %>" })
             });
 
-            // Reset UI (same as your style)
-            timeLeft = 45;
-            resendBtn.disabled = true;
-            resendBtn.classList.remove('text-[#a78a7f]', 'cursor-pointer');
-            resendBtn.classList.add('text-gray-400');
-
-            otpInputs.forEach(input => {
-                input.value = '';
-                input.classList.remove('error-border');
-            });
-
-            otpError.textContent = 'New OTP sent to your email';
-            otpInputs[0].focus();
-
-            clearInterval(timerInterval);
-            timerInterval = setInterval(updateTimer, 1000);
+            if (res.ok) {
+                sessionStorage.setItem(TIMER_KEY, Date.now() + TIMER_DURATION * 1000);
+                resendBtn.disabled = true;
+                otpInputs.forEach(input => { input.value = ''; input.classList.remove('error-border'); });
+                otpError.textContent = 'New Code Sent';
+                otpInputs[0].focus();
+                startTimer();
+            }
         }
     });
 

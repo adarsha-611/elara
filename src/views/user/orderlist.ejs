@@ -27,6 +27,7 @@ body {
     display: flex;
     max-width: 1300px;
     margin: 40px auto;
+    margin-top: 120px;
     padding: 0 20px;
     gap: 30px;
 }
@@ -43,7 +44,7 @@ body {
 .orders-table-container {
     background: var(--white);
     border-radius: 8px;
-    padding: 20px;
+    padding: 125px;
     box-shadow: 0 4px 15px rgba(0,0,0,0.03);
 }
 
@@ -135,18 +136,31 @@ body {
 .pagination { display: flex; gap: 8px; }
 
 .page-btn {
-    width: 35px;
-    height: 35px;
-    border: 1px solid #ddd;
+    width: 42px;
+    height: 42px;
+    border: 1px solid #F4F1EE;
     background: white;
-    border-radius: 6px;
+    border-radius: 50%;
     cursor: pointer;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #3D2B24;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    text-decoration: none;
+}
+
+.page-btn:hover:not(.active) {
+    border-color: #7A5C4D;
+    color: #7A5C4D;
 }
 
 .page-btn.active {
-    background: var(--primary-taupe);
+    background: #3D2B24;
     color: white;
-    border-color: var(--primary-taupe);
+    border-color: #3D2B24;
 }
 </style>
 </head>
@@ -156,9 +170,9 @@ body {
 <%- include('../partials/header') %>
 
 <main class="account-container">
-
+<div style="width: 288px; min-width: 288px; flex-shrink: 0;">
     <%- include('../partials/profileSidebar', { user, path: '/profile/orders' }) %>
-
+</div>
     <section class="orders-content">
         <h1 class="section-title">My Orders</h1>
 
@@ -227,7 +241,7 @@ body {
                         <% }) %>
                     <% } else { %>
                         <tr>
-                            <td colspan="6" style="text-align:center; padding: 40px;">No orders found</td>
+                            <td colspan="6" style="text-align:center; padding: 88px;">No orders found</td>
                         </tr>
                     <% } %>
                 </tbody>

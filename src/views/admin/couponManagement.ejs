@@ -263,17 +263,17 @@
                     </div>
                 </div>
 
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
-                    <div class="form-group">
-                        <label>Max Discount (₹)</label>
-                        <input type="number" name="maxDiscount" id="max-discount" placeholder="e.g. 500">
-                    </div>
+               <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+    <div class="form-group" id="max-discount-group">
+        <label>Max Discount (₹)</label>
+        <input type="number" name="maxDiscount" id="max-discount" placeholder="e.g. 500">
+    </div>
 
-                    <div class="form-group">
-                        <label>Minimum Order (₹)</label>
-                        <input type="number" name="minOrder" id="min-purchase" placeholder="e.g. 1000">
-                    </div>
-                </div>
+    <div class="form-group" id="min-order-group">
+        <label>Minimum Order (₹) <span style="color:red;">*</span></label>
+        <input type="number" name="minOrder" id="min-purchase" placeholder="e.g. 1000">
+    </div>
+</div>
 
                 <div class="form-group">
                     <label>Usage Limit *</label>
@@ -565,43 +565,21 @@ async function toggleCouponStatus(id, isChecked) {
         Swal.fire("Error", "Something went wrong", "error");
     }
 }
-        function openCouponModal() {
-            document.getElementById('modal-title').innerText = 'Create Coupon';
-            document.getElementById('couponForm').reset();
-            document.getElementById('couponForm').action = '/admin/coupons/create';
-            document.getElementById('edit-id').value = '';
-            document.body.classList.add('modal-open');
-        }
-
-        function openEditCoupon(id) {
-            const coupon = coupons.find(c => c._id === id);
-            if (!coupon) return;
-
-            document.getElementById('modal-title').innerText = 'Edit Coupon';
-            document.getElementById('coupon-code').value = coupon.code;
-            document.getElementById('discount-type').value = coupon.discountType;
-            document.getElementById('discount-val').value = coupon.discountValue;
-            document.getElementById('max-discount').value = coupon.maxDiscount || '';
-            document.getElementById('min-purchase').value = coupon.minOrder || '';
-            document.getElementById('usage-limit').value = coupon.usageLimit;
-            document.getElementById('start-date').value = coupon.startDate ? new Date(coupon.startDate).toISOString().split('T')[0] : '';
-            document.getElementById('end-date').value = coupon.endDate ? new Date(coupon.endDate).toISOString().split('T')[0] : '';
-
-            document.getElementById('couponForm').action = `/admin/coupons/update/${coupon._id}`;
-            document.getElementById("edit-id").value = coupon._id;
-            document.body.classList.add('modal-open');
-        }
+     
 
         function closeCouponModal() {
             document.body.classList.remove('modal-open');
         }
 
-        // Event listeners
+        
         document.getElementById('modalOverlay').addEventListener('click', function(e) {
             if (e.target === this) closeCouponModal();
         });
         document.getElementById('search-input').addEventListener('input', filterCoupons);
         
+document.getElementById('start-date').addEventListener('change', function() {
+    document.getElementById('end-date').min = this.value;
+});
         // Make functions global
         window.filterCoupons = filterCoupons;
         window.openCouponModal = openCouponModal;
@@ -678,6 +656,64 @@ function showValidationErrors(errors) {
         input.parentElement.appendChild(msg);
     });
 }
+
+function onDiscountTypeChange() {
+    const type = document.getElementById('discount-type').value;
+    const maxDiscountGroup = document.getElementById('max-discount-group');
+    const minOrderGroup = document.getElementById('min-order-group');
+
+    if (type === 'percentage') {
+        maxDiscountGroup.style.display = 'flex';
+    } else {
+        maxDiscountGroup.style.display = 'none';
+        document.getElementById('max-discount').value = 0;
+    }
+
+    minOrderGroup.style.display = 'flex';
+}
+
+// Attach listener
+document.getElementById('discount-type').addEventListener('change', onDiscountTypeChange);
+
+// Also call on modal open so state is correct
+function openCouponModal() {
+    document.getElementById('modal-title').innerText = 'Create Coupon';
+    document.getElementById('couponForm').reset();
+    document.getElementById('edit-id').value = '';
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementById('start-date').min = today;
+    document.getElementById('end-date').min = today;
+    onDiscountTypeChange(); // ✅ set correct visibility on open
+    document.body.classList.add('modal-open');
+}
+
+function openEditCoupon(id) {
+    const coupon = coupons.find(c => c._id === id);
+    if (!coupon) return;
+
+    document.getElementById('modal-title').innerText = 'Edit Coupon';
+    document.getElementById('coupon-code').value = coupon.code;
+    document.getElementById('discount-type').value = coupon.discountType;
+    document.getElementById('discount-val').value = coupon.discountValue;
+    document.getElementById('max-discount').value = coupon.maxDiscount || '';
+    document.getElementById('min-purchase').value = coupon.minOrder || '';
+    document.getElementById('usage-limit').value = coupon.usageLimit;
+    document.getElementById('start-date').value = coupon.startDate ? new Date(coupon.startDate).toISOString().split('T')[0] : '';
+    document.getElementById('end-date').value = coupon.endDate ? new Date(coupon.endDate).toISOString().split('T')[0] : '';
+    document.getElementById('edit-id').value = coupon._id;
+
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementById('start-date').min = today;
+    const startVal = document.getElementById('start-date').value;
+    document.getElementById('end-date').min = startVal || today;
+
+    onDiscountTypeChange(); // ✅ show/hide fields based on the coupon's type
+
+    document.body.classList.add('modal-open');
+}
+
+
+
     </script>
 </body>
 </html>

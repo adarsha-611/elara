@@ -2,7 +2,8 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>  <script src="https://cdn.tailwindcss.com"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <script src="https://cdn.tailwindcss.com"></script>
     <script>
     tailwind.config = {
       theme: {
@@ -17,24 +18,18 @@
       }
     }
     </script>
-
     <title>Refer & Earn | ELARA</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
             min-height: 100vh;
             background-color: #f0e8e0;
-            font-family: 'Segoe UI', 'Poppins', system-ui, -apple-system, sans-serif;
+            font-family: 'Segoe UI', 'Poppins', system-ui, sans-serif;
             display: flex;
             flex-direction: column;
         }
 
-        /* Main layout wrapper */
         .profile-layout {
             display: flex;
             gap: 40px;
@@ -42,234 +37,263 @@
             margin: 100px auto 60px auto;
             padding: 0 24px;
             flex: 1;
+            align-items: flex-start;
         }
 
-        /* Sidebar styles are already defined inside partial */
-        /* Main content card */
         .profile-content {
             flex: 1;
-            background: #fff9f5;
-            border-radius: 2rem;
-            box-shadow: 0 20px 35px -12px rgba(0, 0, 0, 0.08);
-            padding: 2.5rem 2rem;
-            transition: all 0.2s ease;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
         }
 
-        /* Referral specific styles */
-        .referral-hero {
+        /* Page title */
+        .page-title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #3D2B24;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            margin-bottom: 4px;
+        }
+
+        .page-title span {
+            color: #A68B67;
+        }
+
+        /* Stats row */
+        .stats-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        .stat-card {
+            background: #fff9f5;
+            border: 1px solid #e8ddd5;
+            border-radius: 16px;
+            padding: 1.5rem 2rem;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            box-shadow: 0 4px 16px rgba(61,43,36,0.05);
+        }
+
+        .stat-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            background: #f0e8e0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.4rem;
+            flex-shrink: 0;
+        }
+
+        .stat-label {
+            font-size: 0.78rem;
+            color: #9a7060;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .stat-value {
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: #3D2B24;
+        }
+
+        /* Invite card */
+        .invite-card {
+            background: #fff9f5;
+            border: 1px solid #e8ddd5;
+            border-radius: 20px;
+            padding: 2.5rem 2rem;
             text-align: center;
+            box-shadow: 0 4px 16px rgba(61,43,36,0.05);
+        }
+
+        .invite-card h2 {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #3D2B24;
+            margin-bottom: 8px;
+        }
+
+        .invite-card p {
+            font-size: 0.88rem;
+            color: #7A5C4D;
             margin-bottom: 2rem;
         }
 
-        .referral-hero h1 {
-            font-size: 2.2rem;
-            font-weight: 500;
-            color: #3d1f0d;
-            margin-bottom: 0.75rem;
-            letter-spacing: -0.3px;
-            font-family: 'Segoe UI', 'Poppins', serif;
+        .code-row {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 16px;
+            flex-wrap: wrap;
         }
 
-        .referral-hero .subtitle {
-            font-size: 0.95rem;
-            color: #6b4226;
-            line-height: 1.5;
-            max-width: 450px;
-            margin: 0 auto;
-        }
-
-        .reward-badge {
-            background: #f3ede8;
-            display: inline-block;
-            padding: 0.4rem 1rem;
-            border-radius: 40px;
-            font-size: 0.8rem;
-            font-weight: 600;
-            color: #a07060;
-            margin-bottom: 1.5rem;
-            letter-spacing: 0.3px;
-        }
-
-        .code-card {
-            background: #ffffff;
-            border: 2px dashed #c7a78b;
-            border-radius: 28px;
-            padding: 2rem 1.5rem;
-            margin: 2rem auto 2rem auto;
-            max-width: 480px;
-            width: 100%;
-            text-align: center;
-            box-shadow: 0 8px 18px rgba(0, 0, 0, 0.02);
-            transition: border 0.2s;
-        }
-
-        .referral-code {
-            font-size: 28px;
+        .referral-code-box {
+            background: #f0e8e0;
+            border: 2px solid #c7a78b;
+            border-radius: 12px;
+            padding: 14px 32px;
+            font-size: 1.4rem;
             font-weight: 700;
-            color: #3d1f0d;
-            letter-spacing: 2px;
-            background: #fef7f0;
-            padding: 0.4rem 1.2rem;
-            border-radius: 60px;
+            color: #3D2B24;
+            letter-spacing: 3px;
             font-family: monospace;
-            display: inline-block;
         }
 
         .copy-btn {
-            background-color: #a07060;
-            color: white;
+            background: #3D2B24;
+            color: #fff;
             border: none;
-            border-radius: 40px;
-            padding: 14px 48px;
-            font-size: 0.9rem;
-            font-weight: 500;
-            cursor: pointer;
-            transition: background 0.2s ease, transform 0.1s ease;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.05);
-            margin-top: 0.5rem;
-            letter-spacing: 0.5px;
-        }
-
-        .copy-btn:hover {
-            background-color: #8a5e4e;
-            transform: translateY(-1px);
-        }
-
-        .copy-btn:active {
-            transform: scale(0.97);
-        }
-
-        .copy-btn.copied {
-            background-color: #5e8a6a;
-        }
-
-        .toast-msg {
-            margin-top: 1rem;
-            font-size: 0.8rem;
-            color: #5e8a6a;
-            font-weight: 500;
-            opacity: 0;
-            transition: opacity 0.25s ease;
-            min-height: 28px;
-        }
-
-        .toast-msg.show {
-            opacity: 1;
-        }
-
-        .info-box {
-            background: #f9f1ea;
-            border-radius: 1.5rem;
-            padding: 1.5rem;
-            margin-top: 2rem;
-            text-align: left;
-            border: 1px solid #f0e2d6;
-        }
-
-        .info-box h4 {
-            font-size: 1rem;
+            border-radius: 10px;
+            padding: 14px 28px;
+            font-size: 0.88rem;
             font-weight: 600;
-            color: #3d2b24;
-            margin-bottom: 0.75rem;
+            cursor: pointer;
+            letter-spacing: 0.5px;
+            transition: background 0.2s, transform 0.1s;
             display: flex;
             align-items: center;
             gap: 8px;
         }
 
-        .info-box ul {
-            padding-left: 1.4rem;
-            color: #5e4a3e;
-            font-size: 0.85rem;
-            line-height: 1.6;
+        .copy-btn:hover { background: #A68B67; transform: translateY(-1px); }
+        .copy-btn:active { transform: scale(0.97); }
+        .copy-btn.copied { background: #5e8a6a; }
+
+        .toast-msg {
+            margin-top: 1rem;
+            font-size: 0.82rem;
+            color: #5e8a6a;
+            font-weight: 600;
+            opacity: 0;
+            transition: opacity 0.25s ease;
+            min-height: 24px;
         }
 
-        .info-box li {
-            margin-bottom: 0.4rem;
+        .toast-msg.show { opacity: 1; }
+
+        /* Steps row */
+        .steps-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 16px;
         }
 
-        hr {
-            margin: 1.8rem 0 1rem;
-            border: none;
-            border-top: 1px solid #ede0d4;
+        .step-card {
+            background: #fff9f5;
+            border: 1px solid #e8ddd5;
+            border-radius: 16px;
+            padding: 2rem 1.5rem;
+            text-align: center;
+            box-shadow: 0 4px 16px rgba(61,43,36,0.05);
+            transition: transform 0.2s;
         }
 
-        .footer-margin {
-            margin-top: auto;
+        .step-card:hover { transform: translateY(-3px); }
+
+        .step-number {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #A68B67;
+            color: #fff;
+            font-size: 1rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1rem;
+        }
+
+        .step-card h3 {
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: #3D2B24;
+            margin-bottom: 8px;
+        }
+
+        .step-card p {
+            font-size: 0.82rem;
+            color: #7A5C4D;
+            line-height: 1.5;
+        }
+
+        .step-card p strong {
+            color: #A68B67;
         }
 
         @media (max-width: 900px) {
-            .profile-layout {
-                flex-direction: column;
-                gap: 28px;
-                margin-top: 30px;
-                margin-bottom: 40px;
-            }
-            .profile-content {
-                padding: 1.8rem;
-            }
-            .referral-code {
-                font-size: 22px;
-                letter-spacing: 1px;
-            }
-            .code-card {
-                padding: 1.5rem 1rem;
-            }
+            .profile-layout { flex-direction: column; gap: 28px; margin-top: 30px; }
+            .stats-row { grid-template-columns: 1fr; }
+            .steps-row { grid-template-columns: 1fr; }
+            .code-row { flex-direction: column; }
         }
     </style>
-    <!-- SweetAlert CDN (for possible future use but not required here) -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 <body>
 
-    <!-- Header partial (ensure your header path is correct) -->
     <%- include('../../partials/header') %>
 
     <div class="profile-layout">
-        <!-- Sidebar partial with dynamic user & active path -->
-        <%- include('../../partials/profileSidebar', { user: user, path: '/profile/referral' }) %>
 
-        <!-- Main Referral Content -->
+        <div style="width: 288px; min-width: 288px; flex-shrink: 0;">
+            <%- include('../../partials/profileSidebar', { user: user, path: '/profile/referral' }) %>
+        </div>
+
         <div class="profile-content">
-            <div class="referral-hero">
-<span class="reward-badge">🎁 EARN ₹200 PER REFERRAL</span>
 
-<p class="subtitle">
-  Invite your friends to join ELARA. 
-  When they sign up using your code, 
-  <strong>you get ₹200</strong> and <strong>they get ₹100</strong> instantly in wallet.
-</p>            </div>
+            <!-- Title -->
+            <h1 class="page-title">Refer & <span>Earn</span></h1>
 
-            <div style="display: flex; justify-content: center;">
-                <div class="code-card">
-                    <span class="referral-code" id="referral-code"><%= user && user.referralCode ? user.referralCode : 'ELARA2026' %></span>
+            <!-- Invite Card -->
+            <div class="invite-card">
+                <h2>Invite your friends to ELARA</h2>
+                <p>Share your code and get rewards for every new signup.</p>
+
+                <div class="code-row">
+                    <div class="referral-code-box" id="referral-code">
+                        <%= user && user.referralCode ? user.referralCode : 'ELARA2026' %>
+                    </div>
+                    <button class="copy-btn" id="copy-btn">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                        COPY CODE
+                    </button>
                 </div>
-            </div>
-
-            <div style="text-align: center;">
-                <button class="copy-btn" id="copy-btn">📋 Copy Referral Code</button>
                 <div class="toast-msg" id="toastMsg">✓ Copied to clipboard!</div>
             </div>
 
-            <div class="info-box">
-                <h4>📌 How it works</h4>
-                <ul>
-                    <li>Share your unique referral code with friends.</li>
-<li>Your friend enters the code during signup.</li>
-<li><strong>You instantly get ₹200</strong> in your wallet.</li>
-<li><strong>Your friend gets ₹100</strong> welcome bonus.</li>
-<li>No limit — refer as many friends as you want!</li>
-                </ul>
-                <hr />
-                <h4>✨ Pro tip</h4>
-                <ul>
-                    <li>Share your referral link: <strong style="color:#a07060;">elara.com/ref/<%= user && user.referralCode ? user.referralCode : 'yourcode' %></strong> (coming soon)</li>
-                    <li>Wallet balance can be used for future purchases on ELARA.</li>
-                </ul>
+            <!-- Steps Row -->
+            <div class="steps-row">
+                <div class="step-card">
+                    <div class="step-number">1</div>
+                    <h3>Share Your Code</h3>
+                    <p>Send your unique referral code to your friends and family.</p>
+                </div>
+                <div class="step-card">
+                    <div class="step-number">2</div>
+                    <h3>They Sign Up</h3>
+                    <p>When they create an account using your code, they get <strong>₹100</strong> bonus credit.</p>
+                </div>
+                <div class="step-card">
+                    <div class="step-number">3</div>
+                    <h3>You Earn</h3>
+                    <p>You receive <strong>₹200</strong> in your wallet for every successful referral!</p>
+                </div>
             </div>
+
         </div>
     </div>
 
-    <!-- Footer partial -->
     <%- include('../../partials/footer') %>
 
     <script>
@@ -277,43 +301,35 @@
             const copyBtn = document.getElementById('copy-btn');
             const codeSpan = document.getElementById('referral-code');
             const toastEl = document.getElementById('toastMsg');
-            
+
             if (!copyBtn || !codeSpan) return;
 
-            const copyReferralCode = async () => {
+            copyBtn.addEventListener('click', async () => {
                 const code = codeSpan.innerText.trim();
                 if (!code) return;
-                
+
                 try {
                     await navigator.clipboard.writeText(code);
-                    showCopiedFeedback();
                 } catch (err) {
-                    // fallback for older browsers
-                    const textarea = document.createElement('textarea');
-                    textarea.value = code;
-                    document.body.appendChild(textarea);
-                    textarea.select();
+                    const ta = document.createElement('textarea');
+                    ta.value = code;
+                    document.body.appendChild(ta);
+                    ta.select();
                     document.execCommand('copy');
-                    document.body.removeChild(textarea);
-                    showCopiedFeedback();
+                    document.body.removeChild(ta);
                 }
-            };
 
-            function showCopiedFeedback() {
-                if (!copyBtn || !toastEl) return;
-                const originalText = copyBtn.innerHTML;
-                copyBtn.innerHTML = '✅ Copied!';
+                const orig = copyBtn.innerHTML;
+                copyBtn.innerHTML = '✅ COPIED!';
                 copyBtn.classList.add('copied');
                 toastEl.classList.add('show');
-                
+
                 setTimeout(() => {
-                    copyBtn.innerHTML = originalText;
+                    copyBtn.innerHTML = orig;
                     copyBtn.classList.remove('copied');
                     toastEl.classList.remove('show');
                 }, 2000);
-            }
-
-            copyBtn.addEventListener('click', copyReferralCode);
+            });
         })();
     </script>
 </body>

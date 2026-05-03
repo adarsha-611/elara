@@ -60,21 +60,20 @@ export const sendOTP = async (email) => {
 export const verifyOTP = async (email, enteredOTP) => {
   const record = await OTP.findOne({ email });
 
-  if (!record) {
-    throw new Error("OTP not found");
-  }
+  if (!record) throw new Error("OTP not found");
+
+  const cleanEntered = String(enteredOTP).trim();
+  const cleanStored = String(record.otp).trim();
 
   if (record.expiresAt < new Date()) {
     throw new Error("OTP expired");
   }
 
-  if (record.otp !== enteredOTP) {
+  if (cleanStored !== cleanEntered) {
     throw new Error("Invalid OTP");
   }
 
-
   await OTP.deleteOne({ email });
-
   return true;
 };
 

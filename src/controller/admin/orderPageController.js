@@ -20,6 +20,7 @@ const getOrderPage = async(req,res)=>{
         res.render('admin/orderManagement',{
         orders,
         totalPages,
+        currentMenu:"orders",
         currentPage,
         search,
         status,

@@ -1,7 +1,8 @@
 import { getAllProducts,getProductById,getRelatedProducts,getBestOfferForProduct } from "../../services/user/shopProductService.js";
 import Review from "../../model/reviewSchema.js"
 import Category from "../../model/categorySchema.js";
-import Wishlist from "../../model/wishlistSchema.js"
+import Wishlist from "../../model/wishlistSchema.js";
+import Cart from "../../model/cartSchema.js"
 
 const getShopPage = async (req, res) => {
   try {
@@ -19,7 +20,7 @@ const getShopPage = async (req, res) => {
     }
 
     const page = parseInt(req.query.page) || 1;
-    const limit = 9;
+    const limit = 6;
     const skip = (page - 1) * limit;
 
     const filters = {
@@ -54,7 +55,9 @@ const getShopPage = async (req, res) => {
       categories,
       currentPage: page,
       totalPages,
-      wishlistProductIds
+      wishlistProductIds,
+      flashError: req.flash("error")[0] || null,   
+      flashSuccess: req.flash("success")[0] || null 
     });
 
   } catch (error) {
@@ -72,38 +75,42 @@ const getProductDetailPage = async (req, res) => {
     if (!product) {
       return res.redirect("/shop");
     }
-  
 
-    const relatedProducts = await getRelatedProducts(
-      product.category,
-      product._id
-    );
-    const reviews = await Review.find({productId:id})
-        .populate("userId","name")
-        .sort({createdAt:-1});
+    if (product.categoryUnlisted) {
+      req.flash("error", "This product's category is currently unavailable.");
+      return res.redirect("/shop");
+    }
+
+    const relatedProducts = await getRelatedProducts(product.category, product._id);
+    const reviews = await Review.find({ productId: id })
+      .populate("userId", "name")
+      .sort({ createdAt: -1 });
 
     const userId = req.session.userId;
-        let isWishlisted = false;
-
-        if(userId){
-          const wishlist = await Wishlist.findOne({userId});
-
-          if (wishlist && Array.isArray(wishlist.products)) {
-        isWishlisted = wishlist.products.some(item =>
-          item.productId.toString() === id.toString()
-       );
-      }
-        }
+    let isWishlisted = false;
     
-    // Pass the first variant price to get initial offer
+    if (userId) {
+      const wishlist = await Wishlist.findOne({ userId });
+      if (wishlist && Array.isArray(wishlist.products)) {
+        isWishlisted = wishlist.products.some(
+          item => item.productId.toString() === id.toString()
+        );
+      }
+    }
+
     const offerData = await getBestOfferForProduct(product, product.variants[0].price);
 
+    const cart = await Cart.findOne({ userId: req.session.userId });
+    const cartVariantIds = cart 
+  ? cart.items.map(i => i.variantId.toString()) 
+  : [];
     return res.render("user/productDetail", {
       product,
       reviews,
       relatedProducts,
       offerData,
-      isWishlisted
+      isWishlisted,
+      cartVariantIds
     });
 
   } catch (error) {
@@ -126,43 +133,26 @@ const checkProductStatus = async(req,res)=>{
   }
 }
 
-// NEW API endpoint to get offer for specific variant
 const getVariantOffer = async (req, res) => {
   try {
-    console.log("\n=== GET VARIANT OFFER CALLED ===");
-    console.log("Request params:", req.params);
     
     const { productId, variantId } = req.params;
-    console.log("Product ID:", productId);
-    console.log("Variant ID:", variantId);
     
     const product = await getProductById(productId);
     
     if (!product) {
-      console.log("❌ Product not found!");
       return res.status(404).json({ success: false, message: "Product not found" });
     }
     
-    console.log("✅ Product found:", product.name);
-    console.log("Product category:", product.category);
-    console.log("Total variants:", product.variants.length);
     
     const variant = product.variants.id(variantId);
     
     if (!variant) {
-      console.log("❌ Variant not found!");
-      console.log("Available variant IDs:", product.variants.map(v => v._id.toString()));
       return res.status(404).json({ success: false, message: "Variant not found" });
     }
     
-    console.log("✅ Variant found:", variant.color);
-    console.log("Variant price:", variant.price);
-    
-    console.log("\n--- Fetching offers from database ---");
     const offerData = await getBestOfferForProduct(product, variant.price);
     
-    console.log("\n--- Offer result ---");
-    console.log("Offer data:", JSON.stringify(offerData, null, 2));
     
     const response = {
       success: true,
@@ -172,14 +162,11 @@ const getVariantOffer = async (req, res) => {
       variantImages: variant.images
     };
     
-    console.log("\n--- Sending response ---");
-    console.log("Response:", JSON.stringify(response, null, 2));
+  
     
     return res.json(response);
     
   } catch (error) {
-    console.log("❌ Get Variant Offer Error:", error);
-    console.log("Error stack:", error.stack);
     return res.status(500).json({ success: false, message: "Server Error", error: error.message });
   }
 };

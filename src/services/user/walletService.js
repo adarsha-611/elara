@@ -1,19 +1,31 @@
 import  Wallet from "../../model/walletSchema.js";
 
-export const getWalletService = async(userId)=>{
-    const wallet = await Wallet.findOne({userId});
+export const getWalletService = async (userId, page = 1, limit = 5) => {
+  const wallet = await Wallet.findOne({ userId });
 
-    if(!wallet){
-        return{
-            balance:0,
-            transactions:[]
-        }
-    }
-    return wallet;
-}
+  if (!wallet) {
+    return { balance: 0, transactions: [], totalPages: 1, currentPage: 1 };
+  }
+
+  const allTransactions = [...wallet.transactions].sort(
+    (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+  );
+
+  const totalTransactions = allTransactions.length;
+  const totalPages = Math.ceil(totalTransactions / limit) || 1;
+  const skip = (page - 1) * limit;
+  const paginatedTransactions = allTransactions.slice(skip, skip + limit);
+
+  return {
+    balance: wallet.balance,
+    transactions: paginatedTransactions,
+    totalPages,
+    currentPage: page,
+    totalTransactions
+  };
+};
 
 
-// walletService.js — update addMoneyToWallet to accept a reason
 export const addMoneyToWallet = async (userId, amount, reason = "Wallet Top-up") => {
     let wallet = await Wallet.findOne({ userId });
 
@@ -30,7 +42,7 @@ export const addMoneyToWallet = async (userId, amount, reason = "Wallet Top-up")
     wallet.transactions.push({
         type: "credit",
         amount,
-        reason   // ✅ now dynamic
+        reason   
     });
 
     await wallet.save();

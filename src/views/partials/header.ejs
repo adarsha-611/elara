@@ -5,109 +5,221 @@
     <title>ELARA</title>
 
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet">
-
-    <link rel="stylesheet"
-     href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
     <style>
         body {
             font-family: 'Jost', sans-serif;
+            margin: 0;
+            padding: 0;
         }
 
+        /* Outer header — full width, transparent, sits over hero */
         .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 999;
+            padding: 18px 40px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: transparent;
+            pointer-events: none; /* let clicks pass through outer bar */
+        }
+
+        /* Inner floating pill */
+        .nav-inner {
+            pointer-events: all;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 18px 60px;
-            background: #F9F8F3;
-            border-bottom: 1px solid #E0DCD0;
+            width: 100%;
+            max-width: 1100px;
+            padding: 14px 32px;
+            border-radius: 14px;
+
+            /* Glassmorphism */
+            background: rgba(255, 255, 255, 0.12);
+            backdrop-filter: blur(18px);
+            -webkit-backdrop-filter: blur(18px);
+            border: 1px solid rgba(255, 255, 255, 0.22);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.18);
+
+            transition: background 0.4s ease,
+                        box-shadow 0.4s ease,
+                        border-color 0.4s ease;
+        }
+
+        /* Darker glass on scroll */
+        .nav-inner.scrolled {
+            background: rgba(249, 248, 243, 0.55);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border-color: rgba(197, 163, 113, 0.25);
+            box-shadow: 0 8px 40px rgba(0, 0, 0, 0.12);
         }
 
         .logo {
             font-family: 'Playfair Display', serif;
-            font-size: 24px;
-            letter-spacing: 2px;
-            color: #1A1A1A;
+            font-size: 20px;
+            letter-spacing: 3px;
+            color: #ffffff;
             font-weight: 600;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        .nav-inner.scrolled .logo {
+            color: #1A1A1A;
         }
 
         .nav-menu {
             display: flex;
-            gap: 40px;
+            gap: 36px;
+            list-style: none;
+            margin: 0;
+            padding: 0;
         }
 
         .nav-menu a {
             text-decoration: none;
-            color: #1A1A1A;
-            font-size: 14px;
-            letter-spacing: 1px;
-            transition: 0.3s;
+            color: rgba(255, 255, 255, 0.85);
+            font-size: 13px;
+            letter-spacing: 1.2px;
+            font-weight: 500;
+            transition: color 0.3s;
+            position: relative;
+            padding-bottom: 3px;
         }
 
-        .nav-menu a:hover {
+        .nav-menu a::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 1.5px;
+            background: #C5A371;
+            transition: width 0.3s ease;
+        }
+
+        .nav-menu a:hover::after,
+        .nav-menu a.active::after {
+            width: 100%;
+        }
+
+        .nav-menu a:hover,
+        .nav-menu a.active {
             color: #C5A371;
         }
 
-        .icons {
-            display: flex;
-            gap: 25px;
-            align-items: center;
-        }
-
-        .icons a {
-            font-size: 18px;
+        /* On scroll — darken text */
+        .nav-inner.scrolled .nav-menu a {
             color: #1A1A1A;
-            text-decoration: none;
-            transition: 0.3s;
         }
 
-        .icons a:hover {
+        .nav-inner.scrolled .nav-menu a:hover,
+        .nav-inner.scrolled .nav-menu a.active {
             color: #C5A371;
         }
 
-        /* LOGIN / SIGNUP */
-        .auth-buttons {
+        /* Right side icons */
+        .nav-right {
             display: flex;
             gap: 20px;
             align-items: center;
         }
 
+        .nav-right a {
+            font-size: 16px;
+            color: rgba(255, 255, 255, 0.85);
+            text-decoration: none;
+            transition: color 0.3s;
+            position: relative;
+        }
+
+        .nav-right a:hover {
+            color: #C5A371;
+        }
+
+        .nav-inner.scrolled .nav-right a {
+            color: #1A1A1A;
+        }
+
+        .nav-inner.scrolled .nav-right a:hover {
+            color: #C5A371;
+        }
+
+        /* Auth buttons */
+        .auth-buttons {
+            display: flex;
+            gap: 14px;
+            align-items: center;
+        }
+
         .auth-link {
             text-decoration: none;
-            color: #1A1A1A;
-            font-size: 13px;
+            color: rgba(255, 255, 255, 0.85);
+            font-size: 12px;
             letter-spacing: 1px;
             font-weight: 500;
-            transition: 0.3s;
+            transition: color 0.3s;
         }
 
         .auth-link:hover {
             color: #C5A371;
         }
 
+        .nav-inner.scrolled .auth-link {
+            color: #1A1A1A;
+        }
+
+        .nav-inner.scrolled .auth-link:hover {
+            color: #C5A371;
+        }
+
         .signup-btn {
-            border: 1px solid #1A1A1A;
-            padding: 8px 18px;
-            border-radius: 6px;
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            padding: 7px 18px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(8px);
             transition: all 0.3s;
+            color: #ffffff !important;
+            font-size: 12px;
+            letter-spacing: 1px;
+            font-weight: 500;
         }
 
         .signup-btn:hover {
-            background: #1A1A1A;
-            color: #F9F8F3 !important;
+            background: #C5A371;
+            border-color: #C5A371;
+            color: #ffffff !important;
         }
-        
-.nav-menu a.active {
-    color: #C5A371;
-    font-weight: 600; 
-    border-bottom: 2px solid #C5A371; 
-}
 
-        /* Responsive */
+        .nav-inner.scrolled .signup-btn {
+            border-color: rgba(26, 26, 26, 0.35);
+            color: #1A1A1A !important;
+            background: rgba(255,255,255,0.2);
+        }
+
+        .nav-inner.scrolled .signup-btn:hover {
+            background: #1A1A1A;
+            border-color: #1A1A1A;
+            color: #ffffff !important;
+        }
+
+        /* Push page content below fixed header */
+        body > *:not(.header) {
+            /* handled per-page with padding-top if needed */
+        }
+
         @media (max-width: 768px) {
-            .nav-menu {
-                display: none;
-            }
+            .nav-menu { display: none; }
+            .header { padding: 14px 16px; }
+            .nav-inner { padding: 12px 20px; border-radius: 20px; }
         }
     </style>
 </head>
@@ -115,61 +227,78 @@
 <body>
 
 <header class="header">
+    <div class="nav-inner" id="navInner">
 
-    <div class="logo">ELARA</div>
+        <a href="/home" class="logo">ELARA</a>
 
-   <nav class="nav-menu">
-    <a href="/home" class="<%= path === '/' ? 'active' : '' %>">HOME</a>
-    <a href="/shop" class="<%= path === '/shop' ? 'active' : '' %>">SHOP</a>
-    <a href="/about" class="<%= path === '/about' ? 'active' : '' %>">ABOUT US</a>
-    
-</nav>
+        <nav>
+            <ul class="nav-menu">
+                <li><a href="/home" class="<%= path === '/' || path === '/home' ? 'active' : '' %>">HOME</a></li>
+                <li><a href="/shop" class="<%= path === '/shop' ? 'active' : '' %>">SHOP</a></li>
+                <li><a href="/about" class="<%= path === '/about' ? 'active' : '' %>">ABOUT US</a></li>
+            </ul>
+        </nav>
 
-    <% if (locals.user) { %>
-        <div class="icons">
-            <a href="/wishlist"><i class="fa-regular fa-heart"></i></a>
-            <a href="/profile"><i class="fa-regular fa-user"></i></a>
-           <a href="/cart" id="cart-icon-link" class="relative inline-block">
-    <i class="fa fa-shopping-cart text-xl"></i>
-    <% if(cartCount > 0){ %>
-        <span id="cart-count" class="absolute -top-2 -right-2 bg-red-500 text-white text-xs px-2 rounded-full">
-            <%= cartCount %>
-        </span>
-    <% } %>
-</a>
-        </div>
-    <% } else { %>
-        <div class="auth-buttons">
-            <a href="/login" class="auth-link">LOGIN</a>
-            <a href="/signup" class="auth-link signup-btn">SIGN UP</a>
-        </div>
-    <% } %>
+        <% if (locals.user) { %>
+            <div class="nav-right">
+                <a href="/wishlist"><i class="fa-regular fa-heart"></i></a>
+                <a href="/profile"><i class="fa-regular fa-user"></i></a>
+                <a href="/cart" id="cart-icon-link" style="position: relative; display: inline-block;">
+                    <i class="fa fa-shopping-cart"></i>
+                    <% if(cartCount > 0){ %>
+                        <span id="cart-count" style="position:absolute;top:-8px;right:-10px;background:#ef4444;color:white;font-size:10px;padding:1px 6px;border-radius:999px;font-weight:600;">
+                            <%= cartCount %>
+                        </span>
+                    <% } %>
+                </a>
+            </div>
+        <% } else { %>
+            <div class="auth-buttons">
+                <a href="/login" class="auth-link">LOGIN</a>
+                <a href="/signup" class="auth-link signup-btn">SIGN UP</a>
+            </div>
+        <% } %>
 
+    </div>
 </header>
 
 <script>
+    const navInner = document.getElementById('navInner');
+
+    const isHomePage = ['/', '/home'].includes(window.location.pathname);
+
+    function updateNav() {
+        if (isHomePage && window.scrollY <= 20) {
+            navInner.classList.remove('scrolled');
+        } else {
+            navInner.classList.add('scrolled');
+        }
+    }
+
+    updateNav(); /* runs instantly on load — no flash on other pages */
+    window.addEventListener('scroll', updateNav, { passive: true });
+
+    /* Active nav highlight */
     document.querySelectorAll('.nav-menu a').forEach(link => {
         if (link.href === window.location.href) {
             link.classList.add('active');
         }
     });
 
+    /* Cart count updater */
     async function updateCartCount() {
         try {
             const res = await fetch('/cart/count');
             const data = await res.json();
             const count = data.count || 0;
-
             const cartLink = document.getElementById("cart-icon-link");
             if (!cartLink) return;
-
             let cartEl = document.getElementById("cart-count");
-
             if (count > 0) {
                 if (!cartEl) {
                     cartEl = document.createElement("span");
                     cartEl.id = "cart-count";
-                    cartEl.className = "absolute -top-2 -right-2 bg-red-500 text-white text-xs px-2 rounded-full";
+                    cartEl.style.cssText = "position:absolute;top:-8px;right:-10px;background:#ef4444;color:white;font-size:10px;padding:1px 6px;border-radius:999px;font-weight:600;";
                     cartLink.appendChild(cartEl);
                 }
                 cartEl.innerText = count;
@@ -177,17 +306,14 @@
             } else {
                 if (cartEl) cartEl.style.display = "none";
             }
-
         } catch (err) {
             console.error("Cart count update failed");
         }
     }
 
- 
     updateCartCount();
-
-   
     window.updateCartCount = updateCartCount;
 </script>
+
 </body>
 </html>

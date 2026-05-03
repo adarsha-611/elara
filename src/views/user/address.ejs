@@ -83,16 +83,16 @@
             justify-content: center;
         }
         
-        .pagination a.page-num {
-            width: 42px;
-            height: 42px;
-            border: 1px solid #F4F1EE;
-            background-color: #FFFFFF;
-            color: #3D2B24;
-            font-size: 0.75rem;
-            font-weight: 700;
-            border-radius: 4px;
-        }
+      .pagination a.page-num {
+    width: 42px;
+    height: 42px;
+    border: 1px solid #F4F1EE;
+    background-color: #FFFFFF;
+    color: #3D2B24;
+    font-size: 0.75rem;
+    font-weight: 700;
+    border-radius: 50%;
+}
         
         .pagination a.page-num:hover:not(.active) {
             border-color: #7A5C4D;
@@ -106,14 +106,23 @@
         }
         
         .pagination a.nav-btn {
-            padding: 0 15px;
-            height: 42px;
-            color: #3D2B24;
-            font-size: 10px;
-            font-weight: 800;
-            text-transform: uppercase;
-            letter-spacing: 0.2em;
-        }
+    padding: 0 18px;
+    height: 42px;
+    color: #3D2B24;
+    font-size: 10px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    border: 1px solid #F4F1EE;
+    border-radius: 21px;
+    background-color: #FFFFFF;
+}
+
+.pagination a.nav-btn:hover {
+    background-color: #3D2B24;
+    color: #FFFFFF;
+    border-color: #3D2B24;
+}
         
         .loading-spinner {
             display: inline-block;
@@ -136,12 +145,12 @@
 
     <%- include('../partials/header') %>
 
-    <main class="max-w-6xl mx-auto px-6 py-12">
+    <main class="max-w-6xl mx-auto px-6 py-12" style="margin-top: 100px;">
         <div class="flex flex-col md:flex-row gap-10 items-start">
             
-            <div class="w-full md:w-72 shrink-0">
-                <%- include('../partials/profileSidebar', { user: user, path: '/profile/address' }) %>
-            </div>
+<div style="width: 288px; min-width: 288px; flex-shrink: 0;">
+        <%- include('../partials/profileSidebar', { user: user, path: '/profile/address' }) %>
+</div>
 
             <section class="flex-1 bg-elara-ivory rounded-3xl shadow-[0_20px_60px_rgba(61,43,36,0.05)] border border-white overflow-hidden">
                 
@@ -156,7 +165,7 @@
                     </button>
                 </div>
 
-                <div class="p-8 md:p-12">
+                <div class="p-8 md:p-12" style="padding: 7rem;">
                     <!-- Flash Messages -->
                     <% if (success && success.length > 0) { %>
                         <div class="bg-green-50 text-green-700 px-6 py-4 rounded-xl text-sm border border-green-100 mb-8 font-medium italic">
@@ -594,37 +603,32 @@ async function deleteAddress(addressId) {
                 
                 const result = await response.json();
                 
-                if (result.success) {
-                    // Success - Show SweetAlert and reload
-                    Swal.fire({
-                        icon: 'success',
-                        title: currentFormMode === 'add' ? 'Address Added!' : 'Address Updated!',
-                        text: result.message,
-                        confirmButtonColor: '#7A5C4D',
-                        confirmButtonText: 'OK'
-                    }).then(() => {
-                        closeAddressModal();
-                        window.location.reload();
-                    });
-                } else {
-                    // Validation Errors
-                    if (result.errors && result.errors.length > 0) {
-                        displayErrors(result.errors);
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Validation Error',
-                            text: 'Please fix the errors in the form',
-                            confirmButtonColor: '#7A5C4D'
-                        });
-                    } else {
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Error!',
-                            text: result.message || 'Failed to save address',
-                            confirmButtonColor: '#7A5C4D'
-                        });
-                    }
-                }
+               if (result.success) {
+            Swal.fire({
+            icon: 'success',
+            title: currentFormMode === 'add' ? 'Address Added!' : 'Address Updated!',
+            text: result.message,
+             confirmButtonColor: '#7A5C4D'
+    }).then(() => {
+        closeAddressModal();
+        window.location.reload();
+    });
+
+} else {
+
+    if (result.errors && result.errors.length > 0) {
+        displayErrors(result.errors);
+        return;
+    }
+
+    Swal.fire({
+        icon: 'error',
+        title: 'Error!',
+        text: result.message || 'Something went wrong',
+        confirmButtonColor: '#7A5C4D'
+    });
+}
+                
             } catch (error) {
                 console.error('Submit error:', error);
                 Swal.fire({
