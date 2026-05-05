@@ -37,10 +37,11 @@
 
         .card {
             background: var(--elara-ivory);
-            padding: 30px;
+            padding: 35px;
             border-radius: 12px;
             border: 1px solid var(--border-color);
             margin-bottom: 25px;
+            margin-left: 150px;
             box-shadow: 0 2px 8px rgba(0,0,0,0.04);
         }
 
@@ -367,7 +368,6 @@
         <%- include('../partials/profileSidebar', { user, path: '/profile/orders' }) %>
 
         <section class="details-content">
-            <h1 class="font-serif text-3xl mb-8 text-stone-800" style="font-family: 'Playfair Display', serif;">Order Details</h1>
 
 <% if(order.paymentStatus === 'failed' || (order.paymentMethod === 'online' && order.paymentStatus === 'pending')) { %>
 <div class="payment-failed-banner">
@@ -394,6 +394,8 @@
 
             <!-- Order Status Card -->
             <div class="card">
+         <h1 class="font-serif text-3xl mb-8 text-stone-800" style="font-family: 'Playfair Display', serif;">Order Details</h1>
+
                 <h3>Order Status</h3>
 
                 <%

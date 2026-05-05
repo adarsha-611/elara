@@ -35,9 +35,11 @@ const userSchema = new mongoose.Schema(
       default: false
     },
 
-   referralCode: {
+referralCode: {
     type: String,
-    unique: true
+    unique: true,
+    sparse: true,
+    default: () => Math.random().toString(36).substring(2, 8).toUpperCase()
 },
 referredBy: {
   type: mongoose.Schema.Types.ObjectId,
