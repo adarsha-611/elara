@@ -4,16 +4,15 @@ import User from "../../../model/userSchema.js";
 import { hashString } from "../../../utils/bcrypt.js";
 
 
-const getForgotPassword = async(req,res)=>{
+const getForgotPassword = async (req, res) => {
     try {
-        const error = req.flash('error');
-        res.render('user/auth/forgotPassword',{error});
+        res.render('user/auth/forgotPassword', {}); 
     } catch (error) {
-        
-console.log("error rendering forgot password page",error);
-res.status(500).send('Server Error')   
- }
+        console.log("error rendering forgot password page", error);
+        res.status(500).send('Server Error');
+    }
 };
+
 
 const postForgotPassword = async (req, res) => {
     try {
@@ -26,6 +25,7 @@ const postForgotPassword = async (req, res) => {
         }
 
         if (user.authType === 'google') {
+             console.log("Google user detected, setting flash");
             req.flash('error', 'This account uses Google Sign-In. Please login with Google instead.');
             return res.redirect('/forgot-password');
         }

@@ -78,7 +78,6 @@ app.use('/',userRouter);
 app.use('/',profileRouter);
 app.use('/admin',adminRouter);
 
-// 404 handler — must be after all routes
 app.use((req, res, next) => {
     res.status(404).render("user/404page", {
         url: req.originalUrl
