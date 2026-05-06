@@ -245,7 +245,7 @@
 
                 <div class="form-group">
                     <label>Coupon Code *</label>
-                    <input type="text" name="code" id="coupon-code" placeholder="e.g. ELARA20" required style="text-transform: uppercase;">
+                    <input type="text" name="code" id="coupon-code" placeholder="e.g. ELARA20"  style="text-transform: uppercase;">
                 </div>
 
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
@@ -259,7 +259,7 @@
 
                     <div class="form-group">
                         <label>Discount Value *</label>
-                        <input type="number" name="discountValue" id="discount-val" placeholder="e.g. 20" required>
+                        <input type="number" name="discountValue" id="discount-val" placeholder="e.g. 20">
                     </div>
                 </div>
 
@@ -277,18 +277,18 @@
 
                 <div class="form-group">
                     <label>Usage Limit *</label>
-                    <input type="number" name="usageLimit" id="usage-limit" placeholder="e.g. 200" required>
+                    <input type="number" name="usageLimit" id="usage-limit" placeholder="e.g. 200" >
                 </div>
 
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
                     <div class="form-group">
                         <label>Start Date *</label>
-                        <input type="date" name="startDate" id="start-date" required>
+                        <input type="date" name="startDate" id="start-date">
                     </div>
 
                     <div class="form-group">
                         <label>End Date *</label>
-                        <input type="date" name="endDate" id="end-date" required>
+                        <input type="date" name="endDate" id="end-date">
                     </div>
                 </div>
 
@@ -638,22 +638,33 @@ document.getElementById("couponForm").addEventListener("submit", async function(
 });
 
 function showValidationErrors(errors) {
-    // Clear old errors
     document.querySelectorAll(".error-text").forEach(el => el.remove());
+    document.querySelectorAll(".error-field").forEach(el => {
+        el.style.border = '';
+        el.classList.remove('error-field');
+    });
 
     errors.forEach(err => {
         const input = document.querySelector(`[name="${err.field}"]`);
         if (!input) return;
 
         input.style.border = "1px solid red";
+        input.classList.add('error-field');
 
         const msg = document.createElement("div");
         msg.className = "error-text";
-        msg.style.color = "red";
-        msg.style.fontSize = "10px";
-        msg.innerText = err.message;
-
+        msg.style.cssText = "color:red; font-size:10px; margin-top:4px;";
+        msg.innerText = err.message.replace(/['"]/g, ''); // clean Joi quotes
         input.parentElement.appendChild(msg);
+    });
+
+    document.querySelectorAll('.error-field').forEach(input => {
+        input.addEventListener('input', function() {
+            this.style.border = '';
+            this.classList.remove('error-field');
+            const errMsg = this.parentElement.querySelector('.error-text');
+            if (errMsg) errMsg.remove();
+        }, { once: true });
     });
 }
 

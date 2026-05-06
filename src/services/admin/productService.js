@@ -75,9 +75,9 @@ export const getProductById = async (id) => {
     if (!product) throw new Error("Product not found");
     return product;
   } catch (error) {
-    console.log("Error fetching product:", error);
-    throw new Error("Failed to fetch product");
-  }
+    console.error("getProductById error:", error.stack);
+    throw error;
+}
 };
 
 
@@ -139,7 +139,7 @@ export const updateProduct = async (id, data, files) => {
     return product;
 
   } catch (error) {
-    console.log("Update error:", error);
-    throw new Error("Failed to update product");
-  }
+    console.error("Update error full:", error.stack);
+    throw error;  
+}
 };

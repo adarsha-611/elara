@@ -6,6 +6,7 @@ import upload from "../../config/multer.js";
 import orderPageController from "../../controller/admin/orderPageController.js";
 import userManagementController from "../../controller/admin/userManagementController.js";
 import adminAuth from "../../middlewares/adminAuthMiddleware.js";
+import { isAdminGuest } from "../../middlewares/adminAuthMiddleware.js";
 import offerController from "../../controller/admin/offerController.js";
 import couponController from "../../controller/admin/couponController.js";
 import dashboardController from "../../controller/admin/dashboardController.js";
@@ -13,8 +14,8 @@ import salesReportController from "../../controller/admin/salesReportController.
 const router = express.Router();
 
 router.get("/", (req, res) => res.redirect("/admin/login"));
-router.get("/login", loginController.getLogin);
-router.post("/login", loginController.postLogin);
+router.get("/login", isAdminGuest, loginController.getLogin);
+router.post("/login", isAdminGuest, loginController.postLogin);;
 router.get("/logout",adminAuth,loginController.logout);
 
 //UserManagement
@@ -38,7 +39,18 @@ router.get('/add-product', adminAuth, productController.getAddProductPage);
 router.post(
   '/add-product',
   adminAuth,
-  upload.any(),   
+  (req, res, next) => {
+    upload.any()(req, res, (err) => {
+      if (err) {
+        console.error("MULTER/CLOUDINARY ERROR:", err);
+        return res.status(500).json({ 
+          success: false, 
+          message: "File upload failed: " + err.message 
+        });
+      }
+      next();
+    });
+  },
   productController.postAddProduct
 );
 
@@ -47,7 +59,18 @@ router.get("/edit-product/:id", adminAuth, productController.getEditProductPage)
 router.post(
   "/edit-product/:id",
   adminAuth,
-  upload.any(),  
+  (req, res, next) => {
+    upload.any()(req, res, (err) => {
+      if (err) {
+        console.error("MULTER/CLOUDINARY ERROR:", err); // ← this will show real error
+        return res.status(500).json({ 
+          success: false, 
+          message: "File upload failed: " + err.message 
+        });
+      }
+      next();
+    });
+  },
   productController.postEditProduct
 );
 
