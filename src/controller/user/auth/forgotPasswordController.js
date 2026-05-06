@@ -25,7 +25,7 @@ const postForgotPassword = async (req, res) => {
             return res.redirect('/forgot-password');
         }
 
-        if (user.googleId || !user.password) {
+        if (user.authType === 'google') {
             req.flash('error', 'This account uses Google Sign-In. Please login with Google instead.');
             return res.redirect('/forgot-password');
         }
