@@ -15,23 +15,30 @@ res.status(500).send('Server Error')
  }
 };
 
-const postForgotPassword = async(req,res)=>{
+const postForgotPassword = async (req, res) => {
     try {
-        const {email} = req.body;
+        const { email } = req.body;
         const user = await findUserByemail(email);
-        if(!user){
-            req.flash('error','User with this email does not exist');
+
+        if (!user) {
+            req.flash('error', 'User with this email does not exist');
+            return res.redirect('/forgot-password');
+        }
+
+        if (user.googleId || !user.password) {
+            req.flash('error', 'This account uses Google Sign-In. Please login with Google instead.');
             return res.redirect('/forgot-password');
         }
 
         req.session.forgotEmail = email;
         await sendOTP(email);
-        res.render('user/auth/loginOtp',{email});
+        res.render('user/auth/loginOtp', { email });
+
     } catch (error) {
-            console.log('Error in postForgotPassword:', error);
-            res.status(500).send("server Error")
+        console.log('Error in postForgotPassword:', error);
+        res.status(500).send("Server Error");
     }
-}
+};
 
  const verifyForgotOtp = async(req,res)=>{
     try {

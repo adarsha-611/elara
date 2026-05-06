@@ -203,6 +203,7 @@ const availableCoupons = await Coupon.find({
 if (err.message.toLowerCase().includes("stock")) {
   return res.render("user/checkout", {
     ...data,
+    shippingFee: SHIPPING_FEE,
     stockIssue: true,
     stockMessage: err.message,
     successMessages: [],

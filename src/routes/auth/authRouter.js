@@ -22,7 +22,8 @@ router.get("/signup", redirectIfAuthenticated, (req, res) => {
 });
 
 router.post("/signup", signupController.postSignup);
-router.post("/verify-otp", signupController.verifyOtp);
+router.get('/verify-otp', signupController.getOtpPage);
+router.post('/verify-otp', signupController.verifyOtp);
 router.post("/resend-otp", signupController.resendOtp);
 
 

@@ -11,6 +11,7 @@ const random = Math.floor(100000 + Math.random() * 900000);
 return `ORD-${Date.now()}-${random}`;
 };
 
+export const SHIPPING_FEE = 50;
 export const getCheckoutData = async (userId) => {
     const user = await User.findById(userId);
 
@@ -23,7 +24,6 @@ export const getCheckoutData = async (userId) => {
         throw new Error("Cart empty");
     }
 
-    // ✅ fetch wallet balance
     const wallet = await Wallet.findOne({ userId });
     const walletBalance = wallet ? wallet.balance : 0;
 
@@ -58,6 +58,7 @@ export const getCheckoutData = async (userId) => {
         addresses: user.addresses,
         cartItems,
         subtotal,
+        shippingFee: SHIPPING_FEE,
         walletBalance  
     };
 };
@@ -129,7 +130,7 @@ totalAmount += itemTotal;
 
 
 const discount = appliedCoupon?.discount || 0;
-const finalAmount = totalAmount - discount;
+const finalAmount = totalAmount - discount + SHIPPING_FEE;
 
 if (paymentMethod === "wallet") {
 await deductWalletBalance(userId, finalAmount);
@@ -231,8 +232,7 @@ discount = Math.min(coupon.discountValue, totalAmount);
 }
 
 discount = Math.round(discount * 100) / 100;
-const finalTotal = Math.round((totalAmount - discount) * 100) / 100;
-
+const finalTotal = Math.round((totalAmount - discount + SHIPPING_FEE) * 100) / 100; 
 session.appliedCoupon = {
 couponId: coupon._id,
 code: coupon.code,

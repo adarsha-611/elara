@@ -416,24 +416,48 @@
                 }
                 %>
 
-                <div class="order-tracker">
-                    <div class="tracker-step active">
-                        <div class="step-circle"><i class="fa-solid fa-box"></i></div>
-                        <div class="step-label">PLACED</div>
-                    </div>
-                    <div class="tracker-step <%= ['shipped','out for delivery','delivered'].includes(trackerStatus) ? 'active' : '' %>">
-                        <div class="step-circle"><i class="fa-solid fa-truck"></i></div>
-                        <div class="step-label">SHIPPED</div>
-                    </div>
-                    <div class="tracker-step <%= ['out for delivery','delivered'].includes(trackerStatus) ? 'active' : '' %>">
-                        <div class="step-circle"><i class="fa-solid fa-motorcycle"></i></div>
-                        <div class="step-label">OUT FOR DELIVERY</div>
-                    </div>
-                    <div class="tracker-step <%= trackerStatus === 'delivered' ? 'active' : '' %>">
-                        <div class="step-circle"><i class="fa-solid fa-house-chimney"></i></div>
-                        <div class="step-label">DELIVERED</div>
-                    </div>
-                </div>
+               <%
+const paymentFailed = order.paymentStatus === 'failed' || 
+    (order.paymentMethod === 'online' && order.paymentStatus === 'pending');
+%>
+
+<% if (paymentFailed) { %>
+    <div style="display:flex; align-items:center; gap:12px; padding:18px 20px; 
+                background:#fef2f2; border:1px solid #fecaca; border-radius:10px; margin:20px 0 15px;">
+        <div style="width:34px; height:34px; background:#dc2626; border-radius:50%;
+                    display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+            <i class="fa-solid fa-xmark" style="color:white; font-size:14px;"></i>
+        </div>
+        <div>
+            <div style="font-weight:700; color:#dc2626; font-size:0.9rem;">
+                <%= order.paymentStatus === 'failed' ? 'Payment Failed' : 'Payment Pending' %>
+            </div>
+            <div style="font-size:0.78rem; color:#888; margin-top:2px;">
+                Order is on hold until payment is completed.
+            </div>
+        </div>
+    </div>
+
+<% } else { %>
+    <div class="order-tracker">
+        <div class="tracker-step active">
+            <div class="step-circle"><i class="fa-solid fa-box"></i></div>
+            <div class="step-label">PLACED</div>
+        </div>
+        <div class="tracker-step <%= ['shipped','out for delivery','delivered'].includes(trackerStatus) ? 'active' : '' %>">
+            <div class="step-circle"><i class="fa-solid fa-truck"></i></div>
+            <div class="step-label">SHIPPED</div>
+        </div>
+        <div class="tracker-step <%= ['out for delivery','delivered'].includes(trackerStatus) ? 'active' : '' %>">
+            <div class="step-circle"><i class="fa-solid fa-motorcycle"></i></div>
+            <div class="step-label">OUT FOR DELIVERY</div>
+        </div>
+        <div class="tracker-step <%= trackerStatus === 'delivered' ? 'active' : '' %>">
+            <div class="step-circle"><i class="fa-solid fa-house-chimney"></i></div>
+            <div class="step-label">DELIVERED</div>
+        </div>
+    </div>
+<% } %>
             </div>
 
             <!-- Order Info Card -->
@@ -538,7 +562,11 @@ const cancellableItems = order.items.filter(i =>
         </span>
     </div>
 
-    <% if(order.paymentStatus !== 'failed') { %>
+<% 
+const paymentIncomplete = order.paymentStatus === 'failed' || 
+    (order.paymentMethod === 'online' && order.paymentStatus === 'pending');
+%>
+<% if(!paymentIncomplete) { %>
 
         <% if(['pending','confirmed','shipped','out for delivery'].includes(item.itemStatus)) { %>
             <button onclick="openCancelModal('<%= order._id %>','<%= item._id %>')" class="btn-cancel-item">

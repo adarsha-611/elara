@@ -7,7 +7,8 @@
 
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600&family=Plus+Jakarta+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
-
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
     <script>
     tailwind.config = {
       theme: {
@@ -120,24 +121,112 @@
             </section>
         </div>
     </main>
+    <!-- Crop Modal -->
+<div id="cropModal" style="display:none; position:fixed; inset:0; z-index:1000;
+     background:rgba(61,43,36,0.7); backdrop-filter:blur(4px);
+     align-items:center; justify-content:center;">
+    <div style="background:#FDFBF9; border-radius:20px; padding:30px;
+                width:90%; max-width:420px; box-shadow:0 25px 60px rgba(0,0,0,0.2);">
+        <p style="font-family:'Cormorant Garamond',serif; font-size:1.4rem;
+                  color:#3D2B24; margin-bottom:16px; font-style:italic;">Crop Photo</p>
+
+        <div style="width:100%; height:320px; overflow:hidden; border-radius:12px;
+                    background:#F4F1EE; border:1px solid #e5e0d8;">
+            <img id="cropImage" style="max-width:100%; display:block;">
+        </div>
+
+        <div style="display:flex; gap:12px; margin-top:20px;">
+            <button onclick="closeCropModal()"
+                style="flex:1; padding:12px; border:2px solid #3D2B24; color:#3D2B24;
+                       border-radius:10px; font-size:0.75rem; font-weight:700;
+                       text-transform:uppercase; letter-spacing:0.15em; cursor:pointer;
+                       background:transparent; transition:0.2s;"
+                onmouseover="this.style.background='#F4F1EE'"
+                onmouseout="this.style.background='transparent'">
+                Cancel
+            </button>
+            <button onclick="applyCrop()"
+                style="flex:1; padding:12px; background:#3D2B24; color:white;
+                       border:none; border-radius:10px; font-size:0.75rem; font-weight:700;
+                       text-transform:uppercase; letter-spacing:0.15em; cursor:pointer;
+                       transition:0.2s;"
+                onmouseover="this.style.background='#7A5C4D'"
+                onmouseout="this.style.background='#3D2B24'">
+                Apply Crop
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Hidden input to hold cropped image data -->
+<input type="hidden" name="croppedImage" id="croppedImageData">
 
     <%- include('../partials/footer') %>
 
-    <script>
-        function previewImage(event) {
-            const reader = new FileReader();
-            reader.onload = function(){
-                const output = document.getElementById('previewImg');
-                const placeholder = document.getElementById('avatarPlaceholder');
-                if(output) {
-                    output.src = reader.result;
-                } else if(placeholder) {
-                    const container = placeholder.parentElement;
-                    container.innerHTML = `<img src="${reader.result}" id="previewImg" class="w-full h-full object-cover">`;
-                }
-            }
-            reader.readAsDataURL(event.target.files[0]);
+   <script>
+    let cropper = null;
+
+    // Called when user picks a file
+    function previewImage(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = function (e) {
+            const cropImage = document.getElementById('cropImage');
+            cropImage.src = e.target.result;
+
+            // Show modal
+            const modal = document.getElementById('cropModal');
+            modal.style.display = 'flex';
+
+            // Destroy previous cropper if any
+            if (cropper) cropper.destroy();
+
+            // Init cropper — square aspect ratio for profile pic
+            cropper = new Cropper(cropImage, {
+                aspectRatio: 1,
+                viewMode: 1,
+                autoCropArea: 0.8,
+                movable: true,
+                zoomable: true,
+                scalable: false,
+                cropBoxResizable: true,
+            });
+        };
+        reader.readAsDataURL(file);
+    }
+
+    function closeCropModal() {
+        document.getElementById('cropModal').style.display = 'none';
+        if (cropper) { cropper.destroy(); cropper = null; }
+        // Clear file input so user can re-pick
+        document.querySelector('input[name="profileImage"]').value = '';
+    }
+
+    function applyCrop() {
+        if (!cropper) return;
+
+        // Get cropped canvas and convert to base64
+        const canvas = cropper.getCroppedCanvas({ width: 300, height: 300 });
+        const croppedDataUrl = canvas.toDataURL('image/jpeg', 0.85);
+
+        // Put cropped image in hidden field (sent to server)
+        document.getElementById('croppedImageData').value = croppedDataUrl;
+
+        const preview = document.getElementById('previewImg');
+        const placeholder = document.getElementById('avatarPlaceholder');
+        if (preview) {
+            preview.src = croppedDataUrl;
+        } else if (placeholder) {
+            const container = placeholder.parentElement;
+            container.innerHTML = `<img src="${croppedDataUrl}" id="previewImg" class="w-full h-full object-cover">`;
         }
-    </script>
+
+        // Close modal
+        document.getElementById('cropModal').style.display = 'none';
+        if (cropper) { cropper.destroy(); cropper = null; }
+    }
+</script>
 </body>
 </html>
