@@ -75,16 +75,16 @@ textarea { resize: vertical; height: 120px; }
     <section class="form-section">
         <h2>Basic Information</h2>
         <div class="form-group">
-            <label>Product Name</label>
-            <input type="text" name="name" placeholder="e.g., Golden Leaf Studs" required>
+            <label>Product Name</label> 
+            <input type="text" name="name" placeholder="e.g., Golden Leaf Studs" maxlength="100" >
         </div>
         <div class="form-group">
             <label>Description</label>
-            <textarea name="description" placeholder="Describe the craftsmanship..." required></textarea>
+            <textarea name="description" placeholder="Describe the craftsmanship..." maxlength="1000" ></textarea>
         </div>
         <div class="form-group">
             <label>Category</label>
-            <select name="category" id="categorySelect" required>
+            <select name="category" id="categorySelect" >
                 <option value="" disabled selected>Loading categories...</option>
             </select>
         </div>
@@ -164,24 +164,27 @@ function createVariantBlock(variantIndex) {   // variantIndex starts from 0
         </div>
 
         <div class="variant-details-grid">
-            <div class="form-group">
-                <label>Price (₹)</label>
-                <input type="number" name="variants[${variantIndex}][price]" placeholder="849.00" step="0.01" required>
-            </div>
-            <div class="form-group">
-                <label>Color</label>
-                <input type="text" name="variants[${variantIndex}][color]" placeholder="e.g., Rose Gold" required>
-            </div>
-            <div class="form-group">
-                <label>Stock</label>
-                <input type="number" name="variants[${variantIndex}][stock]" placeholder="50" required>
-            </div>
+          <div class="form-group">
+    <label>Price (₹)</label>
+    <input type="number" name="variants[${variantIndex}][price]" 
+        placeholder="849.00" step="0.01" min="1">
+</div>
+<div class="form-group">
+    <label>Color</label>
+    <input type="text" name="variants[${variantIndex}][color]" 
+        placeholder="e.g., Rose Gold" maxlength="20">
+</div>
+<div class="form-group">
+    <label>Stock</label>
+    <input type="number" name="variants[${variantIndex}][stock]" 
+        placeholder="50" min="0">
+</div>
         </div>
     `;
     
-    // Attach file input listeners
+
     block.querySelectorAll('.image-upload-box').forEach(box => {
-    const fileInput = box.querySelector('.file-input'); // ← use existing one
+    const fileInput = box.querySelector('.file-input'); 
 
     const label = box.querySelector('.upload-label');
     label.addEventListener('click', () => fileInput.click());
@@ -206,7 +209,7 @@ function createVariantBlock(variantIndex) {   // variantIndex starts from 0
         });
     });
 
-    // Remove image listener
+  
     block.addEventListener('click', e => {
         if (e.target.classList.contains('remove-image-btn')) {
             const box = e.target.closest('.image-upload-box');
@@ -230,11 +233,9 @@ window.removeVariant = function(btn) {
     btn.closest('.variant-block').remove();
 }
 
-// Initialize first variant
 addVariant();
 addVariantBtn.addEventListener('click', addVariant);
 
-// Crop logic
 cropImageBtn.addEventListener('click', () => {
     if (!cropperInstance || !currentUploadTarget) return;
 
@@ -252,7 +253,7 @@ cropImageBtn.addEventListener('click', () => {
         const uploadLabel = currentUploadTarget.querySelector('.upload-label');
         const previewImg = previewContainer.querySelector('img');
 
-        previewImg.src = URL.createObjectURL(blob); // ← use blob URL, not dataURL
+        previewImg.src = URL.createObjectURL(blob); 
         uploadLabel.style.display = 'none';
         previewContainer.style.display = 'flex';
 
@@ -269,7 +270,6 @@ function closeModal() {
 }
 cancelCropBtn.addEventListener('click', closeModal);
 
-// Form submission — send real files (no Base64 trick needed)
 document.getElementById('productForm').addEventListener('submit', async function(e) {
     e.preventDefault();
     
@@ -279,7 +279,7 @@ document.getElementById('productForm').addEventListener('submit', async function
 
     const formData = new FormData(this);
 
-    // Add files from the visible file inputs
+    
     document.querySelectorAll('.image-upload-box .file-input').forEach(input => {
         if (input.files && input.files[0]) {
             const variantBlock = input.closest('.variant-block');
@@ -299,18 +299,22 @@ document.getElementById('productForm').addEventListener('submit', async function
 
         const result = await response.json();
 
-        if (response.ok && result.success) {
-            Swal.fire({
-                title: 'Product Published!',
-                text: result.message || 'Your product has been successfully added.',
-                icon: 'success',
-                confirmButtonColor: '#A17C6B'
-            }).then(() => {
-                window.location.href = "/admin/products";
-            });
-        } else {
-            throw new Error(result.message || 'Server responded with error');
-        }
+       if (response.ok && result.success) {
+    Swal.fire({
+        title: 'Product Published!',
+        text: result.message || 'Your product has been successfully added.',
+        icon: 'success',
+        confirmButtonColor: '#A17C6B'
+    }).then(() => {
+        window.location.href = "/admin/products";
+    });
+} else {
+    if (result.errors) {
+        showValidationErrors(result.errors);  
+    } else {
+        Swal.fire({ title: 'Error', text: result.message, icon: 'error' });
+    }
+}
     } catch (error) {
         Swal.fire({
             title: 'Error',
@@ -322,6 +326,55 @@ document.getElementById('productForm').addEventListener('submit', async function
         submitBtn.disabled = false;
     }
 });
+
+function showValidationErrors(errors) {
+    // Clear previous errors
+    document.querySelectorAll('.error-text').forEach(el => el.remove());
+    document.querySelectorAll('.error-field').forEach(el => {
+        el.style.border = '';
+        el.classList.remove('error-field');
+    });
+    document.getElementById('form-general-error')?.remove();
+
+    const fieldErrors   = errors.filter(e => e.field);
+    const generalErrors = errors.filter(e => !e.field);
+
+    fieldErrors.forEach(err => {
+        const input = document.querySelector(`[name="${err.field}"]`);
+        if (!input) return;
+
+        input.style.border = '1px solid red';
+        input.classList.add('error-field');
+
+        const msg = document.createElement('div');
+        msg.className = 'error-text';
+        msg.style.cssText = 'color:red; font-size:11px; margin-top:5px;';
+        msg.innerText = err.message.replace(/['"]/g, '');
+        input.parentElement.appendChild(msg);
+
+        input.addEventListener('input', function() {
+            this.style.border = '';
+            this.classList.remove('error-field');
+            this.parentElement.querySelector('.error-text')?.remove();
+        }, { once: true });
+    });
+
+    // General errors (e.g. image count) → banner at top of form
+    if (generalErrors.length > 0) {
+        const banner = document.createElement('div');
+        banner.id = 'form-general-error';
+        banner.style.cssText = `
+            background:#fff0f0; border:1px solid red; color:red;
+            padding:10px 14px; font-size:12px; border-radius:4px;
+            margin-bottom:20px;
+        `;
+        banner.innerText = generalErrors.map(e => e.message).join('\n');
+        const form = document.getElementById('productForm');
+        form.insertBefore(banner, form.firstChild);
+        // Scroll to top so user sees it
+        form.scrollIntoView({ behavior: 'smooth' });
+    }
+}
 
 // Load categories
 document.addEventListener('DOMContentLoaded', async () => {

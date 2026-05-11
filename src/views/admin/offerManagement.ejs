@@ -383,122 +383,178 @@
         </main>
     </div>
 
-    <script>
-     
-    // Better flash message handling
+   <script>
+    // ── flash messages (keep these) ──────────────────────────────────────
     <% if (success_msg && success_msg.length > 0) { %>
-        Swal.fire({
-            icon: 'success',
-            title: 'Success',
-            text: '<%= success_msg[0] %>',
-            timer: 3000,
-            showConfirmButton: false
-        });
+        Swal.fire({ icon:'success', title:'Success', text:'<%= success_msg[0] %>', timer:3000, showConfirmButton:false });
     <% } %>
-
     <% if (error_msg && error_msg.length > 0) { %>
-        Swal.fire({
-            icon: 'error',
-            title: 'Error',
-           text: '<%= error_msg[0] %>',
-            confirmButtonColor: '#3D2B24'
-        });
+        Swal.fire({ icon:'error', title:'Error', text:'<%= error_msg[0] %>', confirmButtonColor:'#3D2B24' });
     <% } %>
 
+    // ── form submit via fetch ────────────────────────────────────────────
+    document.getElementById('offerForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
 
-       function openOfferModal() {
-    document.getElementById("modal-title").innerText = "New Offer";
-    document.getElementById("offerForm").reset();
-    document.getElementById("offerForm").action = "/admin/offers/create";
-    document.getElementById("edit-id").value = "";
-    document.getElementById("offerType").value = "product";
-    document.querySelector('input[name="isActive"]').checked = true;
+        const form = e.target;
+        const editId = document.getElementById('edit-id').value;
+        const url = editId ? `/admin/offers/update/${editId}` : '/admin/offers/create';
 
-    
-    const today = new Date().toISOString().split('T')[0];
-    document.getElementById('start-date').min = today;
-    document.getElementById('end-date').min = today;
+        // Build plain object from form (handle checkbox manually)
+        const formData = new FormData(form);
+        const data = Object.fromEntries(formData.entries());
 
-    switchTab('product');
-    document.body.classList.add("modal-open");
-}
+        // checkbox: if unchecked it won't appear in FormData
+        data.isActive = form.querySelector('[name="isActive"]').checked ? 'true' : 'false';
 
+        try {
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
 
-     function openOfferModalForEdit(id, name, offerType, discountType, discountValue, productId, categoryId, startDate, endDate, isActive) {
-    document.getElementById("modal-title").innerText = "Update Offer";
-    document.getElementById("edit-id").value = id;
-    document.getElementById("offer-name").value = name;
-    document.getElementById("discount-type").value = discountType;
-    document.getElementById("discount-val").value = discountValue;
+            const result = await response.json();
 
-    const today = new Date().toISOString().split('T')[0];
-    const startVal = startDate || today;
+            if (!result.success) {
+                if (result.errors) {
+                    showValidationErrors(result.errors);
+                } else {
+                    Swal.fire('Error', result.message, 'error');
+                }
+                return;
+            }
 
-    document.getElementById("start-date").value = startVal;
-    document.getElementById("end-date").value = endDate || '';
+            Swal.fire({ icon:'success', title:'Success', text: result.message, timer:2000, showConfirmButton:false })
+                .then(() => location.reload());
 
-        document.getElementById('start-date').min = today;
-    document.getElementById('end-date').min = startVal;
+        } catch (err) {
+            console.error(err);
+            Swal.fire('Error', 'Something went wrong', 'error');
+        }
+    });
 
-    document.querySelector('input[name="isActive"]').checked = isActive === true || isActive === "true";
+    // ── inline error display (same as coupons) ───────────────────────────
+    function showValidationErrors(errors) {
+        // Clear previous
+        document.querySelectorAll('.error-text').forEach(el => el.remove());
+        document.querySelectorAll('.error-field').forEach(el => {
+            el.style.border = '';
+            el.classList.remove('error-field');
+        });
+        document.getElementById('form-general-error')?.remove();
 
-    switchTab(offerType);
+        const fieldErrors   = errors.filter(e => e.field);
+        const generalErrors = errors.filter(e => !e.field);
 
-    if (offerType === "product" && productId) {
-        document.getElementById("product-select").value = productId;
-    } else if (offerType === "category" && categoryId) {
-        document.getElementById("category-select").value = categoryId;
+        fieldErrors.forEach(err => {
+            const input = document.querySelector(`[name="${err.field}"]`);
+            if (!input) return;
+
+            input.style.border = '1px solid red';
+            input.classList.add('error-field');
+
+            const msg = document.createElement('div');
+            msg.className = 'error-text';
+            msg.style.cssText = 'color:red; font-size:10px; margin-top:4px;';
+            msg.innerText = err.message.replace(/['"]/g, '');
+            input.parentElement.appendChild(msg);
+
+            input.addEventListener('input', function () {
+                this.style.border = '';
+                this.classList.remove('error-field');
+                this.parentElement.querySelector('.error-text')?.remove();
+            }, { once: true });
+        });
+
+        // Object-level errors (no field) → red banner at top of form
+        if (generalErrors.length > 0) {
+            const banner = document.createElement('div');
+            banner.id = 'form-general-error';
+            banner.style.cssText = `
+                background:#fff0f0; border:1px solid red; color:red;
+                padding:10px 14px; font-size:11px; border-radius:4px; margin-bottom:16px;
+            `;
+            banner.innerText = generalErrors.map(e => e.message.replace(/['"]/g, '')).join('\n');
+            const form = document.getElementById('offerForm');
+            form.insertBefore(banner, form.firstChild);
+        }
     }
 
-    document.getElementById("offerForm").action = `/admin/offers/update/${id}`;
-    document.body.classList.add("modal-open");
-}
+    // ── modal / tab helpers (unchanged) ──────────────────────────────────
+    function openOfferModal() {
+        document.getElementById('modal-title').innerText = 'New Offer';
+        document.getElementById('offerForm').reset();
+        document.getElementById('edit-id').value = '';
+        document.getElementById('offerType').value = 'product';
+        document.querySelector('input[name="isActive"]').checked = true;
+        const today = new Date().toISOString().split('T')[0];
+        document.getElementById('start-date').min = today;
+        document.getElementById('end-date').min = today;
+        clearErrors();
+        switchTab('product');
+        document.body.classList.add('modal-open');
+    }
 
+    function openOfferModalForEdit(id, name, offerType, discountType, discountValue, productId, categoryId, startDate, endDate, isActive) {
+        document.getElementById('modal-title').innerText = 'Update Offer';
+        document.getElementById('edit-id').value = id;
+        document.getElementById('offer-name').value = name;
+        document.getElementById('discount-type').value = discountType;
+        document.getElementById('discount-val').value = discountValue;
+        const today = new Date().toISOString().split('T')[0];
+        const startVal = startDate || today;
+        document.getElementById('start-date').value = startVal;
+        document.getElementById('end-date').value = endDate || '';
+        document.getElementById('start-date').min = today;
+        document.getElementById('end-date').min = startVal;
+        document.querySelector('input[name="isActive"]').checked = isActive === true || isActive === 'true';
+        switchTab(offerType);
+        if (offerType === 'product' && productId) document.getElementById('product-select').value = productId;
+        else if (offerType === 'category' && categoryId) document.getElementById('category-select').value = categoryId;
+        clearErrors();
+        document.body.classList.add('modal-open');
+    }
 
-        function closeOfferModal() { 
-            document.body.classList.remove('modal-open'); 
-        }
-
-        document.getElementById('modalOverlay').addEventListener('click', function(e) {
-            if(e.target === this) closeOfferModal();
+    function clearErrors() {
+        document.querySelectorAll('.error-text').forEach(el => el.remove());
+        document.querySelectorAll('.error-field').forEach(el => {
+            el.style.border = '';
+            el.classList.remove('error-field');
         });
+        document.getElementById('form-general-error')?.remove();
+    }
 
-        function switchTab(t) {
-            const tabProduct = document.getElementById('tab-product');
-            const tabCategory = document.getElementById('tab-category');
-            if(t === 'product') {
-                tabProduct.classList.add('active');
-                tabCategory.classList.remove('active');
-                document.getElementById('product-fields').classList.remove('hidden');
-                document.getElementById('category-fields').classList.add('hidden');
-            } else {
-                tabCategory.classList.add('active');
-                tabProduct.classList.remove('active');
-                document.getElementById('category-fields').classList.remove('hidden');
-                document.getElementById('product-fields').classList.add('hidden');
+    function closeOfferModal() {
+        document.body.classList.remove('modal-open');
+        clearErrors();
+    }
+
+    document.getElementById('modalOverlay').addEventListener('click', function(e) {
+        if (e.target === this) closeOfferModal();
+    });
+
+    function switchTab(t) {
+        document.getElementById('tab-product').classList.toggle('active', t === 'product');
+        document.getElementById('tab-category').classList.toggle('active', t === 'category');
+        document.getElementById('product-fields').classList.toggle('hidden', t !== 'product');
+        document.getElementById('category-fields').classList.toggle('hidden', t !== 'category');
+        document.getElementById('offerType').value = t;
+    }
+
+    document.getElementById('start-date').addEventListener('change', function() {
+        document.getElementById('end-date').min = this.value;
+    });
+
+    document.getElementById('search-input').addEventListener('input', function() {
+        const term = this.value.toLowerCase();
+        document.querySelectorAll('#offers-table-body tr').forEach(row => {
+            if (row.cells?.length >= 1) {
+                const text = row.cells[0].innerText.toLowerCase();
+                row.style.display = text.includes(term) ? '' : 'none';
             }
-            document.getElementById('offerType').value = t;
-        }
-
-        // Search functionality
-        document.getElementById('search-input').addEventListener('input', function() {
-            const searchTerm = this.value.toLowerCase();
-            const rows = document.querySelectorAll('#offers-table-body tr');
-            rows.forEach(row => {
-                if(row.cells && row.cells.length >= 1) {
-                    const offerName = row.cells[0]?.innerText.toLowerCase() || '';
-                    const targetDetail = row.cells[0]?.querySelector('div:last-child')?.innerText.toLowerCase() || '';
-                    if(offerName.includes(searchTerm) || targetDetail.includes(searchTerm)) {
-                        row.style.display = '';
-                    } else {
-                        row.style.display = 'none';
-                    }
-                }
-            });
         });
-        document.getElementById('start-date').addEventListener('change', function() {
-    document.getElementById('end-date').min = this.value;
-});
-    </script>
+    });
+</script>
 </body>
 </html>

@@ -44,19 +44,41 @@ const updateProfile = async (req, res) => {
     try {
         const userId = req.session.userId;
         const { fullName } = req.body;
-        const updateData = { fullName };
+
+        if (!fullName || fullName.trim() === '') {
+            req.flash('error', 'Full name is required');
+            return res.redirect('/profile/edit');
+        }
+
+        if (fullName.trim().length < 2) {
+            req.flash('error', 'Full name must be at least 2 characters');
+            return res.redirect('/profile/edit');
+        }
+
+        if (fullName.trim().length > 15) {
+            req.flash('error', 'Full name cannot exceed 15 characters');
+            return res.redirect('/profile/edit');
+        }
+
+        if (!/^[a-zA-Z\s]+$/.test(fullName.trim())) {
+            req.flash('error', 'Full name can only contain letters and spaces');
+            return res.redirect('/profile/edit');
+        }
+
+        const updateData = { fullName: fullName.trim() };
 
         if (req.file) {
             updateData.profileImage = req.file.filename;
         }
 
         await User.findByIdAndUpdate(userId, updateData);
-        req.flash("success", "Profile updated successfully");
-       return res.redirect("/profile");
+        req.flash('success', 'Profile updated successfully');
+        return res.redirect('/profile');
+
     } catch (error) {
         console.log(error);
-        req.flash("error", "Error updating profile");
-        return res.redirect("/profile/edit");
+        req.flash('error', 'Error updating profile');
+        return res.redirect('/profile/edit');
     }
 };
 
@@ -64,7 +86,14 @@ const getChangePassword = async (req, res) => {
     try {
         const userId = req.session.userId;
         const user = await User.findById(userId);
-      return res.render("user/changePassword", { user, success: req.flash('success'), error: req.flash('error') });
+
+        const formData = req.session.formData || {};
+        const formError = req.session.formError || null;  
+
+        delete req.session.formData;
+        delete req.session.formError;
+
+        return res.render("user/changePassword", { user, formData, formError });
     } catch (error) {
         console.log(error);
         res.status(500).send("Server Error");
@@ -77,36 +106,55 @@ const postChangePassword = async (req, res) => {
         const { currentPassword, newPassword, confirmPassword } = req.body;
         const user = await User.findById(userId);
 
+        const redirectWithError = (message) => {
+        req.session.formError = message;  
+        req.session.formData = { currentPassword, newPassword, confirmPassword };
+    return res.redirect("/profile/change-password");
+};
+
         if (!user) {
             req.flash("error", "User not found.");
             return res.redirect("/login");
         }
 
-        if (user.authType !== "local") {
-            req.flash("error",
-                "Password cannot be changed for accounts created using Google login.");
-            return res.redirect("/profile/change-password");
+        if (!currentPassword || !newPassword || !confirmPassword) {
+            return redirectWithError("All fields are required");
         }
 
-       
+        if (newPassword.length < 8) {
+            return redirectWithError("New password must be at least 8 characters");
+        }
+
+        if (!/[A-Z]/.test(newPassword)) {
+            return redirectWithError("Password must contain at least one uppercase letter");
+        }
+
+        if (!/[0-9]/.test(newPassword)) {
+            return redirectWithError("Password must contain at least one number");
+        }
+
         if (newPassword !== confirmPassword) {
-            req.flash("error", "New passwords do not match");
-            return res.redirect("/profile/change-password");
+            return redirectWithError("New passwords do not match");
+        }
+
+        if (currentPassword === newPassword) {
+            return redirectWithError("New password must be different from current password");
         }
 
         const isMatch = await compareString(currentPassword, user.password);
-
+        
         if (!isMatch) {
-            req.flash("error", "Current password is incorrect");
-            return res.redirect("/profile/change-password");
+            return redirectWithError("Current password is incorrect");
         }
 
         const hashedPassword = await hashString(newPassword);
         user.password = hashedPassword;
         await user.save();
 
+        delete req.session.formData;
         req.flash("success", "Password changed successfully");
-       return res.redirect("/profile");
+        return res.redirect("/profile");
+
     } catch (error) {
         console.log(error);
         req.flash("error", "Error changing password");

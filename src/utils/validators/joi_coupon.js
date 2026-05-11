@@ -36,6 +36,40 @@ export const validateCoupon = (data) => {
             }),
 
         editId: Joi.string().allow('').optional()  
+    })
+    .custom((value, helpers) => {
+        const { discountType, discountValue, minOrder, maxDiscount } = value;
+
+        const parsedMinOrder = Number(minOrder) || 0;
+        const parsedDiscountValue = Number(discountValue) || 0;
+        const parsedMaxDiscount = Number(maxDiscount) || 0;
+
+        if (discountType === 'percentage') {
+            // Rule 1: percentage cannot exceed 100
+            if (parsedDiscountValue > 100) {
+                return helpers.error('object.percentageTooHigh');
+            }
+
+            // Rule 2: maxDiscount (the cap) must be less than minOrder
+            // e.g. if minOrder=400 and maxDiscount=1000, customer gets more off than they spent
+            if (parsedMinOrder > 0 && parsedMaxDiscount >= parsedMinOrder) {
+                return helpers.error('object.maxDiscountTooHigh');
+            }
+        }
+
+        if (discountType === 'fixed') {
+            // Rule 3: fixed discount must be less than minOrder
+            if (parsedMinOrder > 0 && parsedDiscountValue >= parsedMinOrder) {
+                return helpers.error('object.discountTooHigh');
+            }
+        }
+
+        return value;
+    })
+    .messages({
+        'object.percentageTooHigh':  'Percentage discount cannot exceed 100%',
+        'object.maxDiscountTooHigh': 'Max discount amount must be less than the minimum order amount',
+        'object.discountTooHigh':    'Discount value must be less than the minimum purchase amount'
     });
 
     return schema.validate(data, { abortEarly: false });

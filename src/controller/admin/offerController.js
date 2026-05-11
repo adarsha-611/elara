@@ -36,44 +36,45 @@ const getOfferPage = async(req,res)=>{
 }
 
 
-const addOffer = async(req, res) => {
+const addOffer = async (req, res) => {
     try {
-        const {error, value} = validateOffer(req.body);
-        
+        const { error, value } = validateOffer(req.body);
+
         if (error) {
-            const errorMessages = error.details.map(err => err.message).join('. ');
-            req.flash('error_msg', errorMessages || 'Validation failed. Please check your inputs.');
-            return res.redirect('/admin/offers');   
+            const errors = error.details.map(err => ({
+                field: err.path[0] || null,
+                message: err.message
+            }));
+            return res.status(400).json({ success: false, errors });
         }
 
         await addOfferService(value);
-        req.flash('success_msg', 'Offer created successfully!');
-        res.redirect("/admin/offers");
+        return res.status(200).json({ success: true, message: 'Offer created successfully!' });
+
     } catch (error) {
         console.log(error);
-        req.flash('error_msg', error.message || 'Failed to create offer.');
-        res.redirect("/admin/offers");
+        return res.status(500).json({ success: false, message: error.message || 'Failed to create offer.' });
     }
 };
 
-
-const updateOffer = async(req, res) => {
+const updateOffer = async (req, res) => {
     try {
-        const {error, value} = validateOffer(req.body);
-        
+        const { error, value } = validateOffer(req.body);
+
         if (error) {
-            const errorMessages = error.details.map(err => err.message).join('. ');
-            req.flash('error_msg', errorMessages || 'Validation failed.');
-            return res.redirect('/admin/offers');
+            const errors = error.details.map(err => ({
+                field: err.path[0] || null,
+                message: err.message
+            }));
+            return res.status(400).json({ success: false, errors });
         }
 
         await updateOfferService(req.params.id, value);
-        req.flash('success_msg', 'Offer updated successfully!');
-        res.redirect("/admin/offers");
+        return res.status(200).json({ success: true, message: 'Offer updated successfully!' });
+
     } catch (error) {
         console.log(error);
-        req.flash('error_msg', error.message || 'Failed to update offer.');
-        res.redirect("/admin/offers");
+        return res.status(500).json({ success: false, message: error.message || 'Failed to update offer.' });
     }
 };
 

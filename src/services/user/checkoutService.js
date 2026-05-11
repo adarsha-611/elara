@@ -39,7 +39,7 @@ export const getCheckoutData = async (userId) => {
 
         const offerData = await getBestOfferForProduct(product, variant.price);
         const price = offerData ? Math.round(offerData.finalPrice) : variant.price;
-        const image = variant.images?.[0] || "/images/placeholder.png";
+        let image = variant.images?.[0] || "/images/placeholder.png";
         const itemTotal = price * item.quantity;
         subtotal += itemTotal;
 
@@ -245,7 +245,7 @@ success: true,
 message: `Coupon "${coupon.code}" applied successfully!`,
 discountAmount: discount,
 newTotal: finalTotal,
-originalTotal: totalAmount
+originalTotal: totalAmount + SHIPPING_FEE
 };
 };
 

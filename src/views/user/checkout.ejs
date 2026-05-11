@@ -699,8 +699,12 @@
                     <% cartItems.forEach(item => { %>
                         <div class="summary-item">
                             <div class="item-thumb">
-                                <img src="<%= item.image && item.image.startsWith('/') ? item.image : '/' + item.image %>" alt="<%= item.name %>">
-                            </div>
+    <img 
+        src="<%= item.image %>" 
+        alt="<%= item.name %>"
+        onerror="this.onerror=null; this.src='/images/placeholder.png';"
+        style="width:100%; height:100%; object-fit: cover;">
+</div>
                             <div class="item-info">
                                 <h4><%= item.name %></h4>
                                 <div class="item-qty">Qty: <%= item.quantity %> × ₹<%= (item.price || 0).toLocaleString('en-IN') %></div>
@@ -710,36 +714,46 @@
                     <% }) %>
                 </div>
 
-                <div class="summary-totals">
-                    <div class="summary-line">
-                        <span>Subtotal</span>
-                        <span>₹ <%= subtotal.toLocaleString('en-IN') %></span>
-                    </div>
-
-                    <div class="coupon-section">
-                        <div class="coupon-toggle" onclick="openCouponModal()">
-                            <span style="margin-right: 8px;">✧</span> View Available Offers
-                        </div>
-                        <div class="coupon-input-group">
-                            <input type="text" id="couponCode" class="coupon-input" placeholder="Enter Promo Code">
-                            <button type="button" class="apply-coupon-btn" onclick="applyCoupon()">Apply</button>
-                        </div>
-                    </div>
-
-                    <div class="summary-line discount-line" id="discountLine" style="display: none;">
-                        <span>Discount</span>
-                        <span id="discountAmount">- ₹0</span>
-                    </div>
-
-                   <div class="summary-line">
-        <span>Shipping</span>
-        <span>₹<%= shippingFee %></span> 
+              <div class="summary-totals">
+    <div class="summary-line">
+        <span>Subtotal</span>
+        <span>₹ <%= subtotal.toLocaleString('en-IN') %></span>
     </div>
-                    <div class="summary-line grand-total">
-                        <span>Total</span>
-                        <span id="grandTotalDisplay">₹ <%= subtotal.toLocaleString('en-IN') %></span>
-                    </div>
-                </div>
+
+    <div class="coupon-section">
+        <div class="coupon-toggle" onclick="openCouponModal()">
+            <span style="margin-right: 8px;">✧</span> View Available Offers
+        </div>
+        <div class="coupon-input-group">
+            <input type="text" id="couponCode" class="coupon-input" placeholder="Enter Promo Code">
+            <button type="button" class="apply-coupon-btn" onclick="applyCoupon()">Apply</button>
+        </div>
+    </div>
+
+    <!-- Discount Line with Remove Button -->
+    <div class="summary-line discount-line" id="discountLine" style="display: none; align-items: center;">
+        <span>Discount</span>
+        <span style="display: flex; align-items: center; gap: 8px;">
+            <span id="discountAmount">- ₹0</span>
+            <button onclick="removeCoupon()" 
+                    style="background:none; border:none; color:#dc3545; font-size:0.85rem; cursor:pointer; text-decoration:underline;">
+                Remove
+            </button>
+        </span>
+    </div>
+
+    <!-- Shipping -->
+    <div class="summary-line">
+        <span>Shipping</span>
+        <span id="shippingDisplay">₹<%= shippingFee %></span> 
+    </div>
+
+    <!-- Grand Total -->
+    <div class="summary-line grand-total">
+        <span>Total</span>
+        <span id="grandTotalDisplay">₹ <%= (subtotal + shippingFee).toLocaleString('en-IN') %></span>
+    </div>
+</div>
 
                 <form id="placeOrderForm" action="/checkout/place-order" method="POST">
                     <input type="hidden" name="addressId" id="selectedAddress" required>
@@ -870,15 +884,18 @@
 
     <script>
         const Toast = Swal.mixin({
-            toast: true,
-            position: 'top-end',
-            showConfirmButton: false,
-            timer: 3000,
-            timerProgressBar: true
-        });
+        toast: true,
+        position: 'top-end',
+        showConfirmButton: false,
+        timer: 3000,
+        timerProgressBar: true
+    });
 
-        let currentFormMode = 'add';
-        const modal = document.getElementById("addressModal");
+    const subtotal = <%= subtotal || 0 %>;
+    const shippingFee = <%= shippingFee || 50 %>;
+
+    let currentFormMode = 'add';
+    const modal = document.getElementById("addressModal");
 
         function closeAddressModal() {
             modal.style.display = "none";
@@ -1289,7 +1306,51 @@ const url = currentFormMode === 'add'
         Swal.fire("Error", "Something went wrong while initiating payment", "error");
     }
 }
+async function removeCoupon() {
+    console.log("🔄 Removing coupon...");   // Debug log
 
+    try {
+        const response = await fetch('/checkout/remove-coupon', {
+            method: 'POST',
+            headers: { 
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        });
+
+        console.log("📡 Response status:", response.status);
+
+        const data = await response.json();
+        console.log("📦 Response data:", data);
+
+        if (data.success) {
+            document.getElementById('discountLine').style.display = 'none';
+            
+            const finalTotal = subtotal + shippingFee;
+            document.getElementById('grandTotalDisplay').textContent = 
+                `₹${finalTotal.toLocaleString('en-IN')}`;
+
+            document.getElementById('appliedCouponHidden').value = '';
+
+            Toast.fire({ 
+                icon: 'success', 
+                title: 'Coupon Removed Successfully' 
+            });
+        } else {
+            Toast.fire({ 
+                icon: 'error', 
+                title: data.message || 'Failed to remove coupon' 
+            });
+        }
+
+    } catch (error) {
+        console.error("❌ Remove coupon error:", error);
+        Toast.fire({ 
+            icon: 'error', 
+            title: 'Something went wrong while removing coupon' 
+        });
+    }
+}
         
     </script>
 </body>

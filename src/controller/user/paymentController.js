@@ -3,38 +3,35 @@ import { placeOrderService } from "../../services/user/checkoutService.js";
 import { createRazorpayOrder, verifyPayment } from "../../services/user/paymentService.js";
 
 const createOrder = async (req, res) => {
-try {
-const { amount, addressId } = req.body;
-const userId = req.session.userId;
+    try {
+        const { amount, addressId, couponCode } = req.body;   
+        const userId = req.session.userId;
 
+        const appliedCoupon = req.session.appliedCoupon || null;
 
+        const order = await placeOrderService(
+            userId,
+            addressId,
+            "online",
+            "pending",
+            appliedCoupon
+        );
 
-const appliedCoupon = req.session.appliedCoupon || null;
+        const razorpayOrder = await createRazorpayOrder(order.finalAmount);
 
-const order = await placeOrderService(
-  userId,
-  addressId,
-  "online",
-  "pending",
-  appliedCoupon
-);
+        return res.json({
+            success: true,
+            razorpayOrder,
+            orderId: order._id
+        });
 
-const razorpayOrder = await createRazorpayOrder(amount);
-
-return res.json({
-  success: true,
-  razorpayOrder,
-  orderId: order._id
-});
-
-
-} catch (error) {
-console.error("RAZORPAY ERROR:", error);
-return res.status(500).json({
-success: false,
-message: error.message || "Razorpay order creation failed"
-});
-}
+    } catch (error) {
+        console.error("RAZORPAY ERROR:", error);
+        return res.status(500).json({
+            success: false,
+            message: error.message || "Razorpay order creation failed"
+        });
+    }
 };
 
 const verifyPaymentController = async (req, res) => {
@@ -112,35 +109,29 @@ res.redirect("/shop");
 };
 
 const retryPayment = async (req, res) => {
-try {
-const { orderId } = req.params;
+    try {
+        const { orderId } = req.params;
 
+        const order = await Order.findById(orderId);
 
-const order = await Order.findById(orderId);
+        if (!order) {
+            return res.json({ success: false, message: "Order not found" });
+        }
 
-if (!order) {
-  return res.json({
-    success: false,
-    message: "Order not found"
-  });
-}
+        const amountToPay = order.finalAmount || order.totalAmount;
 
-const razorpayOrder = await createRazorpayOrder(order.totalAmount);
+        const razorpayOrder = await createRazorpayOrder(amountToPay);
 
-return res.json({
-  success: true,
-  razorpayOrder,
-  orderId: order._id
-});
+        return res.json({
+            success: true,
+            razorpayOrder,
+            orderId: order._id
+        });
 
-
-} catch (error) {
-console.log("Retry Payment Error:", error);
-res.json({
-success: false,
-message: "Retry failed"
-});
-}
+    } catch (error) {
+        console.error("Retry Payment Error:", error);
+        res.json({ success: false, message: "Retry failed" });
+    }
 };
 
 export default {

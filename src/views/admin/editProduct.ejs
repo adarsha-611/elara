@@ -70,15 +70,15 @@
             <h2>Basic Information</h2>
             <div class="form-group">
                 <label>Product Name</label>
-                <input type="text" name="name" value="<%= product.name %>" required>
+                <input type="text" name="name" value="<%= product.name %>" maxlength="100">
             </div>
             <div class="form-group">
                 <label>Description</label>
-                <textarea name="description" required><%= product.description %></textarea>
+                <textarea name="description" maxlength="1000" ><%= product.description %></textarea>
             </div>
             <div class="form-group">
                 <label>Category</label>
-                <select name="category" id="categorySelect" required>
+                <select name="category" id="categorySelect">
                     <option value="" disabled>Loading categories...</option>
                 </select>
             </div>
@@ -135,15 +135,15 @@
                         <div class="variant-details-grid">
                             <div class="form-group">
                                 <label>Price (₹)</label>
-                                <input type="number" name="variants[<%= vIndex %>][price]" value="<%= variant.price %>" step="0.01" min="0" required>
+                                <input type="number" name="variants[<%= vIndex %>][price]" value="<%= variant.price %>" step="0.01" min="1" >
                             </div>
                             <div class="form-group">
                                 <label>Color</label>
-                                <input type="text" name="variants[<%= vIndex %>][color]" value="<%= variant.color %>" required>
+                                <input type="text" name="variants[<%= vIndex %>][color]" value="<%= variant.color %>" maxlength ="10" >
                             </div>
                             <div class="form-group">
                                 <label>Stock</label>
-                                <input type="number" name="variants[<%= vIndex %>][stock]" value="<%= variant.stock %>" min="0" required>
+                                <input type="number" name="variants[<%= vIndex %>][stock]" value="<%= variant.stock %>" min="0" >
                             </div>
                         </div>
                     </div>
@@ -307,9 +307,9 @@ document.getElementById('addVariantBtn').addEventListener('click', () => {
         </div>
 
         <div class="variant-details-grid">
-            <div class="form-group"><label>Price (₹)</label><input type="number" name="variants[${vIndex}][price]" step="0.01" min="0" required></div>
-            <div class="form-group"><label>Color</label><input type="text" name="variants[${vIndex}][color]" required></div>
-            <div class="form-group"><label>Stock</label><input type="number" name="variants[${vIndex}][stock]" min="0" required></div>
+            <div class="form-group"><label>Price (₹)</label><input type="number" name="variants[${vIndex}][price]" step="0.01" min="0" ></div>
+            <div class="form-group"><label>Color</label><input type="text" name="variants[${vIndex}][color]"></div>
+            <div class="form-group"><label>Stock</label><input type="number" name="variants[${vIndex}][stock]" min="0"></div>
         </div>
     `;
 
@@ -355,8 +355,13 @@ document.getElementById('productForm').addEventListener('submit', async e => {
         const data = await res.json();
 
         if (!res.ok || !data.success) {
-            throw new Error(data.message || 'Update failed');
-        }
+    if (data.errors) {
+        showValidationErrors(data.errors); 
+    } else {
+        Swal.fire({ title: 'Error', text: data.message, icon: 'error' });
+    }
+    return;  
+}
 
         await Swal.fire({
             title: 'Success',
@@ -378,6 +383,54 @@ document.getElementById('productForm').addEventListener('submit', async e => {
         btn.textContent = 'UPDATE PRODUCT';
     }
 });
+function showValidationErrors(errors) {
+    // Clear previous errors
+    document.querySelectorAll('.error-text').forEach(el => el.remove());
+    document.querySelectorAll('.error-field').forEach(el => {
+        el.style.border = '';
+        el.classList.remove('error-field');
+    });
+    document.getElementById('form-general-error')?.remove();
+
+    const fieldErrors   = errors.filter(e => e.field);
+    const generalErrors = errors.filter(e => !e.field);
+
+    fieldErrors.forEach(err => {
+        const input = document.querySelector(`[name="${err.field}"]`);
+        if (!input) return;
+
+        input.style.border = '1px solid red';
+        input.classList.add('error-field');
+
+        const msg = document.createElement('div');
+        msg.className = 'error-text';
+        msg.style.cssText = 'color:red; font-size:11px; margin-top:5px;';
+        msg.innerText = err.message.replace(/['"]/g, '');
+        input.parentElement.appendChild(msg);
+
+        input.addEventListener('input', function() {
+            this.style.border = '';
+            this.classList.remove('error-field');
+            this.parentElement.querySelector('.error-text')?.remove();
+        }, { once: true });
+    });
+
+    // General errors (e.g. image count) → banner at top of form
+    if (generalErrors.length > 0) {
+        const banner = document.createElement('div');
+        banner.id = 'form-general-error';
+        banner.style.cssText = `
+            background:#fff0f0; border:1px solid red; color:red;
+            padding:10px 14px; font-size:12px; border-radius:4px;
+            margin-bottom:20px;
+        `;
+        banner.innerText = generalErrors.map(e => e.message).join('\n');
+        const form = document.getElementById('productForm');
+        form.insertBefore(banner, form.firstChild);
+        // Scroll to top so user sees it
+        form.scrollIntoView({ behavior: 'smooth' });
+    }
+}
 
 // ── Load categories ──────────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', async () => {

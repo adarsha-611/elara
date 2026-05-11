@@ -29,7 +29,9 @@ export const getProductPage = async (req, res) => {
     try {
   return res.render("admin/addProduct", {
     sidebarPage: "product"
-});    } catch (error) {
+});
+  
+    } catch (error) {
         console.log("Add product page error",error);
         return res.status(500).send("Server Error")
     }
@@ -37,10 +39,13 @@ export const getProductPage = async (req, res) => {
 
 const postAddProduct = async (req, res) => {
   try {
-    const { error } = validateProduct(req.body, req.files, []); 
+    console.log('req.body:', JSON.stringify(req.body, null, 2));
+    const { error } = validateProduct(req.body, req.files, []);
 
     if (error) {
-      return res.status(400).json({ success: false, message: error });
+     console.log('Joi error paths:', JSON.stringify(error, null, 2)); 
+
+      return res.status(400).json({ success: false, errors: error });   
     }
 
     await createProduct(req.body, req.files);
@@ -67,48 +72,29 @@ const getEditProductPage = async (req, res) => {
 const postEditProduct = async (req, res) => {
   try {
     const product = await getProductById(req.params.id);
-
     if (!product) {
       return res.status(404).json({ success: false, message: "Product not found" });
     }
 
-   
-   if (!req.body.variants || req.body.variants === "") {
-  req.body.variants = [];
-}
+    if (!req.body.variants || req.body.variants === "") {
+      req.body.variants = [];
+    }
 
     const existingImages = product.variants.flatMap(v => v.images || []);
-
-    const { error } = validateProduct(
-      req.body,
-      req.files || [],
-      existingImages
-    );
-    console.log("FILES RECEIVED:", req.files);
+    const { error } = validateProduct(req.body, req.files || [], existingImages);
 
     if (error) {
-      return res.status(400).json({
-        success: false,
-        message: error
-      });
+      return res.status(400).json({ success: false, errors: error }); 
     }
 
     await updateProduct(req.params.id, req.body, req.files || []);
-
-    return res.status(200).json({
-      success: true,
-      message: "Product updated successfully"
-    });
+    return res.status(200).json({ success: true, message: "Product updated successfully" });
 
   } catch (err) {
     console.error("Update product error:", err);
-
-    return res.status(500).json({
-      success: false,
-      message: err.message || "Failed to update product"
-    });
+    return res.status(500).json({ success: false, message: err.message || "Failed to update product" });
   }
-};
+}
 
 
 const productStatus = async(req,res)=>{

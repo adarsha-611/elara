@@ -404,10 +404,12 @@
   </div>
   <div class="order-divider"></div>
 
-  <div class="order-row">
+<div class="order-row">
     <span class="order-label">Amount</span>
-    <span class="order-value amount">₹ <%= order.totalAmount.toLocaleString('en-IN') %></span>
-  </div>
+    <span class="order-value amount">
+        ₹ <%= (order.finalAmount || order.totalAmount).toLocaleString('en-IN') %>
+    </span>
+</div>
   <div class="order-divider"></div>
 
   <div class="order-row">
@@ -471,24 +473,30 @@
     btn.style.opacity = '0.75';
 
     try {
-      const res = await fetch(`/retry-payment/${orderId}`, { method: "POST" });
+      const res = await fetch(`/retry-payment/${orderId}`, { 
+        method: "POST",
+        headers: { "Content-Type": "application/json" }
+      });
+
       const data = await res.json();
 
       if (!data.success) {
-        alert(data.message || "Retry failed");
+        alert(data.message || "Retry failed. Please try again.");
         btn.textContent = 'Try Again';
         btn.disabled = false;
         btn.style.opacity = '1';
         return;
       }
 
+      // Use the exact amount sent from backend
       const options = {
         key: razorpayKey,
-        amount: data.razorpayOrder.amount,
+        amount: data.razorpayOrder.amount,        // ← Use backend amount
         currency: "INR",
         order_id: data.razorpayOrder.id,
         name: "ELARA Luxury Jewelry",
-        description: "Retry Payment",
+        description: "Retry Payment for Order #" + orderId,
+
         handler: async function (response) {
           const verifyRes = await fetch("/verify-payment", {
             method: "POST",
@@ -509,6 +517,7 @@
             window.location.href = `/payment-failed/${data.orderId}`;
           }
         },
+
         theme: { color: "#a3866a" }
       };
 

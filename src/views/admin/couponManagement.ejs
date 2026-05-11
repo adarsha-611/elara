@@ -643,8 +643,12 @@ function showValidationErrors(errors) {
         el.style.border = '';
         el.classList.remove('error-field');
     });
+    document.getElementById('form-general-error')?.remove();
 
-    errors.forEach(err => {
+    const fieldErrors = errors.filter(e => e.field);
+    const generalErrors = errors.filter(e => !e.field);
+
+    fieldErrors.forEach(err => {
         const input = document.querySelector(`[name="${err.field}"]`);
         if (!input) return;
 
@@ -654,18 +658,33 @@ function showValidationErrors(errors) {
         const msg = document.createElement("div");
         msg.className = "error-text";
         msg.style.cssText = "color:red; font-size:10px; margin-top:4px;";
-        msg.innerText = err.message.replace(/['"]/g, ''); // clean Joi quotes
+        msg.innerText = err.message.replace(/['"]/g, '');
         input.parentElement.appendChild(msg);
-    });
 
-    document.querySelectorAll('.error-field').forEach(input => {
         input.addEventListener('input', function() {
             this.style.border = '';
             this.classList.remove('error-field');
-            const errMsg = this.parentElement.querySelector('.error-text');
-            if (errMsg) errMsg.remove();
+            this.parentElement.querySelector('.error-text')?.remove();
         }, { once: true });
     });
+
+    if (generalErrors.length > 0) {
+        const banner = document.createElement('div');
+        banner.id = 'form-general-error';
+        banner.style.cssText = `
+            background: #fff0f0;
+            border: 1px solid red;
+            color: red;
+            padding: 10px 14px;
+            font-size: 11px;
+            border-radius: 4px;
+            margin-bottom: 16px;
+        `;
+        banner.innerText = generalErrors.map(e => e.message.replace(/['"]/g, '')).join('\n');
+
+        const form = document.getElementById('couponForm');
+        form.insertBefore(banner, form.firstChild);
+    }
 }
 
 function onDiscountTypeChange() {

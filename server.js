@@ -63,10 +63,10 @@ app.use(express.static(path.join(__dirname,"src/public")));
 app.use("/uploads", express.static(path.join(__dirname, "src/public/uploads")));
 
 app.use((req, res, next) => {
-  res.locals.success = req.flash('success');
-  res.locals.error = req.flash('error');
-  next();
+    res.locals.path = req.path;
+    next();
 });
+
 app.use((req, res, next) => {
     res.locals.path = req.path;
     next();
@@ -83,11 +83,6 @@ app.use((req, res, next) => {
         url: req.originalUrl
     });
 });
-
-
-
-
-
 
 
 

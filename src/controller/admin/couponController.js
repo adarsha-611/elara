@@ -13,6 +13,7 @@ const getCouponPage = async (req, res) => {
             currentMenu:"coupons",
             totalPages,
             sidebarPage: "coupons",
+            currentPage,
             success_msg: req.flash("success_msg"),
             error_msg: req.flash("error_msg")
         });
@@ -29,7 +30,7 @@ const addCoupon = async (req, res) => {
 
         if (error) {
             const errors = error.details.map(err => ({
-                field: err.path[0],
+                field: err.path[0] || null,
                 message: err.message
             }));
 

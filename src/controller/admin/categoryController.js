@@ -4,41 +4,52 @@ import Category from "../../model/categorySchema.js";
 
 const getCategoryPage = async (req, res) => {
   try {
-    const { search, page } = req.query;
+    const { search, page, modal, id, name, description } = req.query;  
 
     const limit = 6;
     const paginationPage = parseInt(page) || 1;
     const skip = (paginationPage - 1) * limit;
 
     let query = {};
-    if (search) {
-      query.name = { $regex: search, $options: "i" };
-    }
+    if (search) query.name = { $regex: search, $options: "i" };
 
     const totalCategories = await Category.countDocuments(query);
-
     const categories = await Category.find(query)
-      .sort({ createdAt: -1 })
-      .skip(skip)
-      .limit(limit);
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit);
 
     const totalPages = Math.ceil(totalCategories / limit);
 
+    // Get fresh flash messages
+    const flashError = req.flash('error');
+    const flashSuccess = req.flash('success');
+
+    console.log("✅ Flash Error Passed:", flashError); // For debugging
+
     res.render("admin/category", {
       categories,
-      sidebarPage: "category",   
-      currentPage: paginationPage, 
+      sidebarPage: "category",
+      currentPage: paginationPage,
       totalPages,
-      search,
-      success: req.flash("success"),
-      error: req.flash("error")
+      search: search || "",
+      modal: modal || null,
+      
+      error: flashError,
+      success: flashSuccess,
+
+      editData: modal === 'edit' ? {
+        id: id || "",
+        name: name || "",
+        description: description || ""
+      } : null
     });
 
   } catch (error) {
     console.error(error);
     return res.status(500).send("Server Error");
   }
-}; 
+};
 
 const getAddCategory = (req, res) => {
     try {
@@ -56,37 +67,66 @@ const getAddCategory = (req, res) => {
     }
 };
 
-const  postAddCategory = async (req,res)=>{
+const postAddCategory = async (req, res) => {
     try {
-        const {name,description} = req.body;
-        console.log("hii")
+        const { name, description } = req.body;
 
-       await createCategory({name,description});
+        if (!name || !name.trim()) {
+            req.flash("error", "Category name is required");
+            return res.redirect("/admin/category?modal=add");  
+        }
+        if (name.trim().length < 3) {
+            req.flash("error", "Category name must be at least 3 characters");
+            return res.redirect("/admin/category?modal=add");
+        }
+        if (name.trim().length > 50) {
+            req.flash("error", "Category name must be at most 50 characters");
+            return res.redirect("/admin/category?modal=add");
+        }
+        if (!/[a-zA-Z]/.test(name)) {
+            req.flash("error", "Category name must contain letters");
+            return res.redirect("/admin/category?modal=add");
+        }
 
-      req.flash("success","Category added successfully");
-      console.log(req.body);
+        await createCategory({ name: name.trim(), description: description?.trim() });
+        req.flash("success", "Category added successfully");
+        return res.redirect("/admin/category");
 
-      return res.redirect("/admin/category");
     } catch (error) {
-        req.flash("error",error.message)
-      return res.redirect("/admin/add-category");    }
+        req.flash("error", error.message);
+        return res.redirect("/admin/category?modal=add");
+    }
 };
 
-const postEditCategory = async(req,res)=>{
+const postEditCategory = async (req, res) => {
+    console.log("📝 POST EDIT called with body:", req.body);
     try {
-        const {id,name,description} = req.body;
-       await updateCategory(id,{name,description});
+        const { id, name, description } = req.body;
 
-       req.flash("success","category updated successfully");
-       return res.redirect('/admin/category')
-    
+        if (!name || !name.trim()) {
+            req.flash("error", "Category name is required");
+            return res.redirect(`/admin/category?modal=edit&id=${id || ''}&name=${encodeURIComponent(name || '')}&description=${encodeURIComponent(description || '')}`);
+        }
+
+        if (name.trim().length < 3) {
+            req.flash("error", "Category name must be at least 3 characters");
+            return res.redirect(`/admin/category?modal=edit&id=${id || ''}&name=${encodeURIComponent(name || '')}&description=${encodeURIComponent(description || '')}`);
+        }
+
+        if (!/[a-zA-Z]/.test(name)) {
+            req.flash("error", "Category name must contain letters");
+            return res.redirect(`/admin/category?modal=edit&id=${id || ''}&name=${encodeURIComponent(name || '')}&description=${encodeURIComponent(description || '')}`);
+        }
+
+        await updateCategory(id, { name: name.trim(), description: description?.trim() || "" });
+        req.flash("success", "Category updated successfully");
+        return res.redirect('/admin/category');
+
     } catch (error) {
-        console.log(error.message);
-        req.flash("error",error.message);
-        return res.redirect("/admin/category")
+        req.flash("error", error.message || "Something went wrong");
+        return res.redirect(`/admin/category?modal=edit&id=${req.body.id || ''}&name=${encodeURIComponent(req.body.name || '')}&description=${encodeURIComponent(req.body.description || '')}`);
     }
-}
-
+};
 const postCategoryStatus = async(req,res)=>{
     try {
         const {id} =req.params;

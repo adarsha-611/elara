@@ -39,18 +39,7 @@ router.get('/add-product', adminAuth, productController.getAddProductPage);
 router.post(
   '/add-product',
   adminAuth,
-  (req, res, next) => {
-    upload.any()(req, res, (err) => {
-      if (err) {
-        console.error("MULTER/CLOUDINARY ERROR:", err);
-        return res.status(500).json({ 
-          success: false, 
-          message: "File upload failed: " + err.message 
-        });
-      }
-      next();
-    });
-  },
+  upload.any(),   
   productController.postAddProduct
 );
 
@@ -59,18 +48,7 @@ router.get("/edit-product/:id", adminAuth, productController.getEditProductPage)
 router.post(
   "/edit-product/:id",
   adminAuth,
-  (req, res, next) => {
-    upload.any()(req, res, (err) => {
-      if (err) {
-        console.error("MULTER/CLOUDINARY ERROR:", err); // ← this will show real error
-        return res.status(500).json({ 
-          success: false, 
-          message: "File upload failed: " + err.message 
-        });
-      }
-      next();
-    });
-  },
+  upload.any(),  
   productController.postEditProduct
 );
 
