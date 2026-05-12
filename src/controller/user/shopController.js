@@ -97,21 +97,28 @@ const getProductDetailPage = async (req, res) => {
         );
       }
     }
+    const selectedVariant =
+      product.variants.find(v => v.stock > 0)
+      || product.variants[0];
 
-    const offerData = await getBestOfferForProduct(product, product.variants[0].price);
+    const offerData = await getBestOfferForProduct(
+    product,
+    selectedVariant.price
+);
 
     const cart = await Cart.findOne({ userId: req.session.userId });
     const cartVariantIds = cart 
   ? cart.items.map(i => i.variantId.toString()) 
   : [];
     return res.render("user/productDetail", {
-      product,
-      reviews,
-      relatedProducts,
-      offerData,
-      isWishlisted,
-      cartVariantIds
-    });
+    product,
+    reviews,
+    relatedProducts,
+    offerData,
+    isWishlisted,
+   cartVariantIds,
+   selectedVariant
+});
 
   } catch (error) {
     console.log("Product Detail Error:", error);

@@ -341,25 +341,27 @@
                 grid-template-columns: 1fr; 
             }
         }
-        .toast {
+       .toast {
   position: fixed;
   top: 30px;
   left: 80%;
   transform: translateX(-50%) translateY(-20px);
-  
-  background: #16a34a; 
+
+  background: #16a34a;
   color: white;
-  
-  padding: 18px 35px;   
-  font-size: 16px;      
+
+  padding: 18px 35px;
+  font-size: 16px;
   font-weight: 500;
-  
+
   border-radius: 10px;
   box-shadow: 0 10px 30px rgba(0,0,0,0.15);
-  
+
   opacity: 0;
   transition: all 0.3s ease;
   z-index: 9999;
+
+  pointer-events: none;
 }
 
 .toast.show {
@@ -381,12 +383,12 @@
         <div class="product-gallery">
             <div class="main-image-zoom-container">
                 <div class="img-zoom-wrapper">
-                    <img src="<%= product.variants[0].images[0] %>" id="current-img" alt="<%= product.name %>" class="zoomable">
+                    <img src="<%= selectedVariant.images[0] %>" id="current-img" alt="<%= product.name %>" class="zoomable">
                 </div>
             </div>
 
             <div class="thumbnail-grid" id="thumbnailGrid">
-                <% product.variants[0].images.forEach((img, index) => { %>
+                <% selectedVariant.images.forEach((img, index) => { %>
                     <img src="<%= img %>" class="<%= index === 0 ? 'active' : '' %>" onclick="changeImage(this.src, this)" alt="Thumbnail <%= index + 1 %>">
                 <% }) %>
             </div>
@@ -400,7 +402,7 @@
 </nav>            <h1 class="product-title text-dark"><%= product.name %></h1>
 
             <div class="status-container">
-    <% const firstStock = product.variants[0].stock; %>
+    <% const firstStock = selectedVariant.stock; %>
 
     <span 
         id="stock-status" 
@@ -430,7 +432,7 @@
       </span>
 
       <span style="text-decoration: line-through; color: #888; font-size: 1.1rem;">
-        ₹<%= product.variants[0].price %>
+        ₹<%= selectedVariant.price %>
       </span>
 
       <span style="
@@ -453,7 +455,7 @@
   <% } else { %>
 
     <span style="font-size: 2rem; font-weight: 600;">
-      ₹<%= product.variants[0].price %>
+      ₹<%= selectedVariant.price %>
     </span>
 
   <% } %>
@@ -465,12 +467,14 @@
                <select class="custom-select" id="colorSelect" onchange="changeVariant()">
     <% product.variants.forEach(function(variant){ %>
         <option 
-            value="<%= variant._id %>"
-            data-price="<%= variant.price %>"
-            data-stock="<%= variant.stock %>"
-            data-images='<%- JSON.stringify(variant.images) %>'>
-            <%= variant.color %>
-        </option>
+    value="<%= variant._id %>"
+    data-price="<%= variant.price %>"
+    data-stock="<%= variant.stock %>"
+    data-images='<%- JSON.stringify(variant.images) %>'
+    <%= String(variant._id) === String(selectedVariant._id) ? 'selected' : '' %>>
+    
+    <%= variant.color %>
+</option>
     <% }) %>
 </select>
 

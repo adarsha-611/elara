@@ -77,13 +77,13 @@
 
         <% if (locals.error && error.length > 0) { %>
             <div class="bg-red-50 text-red-500 px-4 py-3 rounded-xl mb-6 text-xs font-medium text-center flex items-center justify-center gap-2">
-                <i class="fa-solid fa-circle-exclamation"></i> <%= error %>
+                <i class="fa-solid fa-circle-exclamation"></i> <%= error[0] %>
             </div>
         <% } %>
 
         <% if (locals.success && success.length > 0) { %>
             <div class="bg-green-50 text-green-600 px-4 py-3 rounded-xl mb-6 text-xs font-medium text-center">
-                <%= success %>
+                <%= success[0] %>
             </div>
         <% } %>
         
@@ -187,22 +187,27 @@
     
     
     const TIMER_KEY = 'otp_expiry_ts';
-    const TIMER_DURATION = 45; 
+    const TIMER_DURATION = 60; 
 
     const timerElement = document.getElementById('timer');
     const resendBtn = document.getElementById('resendBtn');
     let timerInterval;
 
-    function startTimer() {
-        if (!sessionStorage.getItem(TIMER_KEY)) {
-            const expiryTime = Date.now() + TIMER_DURATION * 1000;
-            sessionStorage.setItem(TIMER_KEY, expiryTime);
-        }
+   function startTimer(reset = false) {
 
-        clearInterval(timerInterval);
-        timerInterval = setInterval(tick, 1000);
-        tick(); 
+    if (reset || !sessionStorage.getItem(TIMER_KEY)) {
+
+        const expiryTime = Date.now() + TIMER_DURATION * 1000;
+
+        sessionStorage.setItem(TIMER_KEY, expiryTime);
     }
+
+    clearInterval(timerInterval);
+
+    timerInterval = setInterval(tick, 1000);
+
+    tick();
+}
 
     function tick() {
         const expiryTime = parseInt(sessionStorage.getItem(TIMER_KEY), 10);
@@ -219,7 +224,13 @@
         }
     }
 
+   const expiryTime = parseInt(sessionStorage.getItem(TIMER_KEY), 10);
+
+if (!expiryTime || expiryTime < Date.now()) {
+    startTimer(true);
+} else {
     startTimer();
+}
 
     resendBtn.addEventListener('click', async () => {
         if (!resendBtn.disabled) {
@@ -230,7 +241,7 @@
             });
 
             if (res.ok) {
-                sessionStorage.setItem(TIMER_KEY, Date.now() + TIMER_DURATION * 1000);
+                startTimer(true);
                 resendBtn.disabled = true;
                 otpInputs.forEach(input => { input.value = ''; input.classList.remove('error-border'); });
                 otpError.textContent = 'New Code Sent';

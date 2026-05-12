@@ -4,15 +4,20 @@ import passport from "passport";
 
 const getLogin = async (req, res) => {
   try {
+
+    const error = req.flash("error");
+    const success = req.flash("success");
+
     return res.render("user/auth/login", {
-      error: res.locals.error,
-      success: res.locals.success
+      error,
+      success
     });
+
   } catch (error) {
     console.log("error rendering login page:", error);
     res.status(500).send("server error: " + error.message);
   }
-}
+};
 
 const postLogin = async(req,res)=>{
     try {

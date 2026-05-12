@@ -32,8 +32,5 @@
     "passport-local": "^1.0.0",
     "pdfkit": "^0.17.2",
     "razorpay": "^2.9.6"
-  },
-  "devDependencies": {
-    "win-ca": "^3.5.1"
   }
 }
