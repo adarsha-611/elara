@@ -15,10 +15,13 @@ import profileRouter from "./src/routes/profileRouter.js";
 import adminRouter from "./src/routes/adminRoutes/adminRouter.js"
 import {setUser} from './src/middlewares/setUser.js';
 import { cartCount} from "./src/middlewares/cartMiddleware.js";
+import 'win-ca'; 
 
 
 
 dotenv.config();
+console.log("Mongo URL:", process.env.MONGODB_URL);
+console.log("Session Secret:", process.env.SESSION_SECRET);
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -31,6 +34,7 @@ const __dirname = path.dirname(__filename);
 
 app.use(express.json());
 app.use(express.urlencoded({extended:true}));
+console.log(process.env.MONGODB_URI);
 app.use(
   session({
     name: "elara.sid", 
@@ -38,11 +42,11 @@ app.use(
     resave: false,
     saveUninitialized: false,
 
-    store: MongoStore.create({
-    client: mongoose.connection.getClient(), 
+   store: MongoStore.create({
+   mongoUrl: process.env.MONGODB_URL,
    collectionName: "sessions",
    ttl: 72 * 60 * 60,
-  }),
+}),
 
 
     cookie: {
@@ -67,10 +71,6 @@ app.use((req, res, next) => {
     next();
 });
 
-app.use((req, res, next) => {
-    res.locals.path = req.path;
-    next();
-});
 
 app.use(cartCount);
 app.use("/", authRouter);

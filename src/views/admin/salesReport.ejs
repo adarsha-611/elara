@@ -845,7 +845,7 @@ function renderTableAndPagination() {
 
     const start = (currentPage - 1) * rowsPerPage;
     const end = start + rowsPerPage;
-    const paginatedData = ordersData.slice(start, end);
+    const paginatedData = filteredOrders.slice(start, end);
 
     if (paginatedData.length === 0) {
         tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding:40px; color:#888;">No records found</td></tr>`;
@@ -877,12 +877,12 @@ function renderTableAndPagination() {
         });
     }
 
-    document.getElementById('tcMeta').textContent = `${ordersData.length} records`;
+    document.getElementById('tcMeta').textContent = `${filteredOrders.length} records`;
     renderPagination();
 }
 
 function renderPagination() {
-     const totalPages = Math.max(Math.ceil(ordersData.length / rowsPerPage), 1);
+     const totalPages = Math.max(Math.ceil(filteredOrders.length / rowsPerPage), 1);
     const pgBtnsContainer = document.getElementById('pgBtns');
     pgBtnsContainer.innerHTML = '';
 
@@ -916,7 +916,7 @@ function renderPagination() {
 }
 
 function goToPage(page) {
-    const totalPages = Math.ceil(ordersData.length / rowsPerPage);
+    const totalPages = Math.ceil(filteredOrders.length / rowsPerPage);
     if (page < 1 || page > totalPages) return;
     currentPage = page;
     renderTableAndPagination();
@@ -924,22 +924,94 @@ function goToPage(page) {
 
 // ==================== FILTER & PERIOD HANDLING ====================
 function setRows(period = 'monthly') {
-    if (period === 'yearly') {
+
+    const now = new Date();
+
+    currentRows = [];
+    filteredOrders = [];
+
+    if (period === 'daily') {
+
+        filteredOrders = ordersData.filter(order => {
+            const d = new Date(order.createdAt);
+
+            return (
+                d.getDate() === now.getDate() &&
+                d.getMonth() === now.getMonth() &&
+                d.getFullYear() === now.getFullYear()
+            );
+        });
+
+        currentRows = rows.filter(row => {
+            return (
+                row.month === (now.getMonth() + 1) &&
+                row.year === now.getFullYear()
+            );
+        });
+
+    }
+
+    else if (period === 'weekly') {
+
+        const weekAgo = new Date();
+        weekAgo.setDate(now.getDate() - 7);
+
+        filteredOrders = ordersData.filter(order => {
+            const d = new Date(order.createdAt);
+            return d >= weekAgo && d <= now;
+        });
+
+        currentRows = rows.filter(row => {
+
+            const rowDate = new Date(row.year, row.month - 1, 1);
+
+            return rowDate >= new Date(weekAgo.getFullYear(), weekAgo.getMonth(), 1);
+        });
+
+    }
+
+    else if (period === 'monthly') {
+
+        filteredOrders = ordersData.filter(order => {
+            const d = new Date(order.createdAt);
+
+            return (
+                d.getMonth() === now.getMonth() &&
+                d.getFullYear() === now.getFullYear()
+            );
+        });
+
+        currentRows = rows.filter(row => {
+            return (
+                row.month === (now.getMonth() + 1) &&
+                row.year === now.getFullYear()
+            );
+        });
+
+    }
+
+    else if (period === 'yearly') {
+
+        filteredOrders = [...ordersData];
+
         const yearlyMap = new Map();
 
         rows.forEach(row => {
+
             if (!yearlyMap.has(row.year)) {
+
                 yearlyMap.set(row.year, {
                     date: row.year.toString(),
                     year: row.year,
-                    month: 0,
                     orders: 0,
                     amount: 0,
                     discount: 0,
                     coupon: 0
                 });
             }
+
             const y = yearlyMap.get(row.year);
+
             y.orders += row.orders;
             y.amount += row.amount;
             y.discount += row.discount;
@@ -947,20 +1019,16 @@ function setRows(period = 'monthly') {
         });
 
         currentRows = Array.from(yearlyMap.values()).map(row => ({
-    ...row,
-    amt: row.amount,
-    disc: row.discount,
-    cpn: row.coupon,
-    net: row.amount - row.discount - row.coupon
-}));
-
-        currentRows.sort((a, b) => a.year - b.year);
-    } 
-    else {
-        currentRows = [...rows]; // monthly or default
+            ...row,
+            amt: row.amount,
+            disc: row.discount,
+            cpn: row.coupon,
+            net: row.amount - row.discount - row.coupon
+        }));
     }
 
     currentPage = 1;
+
     updateSummaryCards(currentRows);
     buildChart(currentRows);
     renderTableAndPagination();
@@ -988,10 +1056,15 @@ function applyCustomFromPicker() {
         return;
     }
 
-    const fromDate = new Date(fromStr);
-    const toDate = new Date(toStr);
+  const fromDate = new Date(fromStr);
+const toDate = new Date(toStr);
 
-    // ← ADD THIS: validate date order
+toDate.setHours(23, 59, 59, 999);
+
+filteredOrders = ordersData.filter(order => {
+    const d = new Date(order.createdAt);
+    return d >= fromDate && d <= toDate;
+});
     if (fromDate > toDate) {
         toast('⚠ "From" date must be before "To" date');
         return;

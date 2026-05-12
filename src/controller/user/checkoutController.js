@@ -10,6 +10,8 @@ import { addUserAddress, editUserAddress, deleteUserAddress, setDefaultAddressSe
 
 const getCheckOutPage = async (req, res) => {
 try {
+delete req.session.appliedCoupon;
+
 const now = new Date();
 
 const availableCoupons = await Coupon.find({

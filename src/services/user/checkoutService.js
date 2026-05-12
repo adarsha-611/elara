@@ -183,7 +183,13 @@ export const applyCouponService = async (code, userId, session) => {
         if (!product) continue;
         const variant = product.variants.find(v => v._id.toString() === item.variantId.toString());
         if (!variant) continue;
-        totalAmount += variant.price * item.quantity;
+        const offerData = await getBestOfferForProduct(product, variant.price);
+
+        const effectivePrice = offerData
+            ? Math.round(offerData.finalPrice)
+            : variant.price;
+
+        totalAmount += effectivePrice * item.quantity;
     }
 
     if (coupon.minOrder > 0 && totalAmount < coupon.minOrder) {

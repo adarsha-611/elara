@@ -8,7 +8,9 @@ const getSalesReport = async (req, res) => {
     const { startDate, endDate, status } = req.query;  
 
    
-    let filter = {};
+    let filter = {
+  orderStatus: { $in: ["delivered", "returned"] }
+};
     if (startDate && endDate) {
       filter.createdAt = {
         $gte: new Date(startDate),

@@ -1,6 +1,5 @@
 import Order from "../../model/orderSchema.js";
-import Cart from "../../model/cartSchema.js";
-import { placeOrderService, deductStockAndClearCart } from "../../services/user/checkoutService.js";
+import { placeOrderService } from "../../services/user/checkoutService.js";
 import { createRazorpayOrder, verifyPayment } from "../../services/user/paymentService.js";
 
 const createOrder = async (req, res) => {
@@ -68,11 +67,6 @@ const verifyPaymentController = async (req, res) => {
             { new: true }
         );
 
-        const cart = await Cart.findOne({ user: order.user }).populate("items.productId");
-        if (cart) {
-            await deductStockAndClearCart(cart);
-        }
-
         delete req.session.appliedCoupon;
 
         return res.json({
@@ -110,10 +104,18 @@ const retryPayment = async (req, res) => {
         const { orderId } = req.params;
         const order = await Order.findById(orderId);
 
-        if (!order) return res.json({ success: false, message: "Order not found" });
+        if (!order) {
+            return res.json({ success: false, message: "Order not found" });
+        }
+
+        if (order.paymentStatus === "paid") {
+            return res.json({ success: false, message: "Order already paid" });
+        }
 
         const amountToPay = order.finalAmount || order.totalAmount;
         const razorpayOrder = await createRazorpayOrder(amountToPay);
+
+        await Order.findByIdAndUpdate(orderId, { paymentStatus: "pending" });
 
         return res.json({
             success: true,
