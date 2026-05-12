@@ -272,34 +272,40 @@
                 </div>
 
                 <div class="item-actions">
-                   <%
+<%
 const statusFlow = ["pending","shipped","out for delivery","delivered"];
 const currentIndex = statusFlow.indexOf(item.itemStatus);
 const nextStatuses = statusFlow.slice(currentIndex + 1);
+const paymentIncomplete = order.paymentStatus === 'failed' || 
+    (order.paymentMethod === 'online' && order.paymentStatus === 'pending');
 %>
 
-<select class="status-select" id="status-<%= item._id %>"
-<%= ['delivered','cancelled','returned'].includes(item.itemStatus) ? 'disabled' : '' %>>
-
-    <!-- Current status -->
-    <option value="<%= item.itemStatus %>" selected>
-        <%= item.itemStatus.charAt(0).toUpperCase() + item.itemStatus.slice(1) %>
-    </option>
-
-    <!-- Next statuses -->
-    <% nextStatuses.forEach(s => { %>
-        <option value="<%= s %>">
-            <%= s.charAt(0).toUpperCase() + s.slice(1) %>
+<% if (paymentIncomplete) { %>
+    <select class="status-select" disabled style="opacity:0.5; cursor:not-allowed;">
+        <option><%= item.itemStatus.charAt(0).toUpperCase() + item.itemStatus.slice(1) %></option>
+    </select>
+    <div style="font-size:11px; color:#C62828; text-align:center; background:#fff0f0; 
+                padding:8px; border-radius:6px; border:1px solid #fecaca;">
+        ⚠ Payment <%= order.paymentStatus === 'failed' ? 'failed' : 'pending' %> — status locked
+    </div>
+<% } else { %>
+    <select class="status-select" id="status-<%= item._id %>"
+        <%= ['delivered','cancelled','returned'].includes(item.itemStatus) ? 'disabled' : '' %>>
+        <option value="<%= item.itemStatus %>" selected>
+            <%= item.itemStatus.charAt(0).toUpperCase() + item.itemStatus.slice(1) %>
         </option>
-    <% }) %>
-
-</select>
-                    
-                    <% if(!['delivered','cancelled','returned'].includes(item.itemStatus)) { %>
-                        <button class="btn-update-status" onclick="updateItemStatus('<%= order._id %>', '<%= item._id %>')">
-                            ✓ Update Status
-                        </button>
-                    <% } %>
+        <% nextStatuses.forEach(s => { %>
+            <option value="<%= s %>">
+                <%= s.charAt(0).toUpperCase() + s.slice(1) %>
+            </option>
+        <% }) %>
+    </select>
+    <% if(!['delivered','cancelled','returned'].includes(item.itemStatus)) { %>
+        <button class="btn-update-status" onclick="updateItemStatus('<%= order._id %>', '<%= item._id %>')">
+            ✓ Update Status
+        </button>
+    <% } %>
+<% } %>
                 </div>
             </div>
         <% }) %>

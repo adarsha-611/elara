@@ -135,17 +135,12 @@ export const placeOrderService = async (
     if (appliedCoupon?.couponId) {
         await incrementCouponUsage(appliedCoupon.couponId);
     }
-
-    // ✅ Only deduct stock and clear cart for COD and wallet
-    // For online/razorpay, stock deduction happens after payment verification
-    if (paymentMethod !== "online") {
         await deductStockAndClearCart(cart);
-    }
+    
 
     return order;
 };
 
-// ✅ Separate function — called after successful payment verification
 export const deductStockAndClearCart = async (cart) => {
     if (!cart) return;
 

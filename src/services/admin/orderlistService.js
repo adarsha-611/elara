@@ -87,30 +87,31 @@ export const changeItemStatus = async (orderId, itemId, newStatus) => {
   const order = await Order.findById(orderId);
   if (!order) throw new Error("Order not found");
 
+  const paymentIncomplete = order.paymentStatus === 'failed' || 
+    (order.paymentMethod === 'online' && order.paymentStatus === 'pending');
+
+  const blockedStatuses = ['shipped', 'out for delivery', 'delivered'];
+
+  if (paymentIncomplete && blockedStatuses.includes(newStatus)) {
+    throw new Error("Cannot update status — payment is not completed for this order");
+  }
+
   const item = order.items.id(itemId);
   if (!item) throw new Error("Item not found");
 
   item.itemStatus = newStatus;
 
- 
-  
-
   const statuses = order.items.map(i => i.itemStatus);
-    
 
   if (statuses.every(s => s === "cancelled")) {
     order.orderStatus = "cancelled";
-  } 
-  else if (statuses.every(s => s === "delivered")) {
+  } else if (statuses.every(s => s === "delivered")) {
     order.orderStatus = "delivered";
-  } 
-  else if (statuses.some(s => s === "out for delivery")) {
+  } else if (statuses.some(s => s === "out for delivery")) {
     order.orderStatus = "out for delivery";
-  } 
-  else if (statuses.some(s => s === "shipped")) {
+  } else if (statuses.some(s => s === "shipped")) {
     order.orderStatus = "shipped";
-  } 
-  else {
+  } else {
     order.orderStatus = "pending";
   }
 

@@ -41,19 +41,15 @@ const updateItemStatus = async (req, res) => {
 
     await changeItemStatus(orderId, itemId, status);
 
-    res.json({
-      success: true,
-      message: "Item status updated"
-    });
+    res.json({ success: true, message: "Item status updated" });
 
   } catch (error) {
-    res.json({
+    res.status(400).json({
       success: false,
       message: error.message
     });
   }
 };
-
 
 const getOrderdetailPage = async (req, res) => {
   try {

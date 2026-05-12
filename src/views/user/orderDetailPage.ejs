@@ -473,7 +473,11 @@ const cancellableItems = order.items.filter(i =>
     <h3 style="margin:0; font-family:'Playfair Display',serif; font-size:1.2rem; color:var(--dark-brown); font-weight:600;">
         Items in this order
     </h3>
-    <% if(order.paymentStatus !== 'failed' && cancellableItems.length > 1) { %>
+    <% 
+const paymentNotComplete = order.paymentStatus === 'failed' || 
+    (order.paymentMethod === 'online' && order.paymentStatus === 'pending');
+%>
+<% if(!paymentNotComplete && cancellableItems.length > 1) { %>
         <button onclick="openCancelAllModal('<%= order._id %>')"
             style="border:1px solid #dc2626; color:#dc2626; background:transparent;
                    padding:9px 18px; border-radius:6px; font-size:0.78rem;
