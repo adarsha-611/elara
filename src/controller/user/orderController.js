@@ -325,14 +325,14 @@ function generateLuxuryInvoice(doc, order) {
   for (let i = 0; i < order.items.length; i++) {
     const item = order.items[i];
 
-    const originalPrice   = item.price || 0;
-    const offerDiscount   = item._offerDiscount || 0;           
-    const effectivePrice  = originalPrice - offerDiscount;       
-    const lineTotal       = effectivePrice * (item.quantity || 1);
-    const lineOriginal    = originalPrice  * (item.quantity || 1);
-    const lineOffer       = offerDiscount  * (item.quantity || 1);
+    const originalPrice = item.price || 0;
+    const offerDiscountPerUnit = item.offerDiscount || 0;  
+    const effectivePrice = originalPrice - offerDiscountPerUnit;
+    const lineTotal = effectivePrice * (item.quantity || 1);
+    const lineOriginal = originalPrice * (item.quantity || 1);
+    const lineOffer = offerDiscountPerUnit * (item.quantity || 1); 
 
-    itemsSubtotal      += lineOriginal;
+    itemsSubtotal += lineOriginal;
     totalOfferDiscount += lineOffer;
 
     

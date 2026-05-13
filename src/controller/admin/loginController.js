@@ -46,10 +46,20 @@ const postLogin = async (req, res) => {
 };
 
 const logout = (req, res) => {
+    try {
+        req.session.adminId = null;
+        delete req.session.isAdmin;
 
-    req.session.adminId = null;
-
-    return res.redirect("/admin/login");
+        req.session.save((err) => {
+            if (err) console.log("Session save error:", err);
+            
+            res.clearCookie('elara.sid');
+            return res.redirect("/admin/login");
+        });
+    } catch (error) {
+        console.log(error);
+        return res.redirect("/admin/login");
+    }
 };
 
 export default {

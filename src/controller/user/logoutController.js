@@ -1,24 +1,21 @@
 const logoutUser = async (req, res) => {
     try {
+        req.session.userId = null;
+        req.session.user = null;
       
-        req.session.destroy((err) => {
+
+        req.session.save((err) => {
             if (err) {
-                console.log("Logout error:", err);
-                return res.redirect('/');
+                console.log("Session save error:", err);
             }
-
-          
-            res.clearCookie('connect.sid');
-
             
+            res.clearCookie('elara.sid');   
             return res.redirect('/login');
         });
+
     } catch (error) {
         console.log("User logout error:", error);
-        return res.redirect('/');
+        return res.redirect('/login');
     }
 };
-
-export default {
-    logoutUser
-};
+export default{logoutUser}

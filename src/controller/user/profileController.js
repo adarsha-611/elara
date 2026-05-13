@@ -30,14 +30,18 @@ const getProfile = async (req, res) => {
 };
 
 const getEditProfile = async (req, res) => {
-  try {
-    const userId = req.session.userId;
-    const user = await User.findById(userId);
-    return res.render("user/profileEdit", { user });
-  } catch (error) {
-    console.log(error);
-   return res.status(500).send("Server Error");
-  }
+    try {
+        const userId = req.session.userId;
+        const user = await User.findById(userId);
+        return res.render("user/profileEdit", { 
+            user,  
+            success: req.flash("success"),
+            error: req.flash("error")
+        });
+    } catch (error) {
+        console.log(error);
+        return res.status(500).send("Server Error");
+    }
 };
 
 const updateProfile = async (req, res) => {

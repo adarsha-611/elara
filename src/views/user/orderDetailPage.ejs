@@ -519,18 +519,18 @@ const paymentNotComplete = order.paymentStatus === 'failed' ||
 
     <div class="item-details">
         <span class="item-name"><%= item.product?.name || "Jewelry Item" %></span>
-        <div class="item-info-text">
+     <div class="item-info-text">
     Qty: <%= item.quantity %> | 
-    <% if (item._offer) { %>
+    <% if (item.offerDiscount > 0) { %>
         <span style="text-decoration:line-through; color:#999;">
             ₹<%= (item.price * item.quantity).toLocaleString() %>
         </span>
         <span style="color:#2e7d32; font-weight:700; margin-left:6px;">
-            ₹<%= ((item.price - item._offerDiscount) * item.quantity).toLocaleString() %>
+            ₹<%= ((item.price - item.offerDiscount) * item.quantity).toLocaleString() %>
         </span>
         <span style="background:#e8f5e9; color:#2e7d32; font-size:0.75rem; 
                      padding:2px 8px; border-radius:10px; margin-left:6px;">
-            <%= item._offer.name %> applied
+            Offer applied
         </span>
     <% } else { %>
         Price: ₹<%= item.total.toLocaleString() %>
@@ -604,22 +604,16 @@ const paymentIncomplete = order.paymentStatus === 'failed' ||
     <div style="display: flex; flex-direction: column; gap: 10px; max-width: 350px; margin-left: auto;">
 
         <%
-        // Calculate subtotal after item-level offer discounts
-        let subtotalAfterOffers = order.items.reduce((sum, item) => {
-            if (item._offer && item._offerDiscount) {
-                return sum + ((item.price - item._offerDiscount) * item.quantity);
-            }
-            return sum + item.total;
-        }, 0);
+// ✅ Use stored offerDiscount from DB (per unit), not recalculated
+let offerSavings = order.items.reduce((sum, item) => {
+    return sum + ((item.offerDiscount || 0) * item.quantity);
+}, 0);
 
-        // Calculate total offer savings
-        let offerSavings = order.items.reduce((sum, item) => {
-            if (item._offer && item._offerDiscount) {
-                return sum + (item._offerDiscount * item.quantity);
-            }
-            return sum;
-        }, 0);
-        %>
+let subtotalAfterOffers = order.items.reduce((sum, item) => {
+    const effectivePrice = item.price - (item.offerDiscount || 0);
+    return sum + (effectivePrice * item.quantity);
+}, 0);
+%>
 
         <!-- Original price row -->
         <% if (offerSavings > 0) { %>

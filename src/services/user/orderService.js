@@ -72,56 +72,19 @@ export const getUserOrders = async (userId, page = 1, limit = 7) => {
 };
 
 export const getOrderById = async (orderId, userId) => {
-  const order = await Order.findOne({
-    _id: orderId,
-    user: userId
-  }).populate("items.product");
+    const order = await Order.findOne({
+        _id: orderId,
+        user: userId
+    }).populate("items.product");
 
-  if (!order) return null;
+    if (!order) return null;
 
-  const now = new Date();
-
-  const offers = await Offer.find({
-    isActive: true,
-    startDate: { $lte: now },
-    endDate: { $gte: now }
-  });
-
-  order.items.forEach(item => {
-    const product = item.product;
-    if (!product) return;
-
-    let bestDiscount = 0;
-    let bestOffer = null;
-
-    offers.forEach(offer => {
-      const isProductOffer =
-        offer.offerType === "product" &&
-        offer.productId?.toString() === product._id.toString();
-
-      const isCategoryOffer =
-        offer.offerType === "category" &&
-        offer.categoryId?.toString() === product.category?.toString();
-
-      if (isProductOffer || isCategoryOffer) {
-        const basePrice = item.price;
-        const discount =
-          offer.discountType === "percentage"
-            ? (basePrice * offer.discountValue) / 100
-            : offer.discountValue;
-
-        if (discount > bestDiscount) {
-          bestDiscount = discount;
-          bestOffer = offer;
-        }
-      }
+    order.items.forEach(item => {
+        item._offerDiscount = item.offerDiscount || 0;
+        item._offer = item.offerDiscount > 0 ? { name: 'Offer' } : null;
     });
 
-    item._offerDiscount = bestDiscount;
-    item._offer = bestOffer;
-  });
-
-  return order;
+    return order;
 };
 
 
@@ -184,39 +147,34 @@ item.cancelRequest = {
 let refundDone = false;
 let refundAmount = 0;
 
-
-
 if (order.paymentMethod !== "cod" && !item.isRefunded) {
-  const offerDiscount = item.offerDiscount || 0;           
-  const effectivePrice = item.price - offerDiscount;       
-
+  const offerDiscount = item.offerDiscount || 0;
+  const effectivePrice = item.price - offerDiscount;
+  
   refundAmount = effectivePrice * item.quantity;
-
-  if (order.discount && order.totalAmount) {               
+  
+  if (order.discount && order.totalAmount && order.totalAmount > 0) {
     const discountRatio = order.discount / order.totalAmount;
-    refundAmount = refundAmount - (refundAmount * discountRatio);
+    const couponDeduction = refundAmount * discountRatio;
+    refundAmount = refundAmount - couponDeduction;
     refundAmount = Math.round(refundAmount * 100) / 100;
   }
-
+  
+  if (refundAmount < 0) refundAmount = 0;
+  
+  // Process refund to wallet
   await cancelRefundToWallet(order.user, refundAmount, order._id);
   item.isRefunded = true;
   refundDone = true;
 }
 
+item.itemStatus = "cancelled";
 
-if (order.paymentMethod !== "cod" && !item.isRefunded) {
-  refundAmount = item.price * item.quantity;  
-
-  if (order.discount && order.totalAmount) {
-    const discountRatio = order.discount / order.totalAmount;
-    refundAmount = refundAmount - (refundAmount * discountRatio);
-    refundAmount = Math.round(refundAmount * 100) / 100;
-  }
-
-  await cancelRefundToWallet(order.user, refundAmount, order._id);
-  item.isRefunded = true;
-  refundDone = true;
-}
+item.cancelRequest = {
+  requested: true,
+  reason: reason,
+  cancelledAt: new Date()
+};
 
 
 const cancelledCount = order.items.filter(

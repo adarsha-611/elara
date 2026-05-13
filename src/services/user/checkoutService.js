@@ -113,7 +113,6 @@ export const placeOrderService = async (
     const discount = appliedCoupon?.discount || 0;
     const finalAmount = totalAmount - discount + SHIPPING_FEE;
 
-    // ✅ Deduct wallet only if payment method is wallet
     if (paymentMethod === "wallet") {
         await deductWalletBalance(userId, finalAmount);
     }
