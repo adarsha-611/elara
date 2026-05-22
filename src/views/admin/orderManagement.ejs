@@ -253,7 +253,14 @@
                 <select name="sort" class="admin-input" id="sortSelect">
                     <option value="newest" <%= sort === "newest" ? "selected" : "" %>>Newest First</option>
                     <option value="oldest" <%= sort === "oldest" ? "selected" : "" %>>Oldest First</option>
-                </select>
+                </select><select name="returnStatus" class="admin-input" id="returnStatusSelect">
+                <option value="">All Returns</option>
+                <option value="pending"  <%= returnStatus === "pending"  ? "selected" : "" %>>Return Requested</option>
+                <option value="accepted" <%= returnStatus === "accepted" ? "selected" : "" %>>Return Accepted</option>
+                <option value="rejected" <%= returnStatus === "rejected" ? "selected" : "" %>>Return Rejected</option>
+                <option value="none"     <%= returnStatus === "none"     ? "selected" : "" %>>No Return</option>
+            </select>
+
 
                 <!-- Added placeholder text for search input as required -->
                 <input type="text" name="search" value="<%= search %>" placeholder="Search by Order ID or Customer name/email" class="admin-input search-id" id="searchInput" />
@@ -339,19 +346,19 @@
             <% if(orders && orders.length > 0 && totalPages > 1) { %>
             <div class="admin-pagination">
                 <% if(currentPage > 1){ %>
-                    <a href="?page=<%= currentPage-1 %>&search=<%= search %>&status=<%= status %>&sort=<%= sort %>">
+                    <a href="?page=<%= currentPage-1 %>&search=<%= search %>&status=<%= status %>&sort=<%= sort %>&returnStatus=<%= returnStatus %>">
                         <button class="page-arrow">‹</button>
                     </a>
                 <% } %>
 
                 <% for(let i = 1; i <= totalPages; i++){ %>
-                    <a href="?page=<%= i %>&search=<%= search %>&status=<%= status %>&sort=<%= sort %>">
+                    <a href="?page=<%= i %>&search=<%= search %>&status=<%= status %>&sort=<%= sort %>&returnStatus=<%= returnStatus %>">
                         <button class="page-num <%= currentPage === i ? 'active' : '' %>"><%= i %></button>
                     </a>
                 <% } %>
 
                 <% if(currentPage < totalPages){ %>
-                    <a href="?page=<%= currentPage+1 %>&search=<%= search %>&status=<%= status %>&sort=<%= sort %>">
+                    <a href="?page=<%= currentPage+1 %>&search=<%= search %>&status=<%= status %>&sort=<%= sort %>&returnStatus=<%= returnStatus %>">
                         <button class="page-arrow">›</button>
                     </a>
                 <% } %>
@@ -421,9 +428,15 @@
                     
                 });
             }
-            
+            const returnStatusSelect = document.getElementById('returnStatusSelect');
+if (returnStatusSelect) {
+    returnStatusSelect.addEventListener('change', function() {
+        submitWithResetPage();
+    });
+}
             
         })();
+   
     </script>
     
 </body>

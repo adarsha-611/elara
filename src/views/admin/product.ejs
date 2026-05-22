@@ -219,10 +219,19 @@
             <div class="header-top">
                 <h2>Product Management</h2>
                 <div class="header-actions">
-                    <div class="search-wrapper">
-                        <span class="search-icon">🔍</span>
-                        <input type="text" placeholder="Search products..." id="productSearch">
-                    </div>
+                    <form method="GET" action="/admin/products" style="display:flex; align-items:center; gap:8px;">
+    <div class="search-wrapper">
+        <span class="search-icon">🔍</span>
+        <input type="text" name="search" placeholder="Search products..."
+            value="<%= search %>" id="productSearch"
+            style="border:none; outline:none; font-size:13px; width:100%;">
+    </div>
+    <button type="submit" style="background:var(--main-bronze); color:white; border:none;
+        padding:10px 16px; border-radius:8px; cursor:pointer; font-size:13px;">Search</button>
+    <% if (search) { %>
+        <a href="/admin/products" style="font-size:12px; color:#888;">Clear</a>
+    <% } %>
+</form>
                     <a href="/admin/add-product" class="btn-add">+ Add New Product</a>
                 </div>
             </div>
@@ -308,17 +317,17 @@
         
 
         <div class="pagination">
-            <% if (currentPage > 1) { %>
-                <a href="?page=<%= currentPage - 1 %>" class="page-btn">‹ Prev</a>
-            <% } %>
+<% if (currentPage > 1) { %>
+    <a href="?page=<%= currentPage - 1 %>&search=<%= search %>" class="page-btn">‹ Prev</a>
+<% } %>
 
-            <% for(let i = 1; i <= totalPages; i++) { %>
-                <a href="?page=<%= i %>" class="page-btn <%= i === currentPage ? 'active' : '' %>"><%= i %></a>
-            <% } %>
+<% for(let i = 1; i <= totalPages; i++) { %>
+    <a href="?page=<%= i %>&search=<%= search %>" class="page-btn <%= i === currentPage ? 'active' : '' %>"><%= i %></a>
+<% } %>
 
-            <% if (currentPage < totalPages) { %>
-                <a href="?page=<%= currentPage + 1 %>" class="page-btn">Next ›</a>
-            <% } %>
+<% if (currentPage < totalPages) { %>
+    <a href="?page=<%= currentPage + 1 %>&search=<%= search %>" class="page-btn">Next ›</a>
+<% } %>
         </div>
     </main>
 
@@ -347,15 +356,7 @@
             });
         });
 
-        // Simple Search Filtering for UI
-        document.getElementById('productSearch').addEventListener('keyup', function() {
-            let filter = this.value.toUpperCase();
-            let rows = document.querySelector(".product-table tbody").rows;
-            for (let i = 0; i < rows.length; i++) {
-                let nameCol = rows[i].cells[1].textContent.toUpperCase();
-                rows[i].style.display = nameCol.indexOf(filter) > -1 ? "" : "none";
-            }
-        });
+       
     </script>
 </body>
 </html>

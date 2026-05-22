@@ -9,7 +9,8 @@ export const getOrderlist = async({
         limit = 5,
         search ="",
         status ="",
-        sort = "newest"
+        sort = "newest",
+        returnStatus = "" 
     })=>{
         const skip =(page-1)*limit; 
 
@@ -44,6 +45,15 @@ if (search) {
         if(status){
             query.orderStatus = status;
         }
+         if (returnStatus === "pending") {
+            query["items.returnRequest.status"] = "pending";
+          } else if (returnStatus === "accepted") {
+           query["items.returnRequest.status"] = "accepted";
+          } else if (returnStatus === "rejected") {
+            query["items.returnRequest.status"] = "rejected";
+          } else if (returnStatus === "none") {
+          query["items.returnRequest.status"] = { $not: { $in: ["pending", "accepted", "rejected"] } };
+      }
 
         let sortOption = {createdAt:-1};
         if(sort === "oldest"){
@@ -167,37 +177,38 @@ export const acceptReturnReq = async (orderId, itemId) => {
     throw new Error("Return already processed");
   }
 
-  const refundAmount = item.price * item.quantity;
+  const offerDiscount = item.offerDiscount || 0;
+  const effectivePrice = item.price - offerDiscount;
 
-  let refundDone = false;
+  let refundAmount = effectivePrice * item.quantity;
+
+  if (order.discount && order.totalAmount && order.totalAmount > 0) {
+    const discountRatio = order.discount / order.totalAmount;
+    const couponDeduction = refundAmount * discountRatio;
+    refundAmount = refundAmount - couponDeduction;
+    refundAmount = Math.round(refundAmount * 100) / 100;
+  }
+
+  if (refundAmount < 0) refundAmount = 0;
+
   if (!item.isRefunded) {
     await returnRefundToWallet(order.user, refundAmount, order._id);
     item.isRefunded = true;
-    refundDone = true;
   }
 
   item.returnRequest.status = "accepted";
   item.returnRequest.processedAt = new Date();
   item.itemStatus = "returned";
 
-
   const product = await Product.findById(item.product);
   if (product) {
-    const variant = product.variants.find(
-      v => v.color === item.variantColor
-    );
-    if (variant) {
-      variant.stock += item.quantity;
-    }
+    const variant = product.variants.find(v => v.color === item.variantColor);
+    if (variant) variant.stock += item.quantity;
     await product.save();
   }
 
-  
   const allReturned = order.items.every(i => i.itemStatus === "returned");
-
-if (allReturned) {
-  order.orderStatus = "returned";
-}
+  if (allReturned) order.orderStatus = "returned";
 
   await order.save();
 };

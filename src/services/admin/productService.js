@@ -1,24 +1,27 @@
+
 import Product from "../../model/productSchema.js";
 
-export const productsPage = async (page = 1, limit = 5) => {
+export const productsPage = async (page = 1, limit = 5, search = "") => {
   try {
     const skip = (page - 1) * limit;
 
-    const totalProducts = await Product.countDocuments({ isDeleted: false });
+    
+    const query = { isDeleted: false };
+    if (search) {
+      query.name = { $regex: search, $options: "i" };
+    }
 
-    const products = await Product.find({ isDeleted: false })
-      .populate('category', 'name') 
-      .sort({ createdAt: -1 }) 
+    const totalProducts = await Product.countDocuments(query);
+
+    const products = await Product.find(query)
+      .populate('category', 'name')
+      .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit);
 
     const totalPages = Math.ceil(totalProducts / limit);
 
-    return {
-      products,
-      totalPages,
-      currentPage: page
-    };
+    return { products, totalPages, currentPage: page };
   } catch (error) {
     console.log("Error fetching products:", error);
     throw new Error("Failed to fetch products");

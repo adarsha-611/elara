@@ -718,6 +718,7 @@ rows.sort((a, b) => {
 });
 
 let currentRows = [...rows];
+let filteredOrders = [...ordersData];
 let chartInstance = null;
 
 let currentPage = 1;
@@ -838,7 +839,6 @@ function buildChart(data) {
     });
 }
 
-// ==================== RENDER TABLE + PAGINATION ====================
 function renderTableAndPagination() {
     const tbody = document.getElementById('tbody');
     tbody.innerHTML = '';
@@ -852,18 +852,20 @@ function renderTableAndPagination() {
     } else {
         paginatedData.forEach(order => {
             const tr = document.createElement('tr');
-            const discount = order.discount || 0;
-            const coupon = order.couponDiscount || 0;
-            const total = order.totalAmount || 0;
-            const net = total - discount - coupon;
+            const coupon = order.discount || 0;           
+const offerDisc = order.items
+    ? order.items.reduce((s, i) => s + ((i.offerDiscount || 0) * i.quantity), 0)
+    : 0;                                     
+const total = order.totalAmount || 0;
+const net = order.finalAmount || (total - coupon - offerDisc); 
 
             tr.innerHTML = `
-                <td class="td-n">#${(order.orderId || order._id).toString().slice(-6)}</td>
-                <td class="td-dt">${new Date(order.createdAt).toLocaleDateString('en-IN')}</td>
-                <td>₹${Number(total).toLocaleString('en-IN')}</td>
-                <td class="td-d">− ₹${Number(discount).toLocaleString('en-IN')}</td>
-                <td class="td-c">− ₹${Number(coupon).toLocaleString('en-IN')}</td>
-                <td class="td-r">₹${Number(net).toLocaleString('en-IN')}</td>
+    <td class="td-n">#${(order.orderId || order._id).toString().slice(-6)}</td>
+    <td class="td-dt">${new Date(order.createdAt).toLocaleDateString('en-IN')}</td>
+    <td>₹${Number(total).toLocaleString('en-IN')}</td>
+    <td class="td-d">− ₹${Number(offerDisc).toLocaleString('en-IN')}</td>
+    <td class="td-c">− ₹${Number(coupon).toLocaleString('en-IN')}</td>
+    <td class="td-r">₹${Number(net).toLocaleString('en-IN')}</td>
                 <td><span style="
                     padding: 3px 10px;
                     border-radius: 20px;
@@ -886,7 +888,6 @@ function renderPagination() {
     const pgBtnsContainer = document.getElementById('pgBtns');
     pgBtnsContainer.innerHTML = '';
 
-    // Previous button
     const prevBtn = document.createElement('button');
     prevBtn.className = `pb ${currentPage === 1 ? 'disabled' : ''}`;
     prevBtn.innerHTML = '‹';
@@ -894,7 +895,6 @@ function renderPagination() {
     prevBtn.onclick = () => goToPage(currentPage - 1);
     pgBtnsContainer.appendChild(prevBtn);
 
-    // Page numbers
     for (let i = 1; i <= totalPages; i++) {
         const btn = document.createElement('button');
         btn.className = `pb ${i === currentPage ? 'active' : ''}`;
@@ -903,7 +903,6 @@ function renderPagination() {
         pgBtnsContainer.appendChild(btn);
     }
 
-    // Next button
     const nextBtn = document.createElement('button');
     nextBtn.className = `pb ${currentPage === totalPages ? 'disabled' : ''}`;
     nextBtn.innerHTML = '›';
@@ -911,7 +910,6 @@ function renderPagination() {
     nextBtn.onclick = () => goToPage(currentPage + 1);
     pgBtnsContainer.appendChild(nextBtn);
 
-    // Update page info
     document.getElementById('pgInfo').textContent = `Page ${currentPage} of ${totalPages}`;
 }
 
@@ -922,7 +920,6 @@ function goToPage(page) {
     renderTableAndPagination();
 }
 
-// ==================== FILTER & PERIOD HANDLING ====================
 function setRows(period = 'monthly') {
 
     const now = new Date();

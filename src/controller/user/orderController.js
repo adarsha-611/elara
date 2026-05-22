@@ -350,18 +350,18 @@ function generateLuxuryInvoice(doc, order) {
        .text((item.quantity || 1).toString(), cQty,   y, { width: 40,  align: 'center' });
 
     
-    if (offerDiscount > 0) {
-      doc.fontSize(7).fillColor('#999')
-         .text(`Rs.${originalPrice.toFixed(0)}`, cUnit, y, { width: 55, align: 'right' });
-      
-      const priceTextWidth = 38;
-      doc.moveTo(cUnit + 55 - priceTextWidth, y + 4)
-         .lineTo(cUnit + 55, y + 4)
-         .lineWidth(0.5).strokeColor('#999').stroke();
+   if (offerDiscountPerUnit > 0) {
+  doc.fontSize(7).fillColor('#999')
+     .text(`Rs.${originalPrice.toFixed(0)}`, cUnit, y, { width: 55, align: 'right' });
+  
+  const priceTextWidth = 38;
+  doc.moveTo(cUnit + 55 - priceTextWidth, y + 4)
+     .lineTo(cUnit + 55, y + 4)
+     .lineWidth(0.5).strokeColor('#999').stroke();
 
-      doc.fontSize(8).fillColor('#2e7d32')
-         .text(`-Rs.${lineOffer.toFixed(0)}`, cOffer, y, { width: 60, align: 'right' });
-    } else {
+  doc.fontSize(8).fillColor('#2e7d32')
+     .text(`-Rs.${lineOffer.toFixed(0)}`, cOffer, y, { width: 60, align: 'right' });
+} else {
       doc.fontSize(8).fillColor('#333')
          .text(`Rs.${originalPrice.toFixed(0)}`, cUnit,  y, { width: 55, align: 'right' })
          .text('—',                               cOffer, y, { width: 60, align: 'right' });

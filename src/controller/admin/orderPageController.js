@@ -8,13 +8,15 @@ const getOrderPage = async(req,res)=>{
         const search = req.query.search || "";
         const status = req.query.status||"";
         const sort = req.query.sort||"desc";
+        const returnStatus = req.query.returnStatus || "";
 
         const { orders, totalPages, currentPage } = await getOrderlist({
         page,
         limit,
         search,
         status,
-        sort
+        sort,
+        returnStatus
     });
 
         res.render('admin/orderManagement',{
@@ -25,6 +27,7 @@ const getOrderPage = async(req,res)=>{
         search,
         status,
         sort,
+        returnStatus,
         sidebarPage:"Orders list"
     })
     } catch (error) {
@@ -50,6 +53,7 @@ const updateItemStatus = async (req, res) => {
     });
   }
 };
+
 
 const getOrderdetailPage = async (req, res) => {
   try {

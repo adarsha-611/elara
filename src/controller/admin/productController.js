@@ -5,19 +5,18 @@ import Product from "../../model/productSchema.js";
 export const getProductPage = async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
+    const search = req.query.search || ""; 
 
-    const { products, totalPages, currentPage } =
-      await productsPage(page, 5);
+    const { products, totalPages, currentPage } = await productsPage(page, 5, search);
 
-      
-
-   return res.render("admin/product", {
+    return res.render("admin/product", {
       products,
       totalPages,
       currentPage,
-      currentMenu:"products",
+      search,           
+      currentMenu: "products",
       sidebarPage: "product"
-  });
+    });
   } catch (error) {
     console.log(error);
     res.status(500).send("Server Error");

@@ -684,10 +684,24 @@
     </label>
 </div>
 
-                <div class="payment-option" data-value="cod">
-                    <input type="radio" name="paymentMethod" value="cod" id="pay-cod" checked>
-                    <label for="pay-cod" class="payment-label">Cash on Delivery</label>
-                </div>
+               <%
+const COD_LIMIT = 5000;
+const codDisabled = (subtotal + shippingFee) > COD_LIMIT;
+%>
+<div class="payment-option <%= codDisabled ? '' : '' %>"
+     data-value="cod"
+     style="<%= codDisabled ? 'opacity:0.5; cursor:not-allowed; pointer-events:none;' : '' %>">
+    <input type="radio" name="paymentMethod" value="cod" id="pay-cod"
+           <%= codDisabled ? 'disabled' : 'checked' %>>
+    <label for="pay-cod" class="payment-label">
+        Cash on Delivery
+        <% if (codDisabled) { %>
+            <span style="margin-left:8px; color:#c62828; font-size:0.78rem; font-weight:500;">
+                (Not available for orders above ₹<%= COD_LIMIT.toLocaleString('en-IN') %>)
+            </span>
+        <% } %>
+    </label>
+</div>
             </section>
         </main>
 
@@ -1109,6 +1123,14 @@ const url = currentFormMode === 'add'
             const pay = document.querySelector('input[name="paymentMethod"]:checked');
             document.getElementById('selectedPayment').value = pay ? pay.value : '';
         }
+const codDisabled = <%= (subtotal + shippingFee) > 1000 ? 'true' : 'false' %>;
+if (codDisabled) {
+    const razorpayRadio = document.getElementById('pay-razorpay');
+    if (razorpayRadio) {
+        razorpayRadio.checked = true;
+        updatePayment();
+    }
+}
 
         document.querySelectorAll('input[name="addressId"]').forEach(r => {
             r.addEventListener('change', updateSelected);

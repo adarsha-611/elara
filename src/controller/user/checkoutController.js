@@ -172,7 +172,15 @@ let { addressId, paymentMethod } = req.body;
 if (paymentMethod === "razorpay") {
   paymentMethod = "online";
 }
-
+const COD_LIMIT = 5000;
+        if (paymentMethod === "cod") {
+            const data = await getCheckoutData(userId);
+            const orderTotal = data.subtotal + SHIPPING_FEE;
+            if (orderTotal > COD_LIMIT) {
+                req.flash("error", `Cash on Delivery is not available for orders above ₹${COD_LIMIT.toLocaleString('en-IN')}`);
+                return res.redirect("/checkout");
+            }
+        }
 const appliedCoupon = req.session.appliedCoupon || null;
 
 const order = await placeOrderService(

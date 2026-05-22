@@ -43,13 +43,15 @@ const downloadSalesReportPDF = async (req, res) => {
   try {
     const { startDate, endDate } = req.query;
 
-    let filter = {};
-    if (startDate && endDate) {
-      filter.createdAt = {
-        $gte: new Date(startDate),
-        $lte: new Date(new Date(endDate).setHours(23, 59, 59, 999))
-      };
-    }
+    let filter = {
+  orderStatus: { $in: ["delivered", "returned"] }  
+};
+if (startDate && endDate) {
+  filter.createdAt = {
+    $gte: new Date(startDate),
+    $lte: new Date(new Date(endDate).setHours(23, 59, 59, 999))
+  };
+}
 
     const orders = await Order.find(filter).sort({ createdAt: -1 });
     const doc = new PDFDocument({ margin: 40, size: 'A4' });
@@ -149,13 +151,15 @@ const downloadSalesReportExcel = async (req, res) => {
   try {
     const { startDate, endDate } = req.query;
 
-    let filter = {};
-    if (startDate && endDate) {
-      filter.createdAt = {
-        $gte: new Date(startDate),
-        $lte: new Date(new Date(endDate).setHours(23, 59, 59, 999))
-      };
-    }
+   let filter = {
+  orderStatus: { $in: ["delivered", "returned"] }  
+};
+if (startDate && endDate) {
+  filter.createdAt = {
+    $gte: new Date(startDate),
+    $lte: new Date(new Date(endDate).setHours(23, 59, 59, 999))
+  };
+}
 
     const orders = await Order.find(filter).sort({ createdAt: -1 });
     const workbook = new ExcelJS.Workbook();
