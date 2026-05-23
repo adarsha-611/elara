@@ -5,7 +5,7 @@ import Mongoose from "mongoose";
 import User from '../../model/userSchema.js';
 import Coupon from "../../model/couponSchema.js";
 import { validateAddress } from "../../utils/validators/joi_address.js";
-import { getCheckoutData, placeOrderService, applyCouponService, removeCouponService } from "../../services/user/checkoutService.js";
+import { getCheckoutData, placeOrderService, applyCouponService, removeCouponService,SHIPPING_FEE } from "../../services/user/checkoutService.js";
 import { addUserAddress, editUserAddress, deleteUserAddress, setDefaultAddressService } from "../../services/user/addressService.js";
 
 const getCheckOutPage = async (req, res) => {
